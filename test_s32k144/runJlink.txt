@@ -1,0 +1,22 @@
+# server minhht3
+# "C:/Program Files (x86)/SEGGER/JLink_V512/JLinkGDBServerCL.exe" -device S32K144 -if swd -speed 1000
+# client
+# arm-none-eabi-gdb -x run.txt
+
+# Segger: listen on port
+target remote localhost:2331
+
+# Segger: reset device
+monitor reset
+
+# Segger: specify flash of device
+monitor device = S32K144
+
+# load/flash application file
+load ./app_flash.elf
+
+# run
+continue
+
+# exit gdb
+quit
