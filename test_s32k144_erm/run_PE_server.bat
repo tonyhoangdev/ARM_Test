@@ -1,1 +1,1 @@
-"C:/NXP/S32DS_ARM_v1.3/eclipse/plugins/com.pemicro.debug.gdbjtag.pne_2.5.8.alpha/win32/pegdbserver_console.exe" -device=NXP_S32K1xx_S32K144F512M15 -startserver -singlesession -serverport=7224 -gdbmiport=6224 -interface=OPENSDA -speed=5000
+"C:/NXP/S32DS_ARM_v1.4/eclipse/plugins/com.pemicro.debug.gdbjtag.pne_2.7.5.201612082022/win32/pegdbserver_console.exe" -device=NXP_S32K1xx_S32K144F512M15 -startserver -singlesession -serverport=7224 -gdbmiport=6224 -interface=OPENSDA -speed=5000

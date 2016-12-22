@@ -19,7 +19,7 @@ CSOURCES+=main.c
 ASMSOURCES:=startup_S32K144.S
 
 ## Define SOURCEDIR
-BASEDIR:=../../../04_Projects/ASDK-S32_SDK/sdk_codebase/
+BASEDIR:=../../../../04_Projects/ASDK-S32_SDK/sdk_codebase/
 SOURCEDIR:=platform/devices/S32K144/include/
 SOURCEDIR+=platform/devices/S32K144/startup/
 SOURCEDIR+=platform/devices/S32K144/startup/gcc/
