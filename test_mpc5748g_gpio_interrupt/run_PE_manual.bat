@@ -1,0 +1,1 @@
+powerpc-eabivle-gdb -x runPE.txt
