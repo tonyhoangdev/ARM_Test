@@ -1,0 +1,438 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .data          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .bss           0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .fixup         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .ctors         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .dtors         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .sdata         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .sbss          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .sdata2        0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .sbss2         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .gcc_except_table
+                0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .init          0x00000000        0xa c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .fini          0x00000000        0xa c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .text          0x00000000      0x18a c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .data          0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .bss           0x00000000       0x20 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .ctors         0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .dtors         0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .jcr           0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .tm_clone_table
+                0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .fini          0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .init          0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .group         0x00000000        0x8 obj/flashrchw.o
+ .group         0x00000000        0x8 obj/flashrchw.o
+ .group         0x00000000        0x8 obj/flashrchw.o
+ .group         0x00000000        0x8 obj/flashrchw.o
+ .group         0x00000000        0x8 obj/flashrchw.o
+ .text          0x00000000        0x0 obj/flashrchw.o
+ .data          0x00000000        0x0 obj/flashrchw.o
+ .bss           0x00000000        0x0 obj/flashrchw.o
+ .group         0x00000000        0x8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .group         0x00000000        0x8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .group         0x00000000        0x8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .group         0x00000000        0x8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .group         0x00000000        0x8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .text          0x00000000        0x0 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .data          0x00000000        0x0 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .bss           0x00000000        0x0 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000000      0x616 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000000       0x22 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000000       0x44 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000000       0x1c obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000000      0x1f7 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/MPC57xx__Interrupt_Init.o
+ .text          0x00000000        0x0 obj/MPC57xx__Interrupt_Init.o
+ .data          0x00000000        0x0 obj/MPC57xx__Interrupt_Init.o
+ .bss           0x00000000        0x0 obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00000000      0x616 obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00000000       0x22 obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00000000       0x44 obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00000000       0x1c obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00000000      0x1f7 obj/MPC57xx__Interrupt_Init.o
+ .group         0x00000000        0x8 obj/Vector.o
+ .group         0x00000000        0x8 obj/Vector.o
+ .text          0x00000000        0x0 obj/Vector.o
+ .data          0x00000000        0x0 obj/Vector.o
+ .bss           0x00000000        0x0 obj/Vector.o
+ .debug_macro   0x00000000      0x616 obj/Vector.o
+ .debug_macro   0x00000000       0x2e obj/Vector.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .group         0x00000000        0x8 obj/main.o
+ .text          0x00000000        0x0 obj/main.o
+ .data          0x00000000        0x0 obj/main.o
+ .bss           0x00000000        0x0 obj/main.o
+ .text.delay    0x00000000       0x3c obj/main.o
+ .debug_macro   0x00000000      0x616 obj/main.o
+ .debug_macro   0x00000000       0x22 obj/main.o
+ .debug_macro   0x00000000       0x44 obj/main.o
+ .debug_macro   0x00000000       0x1c obj/main.o
+ .debug_macro   0x00000000      0x1f7 obj/main.o
+ .debug_macro   0x00000000    0x1814c obj/main.o
+ .text          0x00000000        0x0 obj/startup.o
+ .data          0x00000000        0x0 obj/startup.o
+ .bss           0x00000000        0x0 obj/startup.o
+ .data          0x00000000        0x0 obj/intc_sw_handlers.o
+ .bss           0x00000000        0x0 obj/intc_sw_handlers.o
+ .text          0x00000000       0x4a c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .data          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .bss           0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .ctors         0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .dtors         0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .jcr           0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .tm_clone_table
+                0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .init          0x00000000        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .text          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .data          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .bss           0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .fixup         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .ctors         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .dtors         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .sdata         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .sbss          0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .sdata2        0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .sbss2         0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .gcc_except_table
+                0x00000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .init          0x00000000        0xa c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+ .fini          0x00000000        0xa c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+flash_rchw       0x00fa0000         0x00000004
+cpu0_reset_vec   0x00fa0010         0x00000004
+cpu1_reset_vec   0x00fa0014         0x00000004
+cpu2_reset_vec   0x00fa0004         0x00000004
+m_text           0x01000000         0x001d0000
+m_data           0x40000000         0x00040000
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+LOAD obj/flashrchw.o
+LOAD obj/intc_SW_mode_isr_vectors_MPC5748G.o
+LOAD obj/MPC57xx__Interrupt_Init.o
+LOAD obj/Vector.o
+LOAD obj/main.o
+LOAD obj/startup.o
+LOAD obj/intc_sw_handlers.o
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4\libgcc.a
+LOAD C:/GNU/powerpc-eabivle-4_9/powerpc-eabivle/newlib/lib/fp/e200z4\libc.a
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4\libgcc.a
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+LOAD c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+                0x00000000                __HEAP_SIZE = 0x0
+                0x00001000                __STACK_SIZE = 0x1000
+                0x00040000                SRAM_SIZE = 0x40000
+                0x40000000                SRAM_BASE_ADDR = 0x40000000
+
+.rchw           0x00fa0000        0x4
+ *(.rchw)
+ .rchw          0x00fa0000        0x4 obj/flashrchw.o
+                0x00fa0000                RCHW1
+
+.cpu0_reset_vector
+                0x00fa0010        0x4
+ *(.cpu0_reset_vector)
+ .cpu0_reset_vector
+                0x00fa0010        0x4 obj/flashrchw.o
+                0x00fa0010                RCHW2_0
+
+.cpu1_reset_vector
+ *(.cpu1_reset_vector)
+
+.cpu2_reset_vector
+ *(.cpu2_reset_vector)
+
+.startup        0x01000000      0x26a
+                0x01000000                __start = .
+ *(.startup)
+ .startup       0x01000000      0x26a obj/startup.o
+                0x01000000                _start
+
+.core_exceptions_table
+                0x01001000       0xf4
+                0x01001000                __IVPR_VALUE = .
+ *(.core_exceptions_table)
+ .core_exceptions_table
+                0x01001000       0xf4 obj/Vector.o
+                0x01001000                IVOR0_Vector
+                0x01001000                VTABLE
+                0x01001010                IVOR1_Vector
+                0x01001020                IVOR2_Vector
+                0x01001030                IVOR3_Vector
+                0x01001040                IVOR4_Vector
+                0x01001050                IVOR5_Vector
+                0x01001060                IVOR6_Vector
+                0x01001070                IVOR7_Vector
+                0x01001080                IVOR8_Vector
+                0x01001090                IVOR9_Vector
+                0x010010a0                IVOR10_Vector
+                0x010010b0                IVOR11_Vector
+                0x010010c0                IVOR12_Vector
+                0x010010d0                IVOR13_Vector
+                0x010010e0                IVOR14_Vector
+                0x010010f0                IVOR15_Vector
+
+.intc_vector_table
+                0x01002000      0xbc8
+ *(.intc_vector_table)
+ .intc_vector_table
+                0x01002000      0xbc8 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+                0x01002000                IntcIsrVectorTable
+
+.text           0x01002bd0      0x490
+ *(.text.startup)
+ *(.text)
+ .text          0x01002bd0       0x48 obj/intc_sw_handlers.o
+                0x01002bd0                IVOR4_Handler
+ *(.init)
+ *(.text.*)
+ .text.dummy    0x01002c18        0xc obj/intc_SW_mode_isr_vectors_MPC5748G.o
+                0x01002c18                dummy
+ .text.SetIVPR  0x01002c24       0x1a obj/MPC57xx__Interrupt_Init.o
+                0x01002c24                SetIVPR
+ .text.InitINTC
+                0x01002c3e       0x92 obj/MPC57xx__Interrupt_Init.o
+                0x01002c3e                InitINTC
+ .text.enableIrq
+                0x01002cd0       0x48 obj/MPC57xx__Interrupt_Init.o
+                0x01002cd0                enableIrq
+ .text.xcptn_xmpl
+                0x01002d18       0x34 obj/MPC57xx__Interrupt_Init.o
+                0x01002d18                xcptn_xmpl
+ .text.PORT_SetMuxSel
+                0x01002d4c       0x4a obj/main.o
+ .text.GPIO_SetPinDirection
+                0x01002d96       0xca obj/main.o
+ .text.GPIO_TogglePin
+                0x01002e60       0x6a obj/main.o
+ .text.initPin  0x01002eca       0xe2 obj/main.o
+                0x01002eca                initPin
+ .text.main     0x01002fac       0xb2 obj/main.o
+                0x01002fac                main
+                0x01003060                . = ALIGN (0x10)
+ *fill*         0x0100305e        0x2 
+
+.glink          0x01003060        0x0
+ .glink         0x01003060        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+
+.rodata
+ *(.rodata)
+ *(.rodata.*)
+
+.eh_frame_hdr   0x01003060        0x0
+ *(.eh_frame_hdr)
+ .eh_frame_hdr  0x01003060        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+
+.eh_frame       0x01003060        0x8
+ *(.eh_frame)
+ .eh_frame      0x01003060        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+                0x01003060                __EH_FRAME_BEGIN__
+ .eh_frame      0x01003060        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .eh_frame      0x01003060        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .eh_frame      0x01003060        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .eh_frame      0x01003064        0x4 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+                0x01003064                __EH_FRAME_END__
+
+.data           0x40000000        0x0 load address 0x01003068
+ *(.data)
+ *(.data.*)
+
+.sdata2         0x40000000        0x0 load address 0x01003068
+ *(.sdata2)
+ .sdata2        0x40000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ *(.sdata2.*)
+
+.rela.dyn       0x40000000        0x0 load address 0x01003068
+ .rela.iplt     0x40000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .rela.text     0x40000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .rela.text.xcptn_xmpl
+                0x40000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+
+.sbss2
+ *(.sbss2)
+ *(.sbss2.*)
+
+.sdata          0x40000000        0x4 load address 0x01003068
+ *(.sdata)
+ .sdata         0x40000000        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+                0x40008000                _SDA_BASE_
+ *(.sdata.*)
+ .sdata.time    0x40000000        0x4 obj/main.o
+                0x40000000                time
+
+.bss            0x40000004        0x0 load address 0x0100306c
+                0x40000004                __BSS_START = .
+ *(.sbss)
+ *(.sbss.*)
+ *(.bss)
+ *(.bss.*)
+ *(COMMON)
+                0x40000004                __BSS_END = .
+
+.iplt           0x40000010        0x0 load address 0x0100306c
+ .iplt          0x40000010        0x0 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+
+.stack          0x40000010     0x1004 load address 0x01003070
+                0x40000010                __HEAP = .
+                0x40000010                PROVIDE (_end, .)
+                0x40000010                PROVIDE (end, .)
+                0x40000010                . = (. + __HEAP_SIZE)
+                0x40000010                __HEAP_END = .
+                0x40000010                _stack_end = .
+                0x40001010                . = (. + __STACK_SIZE)
+ *fill*         0x40000010     0x1000 
+                0x40001010                _stack_addr = .
+                0x40001010                __SP_INIT = .
+                0x40001014                . = (. + 0x4)
+ *fill*         0x40001010        0x4 
+                0x40000000                __DATA_SRAM_ADDR = ADDR (.data)
+                0x40000000                __SDATA_SRAM_ADDR = ADDR (.sdata)
+                0x00000000                __DATA_SIZE = SIZEOF (.data)
+                0x00000004                __SDATA_SIZE = SIZEOF (.sdata)
+                0x01003068                __DATA_ROM_ADDR = LOADADDR (.data)
+                0x01003068                __SDATA_ROM_ADDR = LOADADDR (.sdata)
+                0x00040000                __SRAM_SIZE = SRAM_SIZE
+                0x40000000                __SRAM_BASE_ADDR = SRAM_BASE_ADDR
+                0x00000000                __BSS_SIZE = (__BSS_END - __BSS_START)
+OUTPUT(app_flash.elf elf32-powerpc)
+
+.comment        0x00000000       0x75
+ .comment       0x00000000        0xd c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+                                  0xe (size before relaxing)
+ .comment       0x0000000d       0x5b c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+                                 0x5c (size before relaxing)
+ .comment       0x00000068       0x5c obj/flashrchw.o
+ .comment       0x00000068       0x5c obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .comment       0x00000068       0x5c obj/MPC57xx__Interrupt_Init.o
+ .comment       0x00000068       0x5c obj/Vector.o
+ .comment       0x00000068       0x5c obj/main.o
+ .comment       0x00000068       0x5c c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .comment       0x00000068        0xd c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+                                  0xe (size before relaxing)
+
+.PPC.EMB.apuinfo
+                0x00000000       0x18
+ .PPC.EMB.apuinfo
+                0x00000000       0x18 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrti.o
+ .PPC.EMB.apuinfo
+                0x00000018       0x18 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtbegin.o
+ .PPC.EMB.apuinfo
+                0x00000030       0x18 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .PPC.EMB.apuinfo
+                0x00000048       0x18 obj/MPC57xx__Interrupt_Init.o
+ .PPC.EMB.apuinfo
+                0x00000060       0x18 obj/Vector.o
+ .PPC.EMB.apuinfo
+                0x00000078       0x18 obj/main.o
+ .PPC.EMB.apuinfo
+                0x00000090       0x18 obj/startup.o
+ .PPC.EMB.apuinfo
+                0x000000a8       0x18 obj/intc_sw_handlers.o
+ .PPC.EMB.apuinfo
+                0x000000c0       0x18 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/crtend.o
+ .PPC.EMB.apuinfo
+                0x000000d8       0x18 c:/gnu/powerpc-eabivle-4_9/bin/../lib/gcc/powerpc-eabivle/4.9.2/fp/e200z4/ecrtn.o
+
+.debug_info     0x00000000     0x1cb4
+ .debug_info    0x00000000       0xa5 obj/flashrchw.o
+ .debug_info    0x000000a5       0xc6 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_info    0x0000016b      0x4df obj/MPC57xx__Interrupt_Init.o
+ .debug_info    0x0000064a       0x21 obj/Vector.o
+ .debug_info    0x0000066b     0x153e obj/main.o
+ .debug_info    0x00001ba9       0x8f obj/startup.o
+ .debug_info    0x00001c38       0x7c obj/intc_sw_handlers.o
+
+.debug_abbrev   0x00000000      0x3f7
+ .debug_abbrev  0x00000000       0x4e obj/flashrchw.o
+ .debug_abbrev  0x0000004e       0x7c obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_abbrev  0x000000ca      0x150 obj/MPC57xx__Interrupt_Init.o
+ .debug_abbrev  0x0000021a       0x13 obj/Vector.o
+ .debug_abbrev  0x0000022d      0x1a2 obj/main.o
+ .debug_abbrev  0x000003cf       0x14 obj/startup.o
+ .debug_abbrev  0x000003e3       0x14 obj/intc_sw_handlers.o
+
+.debug_aranges  0x00000000      0x110
+ .debug_aranges
+                0x00000000       0x18 obj/flashrchw.o
+ .debug_aranges
+                0x00000018       0x20 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_aranges
+                0x00000038       0x38 obj/MPC57xx__Interrupt_Init.o
+ .debug_aranges
+                0x00000070       0x18 obj/Vector.o
+ .debug_aranges
+                0x00000088       0x48 obj/main.o
+ .debug_aranges
+                0x000000d0       0x20 obj/startup.o
+ .debug_aranges
+                0x000000f0       0x20 obj/intc_sw_handlers.o
+
+.debug_macro    0x00000000    0x197f3
+ .debug_macro   0x00000000       0x85 obj/flashrchw.o
+ .debug_macro   0x00000085      0x616 obj/flashrchw.o
+ .debug_macro   0x0000069b       0x22 obj/flashrchw.o
+ .debug_macro   0x000006bd       0x44 obj/flashrchw.o
+ .debug_macro   0x00000701       0x1c obj/flashrchw.o
+ .debug_macro   0x0000071d      0x1f7 obj/flashrchw.o
+ .debug_macro   0x00000914       0x55 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_macro   0x00000969       0x7e obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x000009e7    0x1814c obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00018b33       0x2e obj/MPC57xx__Interrupt_Init.o
+ .debug_macro   0x00018b61       0x26 obj/Vector.o
+ .debug_macro   0x00018b87       0xf7 obj/main.o
+ .debug_macro   0x00018c7e       0x22 obj/main.o
+ .debug_macro   0x00018ca0      0xb53 obj/main.o
+
+.debug_line     0x00000000      0x912
+ .debug_line    0x00000000      0x175 obj/flashrchw.o
+ .debug_line    0x00000175      0x1a2 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_line    0x00000317      0x209 obj/MPC57xx__Interrupt_Init.o
+ .debug_line    0x00000520       0x49 obj/Vector.o
+ .debug_line    0x00000569      0x25b obj/main.o
+ .debug_line    0x000007c4       0xf4 obj/startup.o
+ .debug_line    0x000008b8       0x5a obj/intc_sw_handlers.o
+
+.debug_str      0x00000000    0x67d62
+ .debug_str     0x00000000     0x28b2 obj/flashrchw.o
+                               0x2a06 (size before relaxing)
+ .debug_str     0x000028b2       0x4a obj/intc_SW_mode_isr_vectors_MPC5748G.o
+                               0x2965 (size before relaxing)
+ .debug_str     0x000028fc    0x63ae5 obj/MPC57xx__Interrupt_Init.o
+                              0x6642d (size before relaxing)
+ .debug_str     0x000663e1       0x72 obj/Vector.o
+                               0x1f65 (size before relaxing)
+ .debug_str     0x00066453     0x190f obj/main.o
+                              0x67adc (size before relaxing)
+
+.debug_ranges   0x00000000       0x70
+ .debug_ranges  0x00000000       0x10 obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_ranges  0x00000010       0x28 obj/MPC57xx__Interrupt_Init.o
+ .debug_ranges  0x00000038       0x38 obj/main.o
+
+.debug_frame    0x00000000      0x1b0
+ .debug_frame   0x00000000       0x2c obj/intc_SW_mode_isr_vectors_MPC5748G.o
+ .debug_frame   0x0000002c       0xa0 obj/MPC57xx__Interrupt_Init.o
+ .debug_frame   0x000000cc       0xe4 obj/main.o
