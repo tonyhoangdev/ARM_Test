@@ -1,5 +1,6 @@
-## MinhHT3
-## 20161212
+## MinhHT3 - TonyHoang
+## v1.0 - 20161212
+## v2.0 - 20170113
 ## search file c
 VPATH=$(SOURCEDIRALL)
 
@@ -7,29 +8,29 @@ VPATH=$(SOURCEDIRALL)
 CSOURCES:=
 CSOURCES+=startup.c
 CSOURCES+=system_S32K144.c
-CSOURCES+=erm_driver.c
-CSOURCES+=erm_hal.c
+# CSOURCES+=erm_driver.c
+# CSOURCES+=erm_hal.c
 
-CSOURCES+=FSL_ERM_DRV_UT_TS001.c
-CSOURCES+=FSL_ERM_HAL_UT_TS001.c
-CSOURCES+=erm_test.c
+#CSOURCES+=FSL_ERM_DRV_UT_TS001.c
+#CSOURCES+=FSL_ERM_HAL_UT_TS001.c
+#CSOURCES+=erm_test.c
 CSOURCES+=main.c
 
 ## Define ASMSOURCES
 ASMSOURCES:=startup_S32K144.S
 
 ## Define SOURCEDIR
-BASEDIR:=../../../../04_Projects/ASDK-S32_SDK/sdk_codebase/
-SOURCEDIR:=platform/devices/S32K144/include/
-SOURCEDIR+=platform/devices/S32K144/startup/
-SOURCEDIR+=platform/devices/S32K144/startup/gcc/
-SOURCEDIR+=platform/devices/
-SOURCEDIR+=platform/devices/common/
+BASEDIR:=./
+SOURCEDIR:=include/
+SOURCEDIR+=Project_Settings/Startup_Code/
 
 SOURCEDIR+=platform/drivers/inc/
 SOURCEDIR+=platform/drivers/src/erm/
 SOURCEDIR+=platform/hal/inc/
 SOURCEDIR+=platform/hal/src/erm/
+
+LIBDIR:=
+LIBDIR+=
 
 SOURCEDIR_NAME:=src/
 
@@ -46,25 +47,42 @@ CCSIZE:=arm-none-eabi-size
 
 ## Toolchain flags ##
 CFLAGS:=-mcpu=cortex-m4 -mthumb
-CFLAGS+=-Wall -Wextra -Wstrict-prototypes -pedantic
-CFLAGS+=-O1
-CFLAGS+=-funsigned-char -funsigned-bitfields  -fshort-enums
-CFLAGS+=-ffunction-sections -fdata-sections -fno-jump-tables
-CFLAGS+=-std=gnu99# -save-temps=obj
-CFLAGS+=-g
+#CFLAGS+=-mfloat-abi=hard -mfpu=fpv4-sp-d16
 CFLAGS+=-DCPU_S32K144HFT0VLLT
+CFLAGS+=-O1 -g3 -Wall
+CFLAGS+=-c -fmessage-length=0 -ffunction-sections -fdata-sections -fsigned-char 
+#CFLAGS+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
+CFLAGS+=-nostartfiles -nodefaultlibs
+
+ASFLAGS:=-mcpu=cortex-m4 -mthumb
+ASFLAGS+=-x assembler-with-cpp
+ASFLAGS+=-O0 -g3
+#ASFLAGS+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
+ASFLAGS+=-nostartfiles -nodefaultlibs
 
 # Assenbler file extension
 ASM_EXT:=S
 # Map file names
 MAP_FLASH:=app_flash.map
+MAP_RAM:=app_ram.map
 ## Execute file ##
 EXECUTABLE_FLASH:=app_flash.elf
+EXECUTABLE_RAM:=app_ram.elf
 
 ## Linker flags
-LDFLAGS_FLASH:=-Wl,-Map=$(MAP_FLASH)
-LDFLAGS_FLASH+=-nostartfiles -nodefaultlibs -nostdlib -T "$(BASEDIR)/platform/devices/S32K144/linker/gcc/S32K144_64_flash.ld" --entry=Reset_Handler -Wl,-gc-sections
-#LDFLAGS_FLASH+=-lgcc -lm -lc -lrdimon --specs=rdimon.specs
+LDFLAGS_FLASH:=-mcpu=cortex-m4 -mthumb
+#LDFLAGS_FLASH+=-mfloat-abi=hard -mfpu=fpv4-sp-d16
+LDFLAGS_FLASH+=-Wl,-Map=$(MAP_FLASH) -Xlinker --gc-sections
+LDFLAGS_FLASH+=-T "Project_Settings/Linker_Files/S32K1xx_flash.ld" --entry=Reset_Handler
+#LDFLAGS_FLASH+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
+LDFLAGS_FLASH+=-nostartfiles -nodefaultlibs
+
+LDFLAGS_RAM:=-mcpu=cortex-m4 -mthumb
+#LDFLAGS_RAM+=-mfloat-abi=hard -mfpu=fpv4-sp-d16
+LDFLAGS_RAM+=-Wl,-Map=$(MAP_RAM) -Xlinker --gc-sections
+LDFLAGS_RAM+=-T"Project_Settings/Linker_Files/S32K1xx_ram.ld" --entry=Reset_Handler
+#LDFLAGS_RAM+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
+LDFLAGS_RAM+=-nostartfiles -nodefaultlibs
 
 ## Internal variables
 OBJECTS:=$(CSOURCES:%.c=%.o)
@@ -72,11 +90,12 @@ OBJECTS+=$(ASMSOURCES:%.$(ASM_EXT)=%.o)
 COBJECTS:=$(addprefix $(OBJECTDIR),$(OBJECTS))
 SOURCEDIRALL:=$(SOURCEDIR_NAME)
 SOURCEDIRALL+=$(addprefix $(BASEDIR),$(SOURCEDIR))
+SOURCEDIRALL+=$(LIBDIR)
 
 INCLUDES:=$(addprefix -I,$(SOURCEDIRALL))
 
 ## Targets
-all: print $(EXECUTABLE_FLASH) size
+all: print $(EXECUTABLE_FLASH) $(EXECUTABLE_RAM) size
 
 $(EXECUTABLE_FLASH): dir $(COBJECTS)
 	@echo 'Linking to $(EXECUTABLE_FLASH)'
@@ -92,8 +111,14 @@ $(OBJECTDIR)%.o: %.S
 	@echo 'Compiling $@'
 	@$(AS) $(ASFLAGS) $(INCLUDES) -c $< -o $@
 
+$(EXECUTABLE_RAM): $(COBJECTS)
+	@echo 'Linking to $(EXECUTABLE_RAM)'
+	@$(LD) -o $(EXECUTABLE_RAM) $(COBJECTS) $(LDFLAGS_RAM)
 size:
+	@echo 'size of $(EXECUTABLE_FLASH)'
 	@$(CCSIZE) $(EXECUTABLE_FLASH)
+	@echo 'size of $(EXECUTABLE_RAM)'
+	@$(CCSIZE) $(EXECUTABLE_RAM)
 
 print:
 	@echo 'Compile options: $(CFLAGS) $(INCLUDES)'
@@ -105,7 +130,7 @@ clean:
 	$(RM) -rf $(OBJECTDIR)
 
 clean_all:
-	$(RM) -rf $(OBJECTDIR) $(EXECUTABLE_FLASH) $(MAP_FLASH)
+	$(RM) -rf $(OBJECTDIR) $(EXECUTABLE_FLASH) $(MAP_FLASH) $(EXECUTABLE_RAM) $(MAP_RAM)
 
 run:
 	@echo 'Run...'

@@ -8,6 +8,7 @@
 /* ---------------------------------------------------------------------------------------*/
 /*                                                                                        */
 /* Copyright (c) 1997 - 2016 , Freescale Semiconductor, Inc.                              */
+/* Copyright 2016 NXP                                                                     */
 /* All rights reserved.                                                                   */
 /*                                                                                        */
 /* Redistribution and use in source and binary forms, with or without modification,       */
@@ -371,7 +372,7 @@ DefaultISR:
 /*    Macro to define default handlers. Default handler
  *    will be weak symbol and just dead loops. They can be
  *    overwritten by other handlers */
-    .macro def_irq_handler  handler_name
+    .macro def_irq_handler	handler_name
     .weak \handler_name
     .set  \handler_name, DefaultISR
     .endm

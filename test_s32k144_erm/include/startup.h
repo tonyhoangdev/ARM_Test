@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2014, Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -40,7 +41,7 @@
  *
  * - Copy initialized data from ROM to RAM.
  * - Clear the zero-initialized data section.
- * - Copy the vector table from ROM to RAM. This could be an option.  
+ * - Copy the vector table from ROM to RAM. This could be an option.
  */
 void init_data_bss(void);
 

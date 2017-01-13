@@ -1,15 +1,13 @@
 /*
 ** ###################################################################
-**     Processor:           S32K144_100
+**     Processor:           S32K144 with 64 KB SRAM
 **     Compiler:            GNU C Compiler
-**     Reference manual:    S32K144RM Rev. 1, Draft D, 10/2015
-**     Version:             rev. 1.7, 2015-10-21
-**     Build:               b151027
 **
 **     Abstract:
 **         Linker file for the GNU C Compiler
 **
 **     Copyright (c) 2015 Freescale Semiconductor, Inc.
+**     Copyright 2016 NXP
 **     All rights reserved.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
@@ -51,7 +49,6 @@ To use "new" operator with EWL in C++ project the following symbol shall be defi
 */
 /*EXTERN(_ZN10__cxxabiv119__terminate_handlerE)*/
 
-
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
 
@@ -79,7 +76,7 @@ SECTIONS
   } > m_interrupts
 
   __VECTOR_RAM = __VECTOR_TABLE;
-  __RAM_VECTOR_TABLE_SIZE_BYTES = 0x0;
+  __RAM_VECTOR_TABLE_SIZE = 0x0;
 
   /* The program code and other data goes into internal RAM */
   .text :
@@ -94,6 +91,17 @@ SECTIONS
     *(.eh_frame)
     KEEP (*(.init))
     KEEP (*(.fini))
+    . = ALIGN(4);
+  } > m_text
+
+  /* Section for storing functions that needs to execute from RAM */
+  .code_ram :
+  {
+    . = ALIGN(4);
+    __CODE_RAM = .;
+    *(.code_ram)               /* Custom section for storing code in RAM */
+    __CODE_ROM = .;            /* Symbol is used by start-up for data initialization. */
+    __CODE_END = .;            /* No copy */
     . = ALIGN(4);
   } > m_text
 
@@ -167,35 +175,42 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } > m_text
 
-  __etext = .;    /* define a global symbol at end of code */
-  __DATA_ROM = .; /* Symbol is used by startup for data initialization */
+  __etext = .;    /* Define a global symbol at end of code. */
+  __DATA_ROM = .; /* Symbol is used by startup for data initialization. */
   __DATA_END = __DATA_ROM; /* No copy */
-  
+
+  /* Custom Section Block that can be used to place data at absolute address. */
+  /* Use __attribute__((section (".customSection"))) to place data here. */
+  .customSectionBlock  ORIGIN(m_data) :
+  {
+    KEEP(*(.customSection))  /* Keep section even if not referenced. */
+  } > m_data
+
   .data :
   {
     . = ALIGN(4);
     __DATA_RAM = .;
-    __data_start__ = .;      /* create a global symbol at data start */
+    __data_start__ = .;      /* Create a global symbol at data start. */
     *(.data)                 /* .data sections */
     *(.data*)                /* .data* sections */
     KEEP(*(.jcr*))
     . = ALIGN(4);
-    __data_end__ = .;        /* define a global symbol at data end */
+    __data_end__ = .;        /* Define a global symbol at data end. */
   } > m_data
 
-  /* Uninitialized data section */
+  /* Uninitialized data section. */
   .bss :
   {
-    /* This is used by the startup in order to initialize the .bss section */
+    /* This is used by the startup in order to initialize the .bss section. */
     . = ALIGN(4);
-    __START_BSS = .;
+    __BSS_START = .;
     __bss_start__ = .;
     *(.bss)
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
     __bss_end__ = .;
-    __END_BSS = .;
+    __BSS_END = .;
   } > m_data
 
   .heap :
@@ -216,10 +231,6 @@ SECTIONS
     . = ALIGN(8);
     . += STACK_SIZE;
   } > m_data
-  
-  /DISCARD/ : {
-  *(.FlashConfig)
-  }
 
   /* Initializes stack on the end of block */
   __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
@@ -229,5 +240,9 @@ SECTIONS
   .ARM.attributes 0 : { *(.ARM.attributes) }
 
   ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
+
+  /DISCARD/ : {
+  *(.FlashConfig)
+  }
 }
 

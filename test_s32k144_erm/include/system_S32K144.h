@@ -15,6 +15,7 @@
 **         the oscillator (PLL) that is part of the microcontroller device.
 **
 **     Copyright (c) 2015 Freescale Semiconductor, Inc.
+**     Copyright 2016 NXP
 **     All rights reserved.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
@@ -93,7 +94,7 @@ extern "C" {
 
 /* Value of the external crystal or oscillator clock frequency in Hz */
 #ifndef CPU_XTAL_CLK_HZ
-  #define CPU_XTAL_CLK_HZ                80000000u
+  #define CPU_XTAL_CLK_HZ                8000000u
 #endif
 
 /* Value of the fast internal oscillator clock frequency in Hz  */
@@ -132,6 +133,10 @@ void SystemInit(void);
  * It must be called whenever the core clock is changed during program
  * execution. SystemCoreClockUpdate() evaluates the clock register settings and calculates
  * the current core clock.
+ * This function must be called when user does not want to use clock manager component.
+ * If clock manager is used, the CLOCK_SYS_GetFreq function must be used with CORE_CLOCK
+ * parameter.
+ *
  */
 void SystemCoreClockUpdate(void);
 

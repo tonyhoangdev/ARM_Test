@@ -36,21 +36,23 @@ CCSIZE:=powerpc-eabivle-size.exe
 
 ## Toolchain flags ##
 CFLAGS:=-mcpu=e200z4
+CFLAGS+=-mhard-float -mbig -mvle -mregnames
 CFLAGS+=-DSTART_FROM_FLASH -DMPC574xG -DTURN_ON_CPU0
 # CFLAGS+=-DTURN_ON_CPU1 
 # CFLAGS+=-DTURN_ON_CPU2 
 # CFLAGS+=-DDEBUG_SECONDARY_CORES
-CFLAGS+=-O0 -g3 -Wall -c
-CFLAGS+=-fmessage-length=0 -ffunction-sections -fdata-sections -fsigned-char 
-CFLAGS+=-mbig -mvle -mregnames -mhard-float
-CFLAGS+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+CFLAGS+=-O1 -g3 -Wall
+CFLAGS+=-c -fmessage-length=0 -ffunction-sections -fdata-sections -fsigned-char 
+#CFLAGS+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+CFLAGS+=-nostartfiles -nodefaultlibs
 
 ASFLAGS:=-mcpu=e200z4 
 ASFLAGS+=-DSTART_FROM_FLASH -DMPC574xG -DDISABLE_SWT0 -DI_CACHE -DD_CACHE 
 # ASFLAGS+=-DHW_INIT
 ASFLAGS+=-x assembler-with-cpp
 ASFLAGS+=-O0 -g3 -mbig -mvle -mregnames
-ASFLAGS+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+#ASFLAGS+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+ASFLAGS+=-nostartfiles -nodefaultlibs
 
 # Assenbler file extension
 ASM_EXT:=S
@@ -63,14 +65,18 @@ EXECUTABLE_RAM:=app_ram.elf
 
 ## Linker flags
 LDFLAGS_FLASH:=-mcpu=e200z4
-LDFLAGS_FLASH+=-Wl,-Map=$(MAP_FLASH) -Xlinker --gc-sections -mhard-float
+LDFLAGS_FLASH+=-mhard-float
+LDFLAGS_FLASH+=-Wl,-Map=$(MAP_FLASH) -Xlinker --gc-sections
 LDFLAGS_FLASH+=-T "Project_Settings/Linker_Files/57xx_flash.ld" -T "Project_Settings/Linker_Files/libs.ld"
-LDFLAGS_FLASH+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+#LDFLAGS_FLASH+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+LDFLAGS_FLASH+=-nostartfiles -nodefaultlibs
 
 LDFLAGS_RAM:=-mcpu=e200z4
-LDFLAGS_RAM+=-Wl,-Map=$(MAP_RAM) -Xlinker --gc-sections -mhard-float
+LDFLAGS_RAM+=-mhard-float
+LDFLAGS_RAM+=-Wl,-Map=$(MAP_RAM) -Xlinker --gc-sections
 LDFLAGS_RAM+=-T"Project_Settings/Linker_Files/57xx_ram.ld"
-LDFLAGS_RAM+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+#LDFLAGS_RAM+=--sysroot="C:\GNU\powerpc-eabivle-4_9\powerpc-eabivle\newlib" -specs=nano.specs
+LDFLAGS_RAM+=-nostartfiles -nodefaultlibs
 
 ## Internal variables
 OBJECTS:=$(CSOURCES:%.c=%.o)

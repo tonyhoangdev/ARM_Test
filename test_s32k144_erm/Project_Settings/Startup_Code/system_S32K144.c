@@ -15,6 +15,7 @@
 **         the oscillator (PLL) that is part of the microcontroller device.
 **
 **     Copyright (c) 2015 Freescale Semiconductor, Inc.
+**     Copyright 2016 NXP
 **     All rights reserved.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
@@ -91,12 +92,15 @@
  * The cast is required to initialize a pointer with an unsigned int define,
  * representing an address.
  *
+ * @section [global]
+ * Violates MISRA 2012 Advisory Rule 8.7, External could be made static.
+ * Function is defined for usage by application code.
+ *
  */
 
-#include <stdbool.h>
-#include "fsl_device_registers.h"
+#include "device_registers.h"
 #include "system_S32K144.h"
-
+#include "stdbool.h"
 
 /* ----------------------------------------------------------------------------
    -- Core clock
@@ -113,30 +117,37 @@ uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
  *
  * Implements    : SystemInit_Activity
  *END**************************************************************************/
-void SystemInit(void) {
+void SystemInit(void)
+{
 /**************************************************************************/
                       /* FPU ENABLE*/
 /**************************************************************************/
 #ifdef ENABLE_FPU
   /* Enable CP10 and CP11 coprocessors */
-  FSL_SCB->CPACR |= (FSL_SCB_CPACR_CP10_MASK | FSL_SCB_CPACR_CP11_MASK); 
+  S32_SCB->CPACR |= (S32_SCB_CPACR_CP10_MASK | S32_SCB_CPACR_CP11_MASK);
+#ifdef  ERRATA_E6940
+  /* Disable lazy context save of floating point state by clearing LSPEN bit
+   * Workaround for errata e6940 */
+  S32_SCB->FPCCR &= ~(S32_SCB_FPCCR_LSPEN_MASK);
+#endif
 #endif /* ENABLE_FPU */
 
 /**************************************************************************/
                       /* WDOG DISABLE*/
 /**************************************************************************/
-  
+
 #if (DISABLE_WDOG)
   /* Write of the WDOG unlock key to CNT register, must be done in order to allow any modifications*/
-  WDOG->CNT = (uint32_t ) FSL_FEATURE_WDOG_UNLOCK_VALUE;
-  
-  /* Initial write of WDOG configuration register; clock select from LPO, update enable, watchdog disabled*/
-  /* In the CS reg, bit 13 is reserved but if it is not written the WDOG can't be disabled*/
-  WDOG->CS  = (uint32_t ) ( (1UL << 13U)                                         |
-                            (FSL_FEATURE_WDOG_CLK_FROM_LPO << WDOG_CS_CLK_SHIFT) |
+  WDOG->CNT = (uint32_t ) FEATURE_WDOG_UNLOCK_VALUE;
+
+  /* Initial write of WDOG configuration register:
+   * enables support for 32-bit refresh/unlock command write words,
+   * clock select from LPO, update enable, watchdog disabled */
+  WDOG->CS  = (uint32_t ) ( (1UL << WDOG_CS_CMD32EN_SHIFT)                       |
+                            (FEATURE_WDOG_CLK_FROM_LPO << WDOG_CS_CLK_SHIFT) |
                             (0U << WDOG_CS_EN_SHIFT)                             |
                             (1U << WDOG_CS_UPDATE_SHIFT)                         );
-                            
+
   /* Configure timeout */
   WDOG->TOVAL = (uint32_t )0xFFFF;
 #endif /* (DISABLE_WDOG) */
@@ -159,19 +170,19 @@ void SystemInit(void) {
  *
  * Implements    : SystemCoreClockUpdate_Activity
  *END**************************************************************************/
-void SystemCoreClockUpdate(void) {
-
+void SystemCoreClockUpdate(void)
+{
   uint32_t SCGOUTClock = 0U;      /* Variable to store output clock frequency of the SCG module */
   uint32_t regValue;              /* Temporary variable */
   uint32_t divider, prediv, multi;
   bool validSystemClockSource = true;
   static const uint32_t fircFreq[] = {
-      FSL_FEATURE_SCG_FIRC_FREQ0,
-      FSL_FEATURE_SCG_FIRC_FREQ1,
-      FSL_FEATURE_SCG_FIRC_FREQ2,
-      FSL_FEATURE_SCG_FIRC_FREQ3,
+      FEATURE_SCG_FIRC_FREQ0,
+      FEATURE_SCG_FIRC_FREQ1,
+      FEATURE_SCG_FIRC_FREQ2,
+      FEATURE_SCG_FIRC_FREQ3,
   };
-  
+
   divider = ((SCG->CSR & SCG_CSR_DIVCORE_MASK) >> SCG_CSR_DIVCORE_SHIFT) + 1U;
 
   switch ((SCG->CSR & SCG_CSR_SCS_MASK) >> SCG_CSR_SCS_SHIFT) {
@@ -183,7 +194,7 @@ void SystemCoreClockUpdate(void) {
       /* Slow IRC */
       regValue = (SCG->SIRCCFG & SCG_SIRCCFG_RANGE_MASK) >> SCG_SIRCCFG_RANGE_SHIFT;
       SCGOUTClock = (regValue != 0U) ?
-                    FSL_FEATURE_SCG_SIRC_HIGH_RANGE_FREQ : FSL_FEATURE_SCG_SIRC_LOW_RANGE_FREQ;
+                    FEATURE_SCG_SIRC_HIGH_RANGE_FREQ : FEATURE_SCG_SIRC_LOW_RANGE_FREQ;
       break;
     case 0x3:
       /* Fast IRC */
@@ -214,23 +225,22 @@ void SystemCoreClockUpdate(void) {
  *
  * Implements    : SystemSoftwareReset_Activity
  *END**************************************************************************/
-
-void SystemSoftwareReset(void) {
-
+void SystemSoftwareReset(void)
+{
     uint32_t regValue;
 
     /* Read Application Interrupt and Reset Control Register */
-    regValue = FSL_SCB->AIRCR;
+    regValue = S32_SCB->AIRCR;
 
     /* Clear register key */
-    regValue &= ~( FSL_SCB_AIRCR_VECTKEY_MASK);
+    regValue &= ~( S32_SCB_AIRCR_VECTKEY_MASK);
 
     /* Configure System reset request bit and Register Key */
-    regValue |= FSL_SCB_AIRCR_VECTKEY(FSL_FEATURE_SCB_VECTKEY);
-    regValue |= FSL_SCB_AIRCR_SYSRESETREQ(0x1u);
+    regValue |= S32_SCB_AIRCR_VECTKEY(FEATURE_SCB_VECTKEY);
+    regValue |= S32_SCB_AIRCR_SYSRESETREQ(0x1u);
 
     /* Write computed register value */
-    FSL_SCB->AIRCR = regValue;
+    S32_SCB->AIRCR = regValue;
 }
 
 /*******************************************************************************

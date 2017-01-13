@@ -1,12 +1,13 @@
 /*
 ** ###################################################################
-**     Version:             rev. 1.0, 2015-04-09
-**     Build:               b150416
+**     Version:             rev. 2.0, 2016-07-25
+**     Build:               b160725
 **
 **     Abstract:
 **         Common include file for CMSIS register access layer headers.
 **
 **     Copyright (c) 2015 Freescale Semiconductor, Inc.
+**     Copyright 2016 NXP
 **     All rights reserved.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
@@ -40,12 +41,14 @@
 **     Revisions:
 **     - rev. 1.0 (2015-04-09)
 **         Initial version.
+**     - rev. 2.0 (2016-07-25)
+**         Added S32V
 **
 ** ###################################################################
 */
 
-#ifndef FSL_DEVICE_REGISTERS_H
-#define FSL_DEVICE_REGISTERS_H
+#ifndef DEVICE_REGISTERS_H
+#define DEVICE_REGISTERS_H
 
 /**
 * @page misra_violations MISRA-C:2012 violations
@@ -72,7 +75,7 @@
     /* CPU specific feature definitions */
     #include "S32K144_features.h"
     /* Specific core definitions */
-    #include "fsl_core_cm4.h"
+    #include "s32_core_cm4.h"
 
 #else
     #error "No valid CPU defined!"
@@ -80,7 +83,7 @@
 
 #include "devassert.h"
 
-#endif /* FSL_DEVICE_REGISTERS_H */
+#endif /* DEVICE_REGISTERS_H */
 
 /*******************************************************************************
  * EOF

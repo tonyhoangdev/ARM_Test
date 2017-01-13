@@ -5,14 +5,16 @@
 **                          GreenHills ARM Compiler
 **                          IAR ANSI C/C++ Compiler for ARM
 **
-**     Reference manual:    S32K14XRM Rev. 1, 08/2016
-**     Version:             rev. 2.3, 2016-09-09
-**     Build:               b160909
+**     Reference manual:    S32K14XRM Rev. 2 Draft B, 11/2016
+**     Version:             rev. 2.5, 2016-11-25
+**     Build:               b161202
 **
 **     Abstract:
 **         Peripheral Access Layer for S32K144
 **
 **     Copyright (c) 1997 - 2016 Freescale Semiconductor, Inc.
+**     Copyright 2016 NXP
+**     Copyright (c) 2016 - 2016 NXP
 **     All rights reserved.
 **
 **     Redistribution and use in source and binary forms, with or without modification,
@@ -25,9 +27,9 @@
 **       list of conditions and the following disclaimer in the documentation and/or
 **       other materials provided with the distribution.
 **
-**     o Neither the name of Freescale Semiconductor, Inc. nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
+**     o Neither the name of NXP nor the names of its contributors may be used to endorse
+**       or promote products derived from this software without specific prior software
+**       without specific prior written permission.
 **
 **     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 **     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,8 +42,8 @@
 **     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 **     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 **
-**     http:                 www.freescale.com
-**     mail:                 support@freescale.com
+**     http:                 www.nxp.com
+**     mail:                 support@nxp.com
 **
 **     Revisions:
 **     - rev. 1.0 (2015-04-09) - Iulian Talpiga
@@ -98,6 +100,7 @@
 **         Updated PMC, added CLKBIASDIS bitfield
 **         Added FSL_NVIC registers to SVD
 **     - rev. 2.0 (2016-04-07) - Iulian Talpiga
+**         Updated support for Rev2.0 silicon (0N47T)
 **         Updated ADC, AIPS, DMA, FlexIO, FTM, GPIO, LPI2C, LPIT, LPSPI, MCM, MPU, MSCM, PMC, RTC, RCM, PCC, RTC, SCG, SIM, TRGMUX and WDOG  module
 **         Updated interrupts
 **         Added EIM and ERM modules
@@ -112,14 +115,26 @@
 **     - rev. 2.3 (2016-09-09) - Iulian Talpiga
 **         Updated to latest RM
 **         Minor changes to: PCC, FSL_NVIC and FTM
+**     - rev. 2.4 (2016-09-28) - Iulian Talpiga
+**         Fix RAMn array size in FlexCAN
+**         Fix FCSESTAT bit order
+**         Added CP0CFG0, CP0CFG1,CP0CFG2 and CP0CFG3 in MSCM
+**         Fixed STIR register in FSL_NVIC
+**         Fixed SHPR3 and ACTLR registers in FSL_SCB
+**     - rev. 2.5 (2016-11-25) - Iulian Talpiga
+**         Fix FRAC bit-field in PCC module
+**         Removed BITBAND_ACCESS macros
+**         Added MISRA declarations
+**         Updated copyright
+**         Changed prefix of NVIC, SCB and SysTick to S32_
 **
 ** ###################################################################
 */
 
 /*!
  * @file S32K144.h
- * @version 2.3
- * @date 2016-09-09
+ * @version 2.5
+ * @date 2016-11-25
  * @brief Peripheral Access Layer for S32K144
  *
  * This file contains register definitions and macros for easy access to their
@@ -128,6 +143,41 @@
  * This file assumes LITTLE endian system.
  */
 
+/**
+* @page misra_violations MISRA-C:2012 violations
+*
+* @section [global]
+* Violates MISRA 2012 Advisory Rule 2.3, local typedef not referenced
+* The SoC header defines typedef for all modules.
+*
+* @section [global]
+* Violates MISRA 2012 Advisory Rule 2.5, local macro not referenced
+* The SoC header defines macros for all modules and registers.
+*
+* @section [global]
+* Violates MISRA 2012 Advisory Directive 4.9, Function-like macro
+* These are generated macros used for accessing the bit-fields from registers.
+*
+* @section [global]
+* Violates MISRA 2012 Required Rule 5.1, identifier clash
+* The supported compilers use more than 31 significant characters for identifiers.
+*
+* @section [global]
+* Violates MISRA 2012 Required Rule 5.2, identifier clash
+* The supported compilers use more than 31 significant characters for identifiers.
+*
+* @section [global]
+* Violates MISRA 2012 Required Rule 5.4, identifier clash
+* The supported compilers use more than 31 significant characters for identifiers.
+*
+* @section [global]
+* Violates MISRA 2012 Required Rule 5.5, identifier clash
+* The supported compilers use more than 31 significant characters for identifiers.
+*
+* @section [global]
+* Violates MISRA 2012 Required Rule 21.1, defined macro '__I' is reserved to the compiler
+* This type qualifier is needed to ensure correct I/O access and addressing.
+*/
 
 /* ----------------------------------------------------------------------------
    -- MCU activation
@@ -150,7 +200,7 @@
  * compatible) */
 #define MCU_MEM_MAP_VERSION 0x0200u
 /** Memory map minor version */
-#define MCU_MEM_MAP_VERSION_MINOR 0x0003u
+#define MCU_MEM_MAP_VERSION_MINOR 0x0005u
 
 /* ----------------------------------------------------------------------------
    -- Generic macros
@@ -172,39 +222,6 @@
 #define     __IO    volatile             /*!< Defines 'read / write' permissions              */
 #endif
 
-
-/**
- * @brief Macro to access a single bit of a 32-bit peripheral register (bit band region
- *        0x40000000 to 0x400FFFFF) using the bit-band alias region access.
- * @param Reg Register to access.
- * @param Bit Bit number to access.
- * @return Value of the targeted bit in the bit band region.
- */
-#if !defined(BITBAND_ACCESS32)
-  #define BITBAND_ACCESS32(Reg,Bit) (*((uint32_t volatile*)(0x42000000u + (32u*((uintptr_t)(Reg) - (uintptr_t)0x40000000u)) + (4u*((uintptr_t)(Bit))))))
-#endif
-
-/**
- * @brief Macro to access a single bit of a 16-bit peripheral register (bit band region
- *        0x40000000 to 0x400FFFFF) using the bit-band alias region access.
- * @param Reg Register to access.
- * @param Bit Bit number to access.
- * @return Value of the targeted bit in the bit band region.
- */
-#if !defined(BITBAND_ACCESS16)
-  #define BITBAND_ACCESS16(Reg,Bit) (*((uint16_t volatile*)(0x42000000u + (32u*((uintptr_t)(Reg) - (uintptr_t)0x40000000u)) + (4u*((uintptr_t)(Bit))))))
-#endif
-
-/**
- * @brief Macro to access a single bit of an 8-bit peripheral register (bit band region
- *        0x40000000 to 0x400FFFFF) using the bit-band alias region access.
- * @param Reg Register to access.
- * @param Bit Bit number to access.
- * @return Value of the targeted bit in the bit band region.
- */
-#if !defined(BITBAND_ACCESS8)
-  #define BITBAND_ACCESS8(Reg,Bit) (*((uint8_t volatile*)(0x42000000u + (32u*((uintptr_t)(Reg) - (uintptr_t)0x40000000u)) + (4u*((uintptr_t)(Bit))))))
-#endif
 
 /**
 * @brief 32 bits memory read macro.
@@ -255,6 +272,13 @@
 /** Interrupt Number Definitions */
 #define NUMBER_OF_INT_VECTORS 139u               /**< Number of interrupts in the Vector table */
 
+/**
+ * @brief Defines the Interrupt Numbers definitions
+ *
+ * This enumeration is used to configure the interrupts.
+ *
+ * Implements : IRQn_Type_Class
+ */
 typedef enum
 {
   /* Auxiliary constants */
@@ -1011,7 +1035,7 @@ typedef struct {
 
 
 /** CAN - Size of Registers Arrays */
-#define CAN_RAMn_COUNT                           64u
+#define CAN_RAMn_COUNT                           128u
 #define CAN_RXIMR_COUNT                          16u
 #define CAN_WMB_COUNT                            4u
 
@@ -1039,7 +1063,7 @@ typedef struct {
   __IO uint32_t CBT;                               /**< CAN Bit Timing Register, offset: 0x50 */
        uint8_t RESERVED_4[44];
   __IO uint32_t RAMn[CAN_RAMn_COUNT];              /**< Embedded RAM, array offset: 0x80, array step: 0x4 */
-       uint8_t RESERVED_5[1792];
+       uint8_t RESERVED_5[1536];
   __IO uint32_t RXIMR[CAN_RXIMR_COUNT];            /**< Rx Individual Mask Registers, array offset: 0x880, array step: 0x4 */
        uint8_t RESERVED_6[576];
   __IO uint32_t CTRL1_PN;                          /**< Pretended Networking Control 1 Register, offset: 0xB00 */
@@ -3842,1197 +3866,6 @@ typedef struct {
 
 
 /* ----------------------------------------------------------------------------
-   -- FSL_NVIC Peripheral Access Layer
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_NVIC_Peripheral_Access_Layer FSL_NVIC Peripheral Access Layer
- * @{
- */
-
-
-/** FSL_NVIC - Size of Registers Arrays */
-#define FSL_NVIC_ISER_COUNT                      4u
-#define FSL_NVIC_ICER_COUNT                      4u
-#define FSL_NVIC_ISPR_COUNT                      4u
-#define FSL_NVIC_ICPR_COUNT                      4u
-#define FSL_NVIC_IABR_COUNT                      4u
-#define FSL_NVIC_IP_COUNT                        123u
-#define FSL_NVIC_STIR_COUNT                      1u
-
-/** FSL_NVIC - Register Layout Typedef */
-typedef struct {
-  __IO uint32_t ISER[FSL_NVIC_ISER_COUNT];         /**< Interrupt Set Enable Register n, array offset: 0x0, array step: 0x4 */
-       uint8_t RESERVED_0[112];
-  __IO uint32_t ICER[FSL_NVIC_ICER_COUNT];         /**< Interrupt Clear Enable Register n, array offset: 0x80, array step: 0x4 */
-       uint8_t RESERVED_1[112];
-  __IO uint32_t ISPR[FSL_NVIC_ISPR_COUNT];         /**< Interrupt Set Pending Register n, array offset: 0x100, array step: 0x4 */
-       uint8_t RESERVED_2[112];
-  __IO uint32_t ICPR[FSL_NVIC_ICPR_COUNT];         /**< Interrupt Clear Pending Register n, array offset: 0x180, array step: 0x4 */
-       uint8_t RESERVED_3[112];
-  __IO uint32_t IABR[FSL_NVIC_IABR_COUNT];         /**< Interrupt Active bit Register n, array offset: 0x200, array step: 0x4 */
-       uint8_t RESERVED_4[240];
-  __IO uint8_t IP[FSL_NVIC_IP_COUNT];              /**< Interrupt Priority Register n, array offset: 0x300, array step: 0x1 */
-       uint8_t RESERVED_5[2693];
-  __IO uint32_t STIR[FSL_NVIC_STIR_COUNT];         /**< Software Trigger Interrupt Register, array offset: 0xE00, array step: 0x4 */
-} FSL_NVIC_Type, *FSL_NVIC_MemMapPtr;
-
- /** Number of instances of the FSL_NVIC module. */
-#define FSL_NVIC_INSTANCE_COUNT                  (1u)
-
-
-/* FSL_NVIC - Peripheral instance base addresses */
-/** Peripheral FSL_NVIC base address */
-#define FSL_NVIC_BASE                            (0xE000E100u)
-/** Peripheral FSL_NVIC base pointer */
-#define FSL_NVIC                                 ((FSL_NVIC_Type *)FSL_NVIC_BASE)
-/** Array initializer of FSL_NVIC peripheral base addresses */
-#define FSL_NVIC_BASE_ADDRS                      { FSL_NVIC_BASE }
-/** Array initializer of FSL_NVIC peripheral base pointers */
-#define FSL_NVIC_BASE_PTRS                       { FSL_NVIC }
- /** Number of interrupt vector arrays for the FSL_NVIC module. */
-#define FSL_NVIC_IRQS_ARR_COUNT                  (1u)
- /** Number of interrupt channels for the FSL_NVIC module. */
-#define FSL_NVIC_IRQS_CH_COUNT                   (1u)
-/** Interrupt vectors for the FSL_NVIC peripheral type */
-#define FSL_NVIC_IRQS                            { SWI_IRQn }
-
-/* ----------------------------------------------------------------------------
-   -- FSL_NVIC Register Masks
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_NVIC_Register_Masks FSL_NVIC Register Masks
- * @{
- */
-
-/* ISER Bit Fields */
-#define FSL_NVIC_ISER_SETENA_MASK                0xFFFFFFFFu
-#define FSL_NVIC_ISER_SETENA_SHIFT               0u
-#define FSL_NVIC_ISER_SETENA_WIDTH               32u
-#define FSL_NVIC_ISER_SETENA(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_ISER_SETENA_SHIFT))&FSL_NVIC_ISER_SETENA_MASK)
-/* ICER Bit Fields */
-#define FSL_NVIC_ICER_CLRENA_MASK                0xFFFFFFFFu
-#define FSL_NVIC_ICER_CLRENA_SHIFT               0u
-#define FSL_NVIC_ICER_CLRENA_WIDTH               32u
-#define FSL_NVIC_ICER_CLRENA(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_ICER_CLRENA_SHIFT))&FSL_NVIC_ICER_CLRENA_MASK)
-/* ISPR Bit Fields */
-#define FSL_NVIC_ISPR_SETPEND_MASK               0xFFFFFFFFu
-#define FSL_NVIC_ISPR_SETPEND_SHIFT              0u
-#define FSL_NVIC_ISPR_SETPEND_WIDTH              32u
-#define FSL_NVIC_ISPR_SETPEND(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_ISPR_SETPEND_SHIFT))&FSL_NVIC_ISPR_SETPEND_MASK)
-/* ICPR Bit Fields */
-#define FSL_NVIC_ICPR_CLRPEND_MASK               0xFFFFFFFFu
-#define FSL_NVIC_ICPR_CLRPEND_SHIFT              0u
-#define FSL_NVIC_ICPR_CLRPEND_WIDTH              32u
-#define FSL_NVIC_ICPR_CLRPEND(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_ICPR_CLRPEND_SHIFT))&FSL_NVIC_ICPR_CLRPEND_MASK)
-/* IABR Bit Fields */
-#define FSL_NVIC_IABR_ACTIVE_MASK                0xFFFFFFFFu
-#define FSL_NVIC_IABR_ACTIVE_SHIFT               0u
-#define FSL_NVIC_IABR_ACTIVE_WIDTH               32u
-#define FSL_NVIC_IABR_ACTIVE(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_IABR_ACTIVE_SHIFT))&FSL_NVIC_IABR_ACTIVE_MASK)
-/* IP Bit Fields */
-#define FSL_NVIC_IP_PRI0_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI0_SHIFT                   0u
-#define FSL_NVIC_IP_PRI0_WIDTH                   8u
-#define FSL_NVIC_IP_PRI0(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI0_SHIFT))&FSL_NVIC_IP_PRI0_MASK)
-#define FSL_NVIC_IP_PRI1_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI1_SHIFT                   0u
-#define FSL_NVIC_IP_PRI1_WIDTH                   8u
-#define FSL_NVIC_IP_PRI1(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI1_SHIFT))&FSL_NVIC_IP_PRI1_MASK)
-#define FSL_NVIC_IP_PRI2_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI2_SHIFT                   0u
-#define FSL_NVIC_IP_PRI2_WIDTH                   8u
-#define FSL_NVIC_IP_PRI2(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI2_SHIFT))&FSL_NVIC_IP_PRI2_MASK)
-#define FSL_NVIC_IP_PRI3_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI3_SHIFT                   0u
-#define FSL_NVIC_IP_PRI3_WIDTH                   8u
-#define FSL_NVIC_IP_PRI3(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI3_SHIFT))&FSL_NVIC_IP_PRI3_MASK)
-#define FSL_NVIC_IP_PRI4_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI4_SHIFT                   0u
-#define FSL_NVIC_IP_PRI4_WIDTH                   8u
-#define FSL_NVIC_IP_PRI4(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI4_SHIFT))&FSL_NVIC_IP_PRI4_MASK)
-#define FSL_NVIC_IP_PRI5_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI5_SHIFT                   0u
-#define FSL_NVIC_IP_PRI5_WIDTH                   8u
-#define FSL_NVIC_IP_PRI5(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI5_SHIFT))&FSL_NVIC_IP_PRI5_MASK)
-#define FSL_NVIC_IP_PRI6_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI6_SHIFT                   0u
-#define FSL_NVIC_IP_PRI6_WIDTH                   8u
-#define FSL_NVIC_IP_PRI6(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI6_SHIFT))&FSL_NVIC_IP_PRI6_MASK)
-#define FSL_NVIC_IP_PRI7_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI7_SHIFT                   0u
-#define FSL_NVIC_IP_PRI7_WIDTH                   8u
-#define FSL_NVIC_IP_PRI7(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI7_SHIFT))&FSL_NVIC_IP_PRI7_MASK)
-#define FSL_NVIC_IP_PRI8_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI8_SHIFT                   0u
-#define FSL_NVIC_IP_PRI8_WIDTH                   8u
-#define FSL_NVIC_IP_PRI8(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI8_SHIFT))&FSL_NVIC_IP_PRI8_MASK)
-#define FSL_NVIC_IP_PRI9_MASK                    0xFFu
-#define FSL_NVIC_IP_PRI9_SHIFT                   0u
-#define FSL_NVIC_IP_PRI9_WIDTH                   8u
-#define FSL_NVIC_IP_PRI9(x)                      (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI9_SHIFT))&FSL_NVIC_IP_PRI9_MASK)
-#define FSL_NVIC_IP_PRI10_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI10_SHIFT                  0u
-#define FSL_NVIC_IP_PRI10_WIDTH                  8u
-#define FSL_NVIC_IP_PRI10(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI10_SHIFT))&FSL_NVIC_IP_PRI10_MASK)
-#define FSL_NVIC_IP_PRI11_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI11_SHIFT                  0u
-#define FSL_NVIC_IP_PRI11_WIDTH                  8u
-#define FSL_NVIC_IP_PRI11(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI11_SHIFT))&FSL_NVIC_IP_PRI11_MASK)
-#define FSL_NVIC_IP_PRI12_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI12_SHIFT                  0u
-#define FSL_NVIC_IP_PRI12_WIDTH                  8u
-#define FSL_NVIC_IP_PRI12(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI12_SHIFT))&FSL_NVIC_IP_PRI12_MASK)
-#define FSL_NVIC_IP_PRI13_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI13_SHIFT                  0u
-#define FSL_NVIC_IP_PRI13_WIDTH                  8u
-#define FSL_NVIC_IP_PRI13(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI13_SHIFT))&FSL_NVIC_IP_PRI13_MASK)
-#define FSL_NVIC_IP_PRI14_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI14_SHIFT                  0u
-#define FSL_NVIC_IP_PRI14_WIDTH                  8u
-#define FSL_NVIC_IP_PRI14(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI14_SHIFT))&FSL_NVIC_IP_PRI14_MASK)
-#define FSL_NVIC_IP_PRI15_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI15_SHIFT                  0u
-#define FSL_NVIC_IP_PRI15_WIDTH                  8u
-#define FSL_NVIC_IP_PRI15(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI15_SHIFT))&FSL_NVIC_IP_PRI15_MASK)
-#define FSL_NVIC_IP_PRI16_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI16_SHIFT                  0u
-#define FSL_NVIC_IP_PRI16_WIDTH                  8u
-#define FSL_NVIC_IP_PRI16(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI16_SHIFT))&FSL_NVIC_IP_PRI16_MASK)
-#define FSL_NVIC_IP_PRI17_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI17_SHIFT                  0u
-#define FSL_NVIC_IP_PRI17_WIDTH                  8u
-#define FSL_NVIC_IP_PRI17(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI17_SHIFT))&FSL_NVIC_IP_PRI17_MASK)
-#define FSL_NVIC_IP_PRI18_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI18_SHIFT                  0u
-#define FSL_NVIC_IP_PRI18_WIDTH                  8u
-#define FSL_NVIC_IP_PRI18(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI18_SHIFT))&FSL_NVIC_IP_PRI18_MASK)
-#define FSL_NVIC_IP_PRI19_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI19_SHIFT                  0u
-#define FSL_NVIC_IP_PRI19_WIDTH                  8u
-#define FSL_NVIC_IP_PRI19(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI19_SHIFT))&FSL_NVIC_IP_PRI19_MASK)
-#define FSL_NVIC_IP_PRI20_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI20_SHIFT                  0u
-#define FSL_NVIC_IP_PRI20_WIDTH                  8u
-#define FSL_NVIC_IP_PRI20(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI20_SHIFT))&FSL_NVIC_IP_PRI20_MASK)
-#define FSL_NVIC_IP_PRI21_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI21_SHIFT                  0u
-#define FSL_NVIC_IP_PRI21_WIDTH                  8u
-#define FSL_NVIC_IP_PRI21(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI21_SHIFT))&FSL_NVIC_IP_PRI21_MASK)
-#define FSL_NVIC_IP_PRI22_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI22_SHIFT                  0u
-#define FSL_NVIC_IP_PRI22_WIDTH                  8u
-#define FSL_NVIC_IP_PRI22(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI22_SHIFT))&FSL_NVIC_IP_PRI22_MASK)
-#define FSL_NVIC_IP_PRI23_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI23_SHIFT                  0u
-#define FSL_NVIC_IP_PRI23_WIDTH                  8u
-#define FSL_NVIC_IP_PRI23(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI23_SHIFT))&FSL_NVIC_IP_PRI23_MASK)
-#define FSL_NVIC_IP_PRI24_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI24_SHIFT                  0u
-#define FSL_NVIC_IP_PRI24_WIDTH                  8u
-#define FSL_NVIC_IP_PRI24(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI24_SHIFT))&FSL_NVIC_IP_PRI24_MASK)
-#define FSL_NVIC_IP_PRI25_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI25_SHIFT                  0u
-#define FSL_NVIC_IP_PRI25_WIDTH                  8u
-#define FSL_NVIC_IP_PRI25(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI25_SHIFT))&FSL_NVIC_IP_PRI25_MASK)
-#define FSL_NVIC_IP_PRI26_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI26_SHIFT                  0u
-#define FSL_NVIC_IP_PRI26_WIDTH                  8u
-#define FSL_NVIC_IP_PRI26(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI26_SHIFT))&FSL_NVIC_IP_PRI26_MASK)
-#define FSL_NVIC_IP_PRI27_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI27_SHIFT                  0u
-#define FSL_NVIC_IP_PRI27_WIDTH                  8u
-#define FSL_NVIC_IP_PRI27(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI27_SHIFT))&FSL_NVIC_IP_PRI27_MASK)
-#define FSL_NVIC_IP_PRI28_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI28_SHIFT                  0u
-#define FSL_NVIC_IP_PRI28_WIDTH                  8u
-#define FSL_NVIC_IP_PRI28(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI28_SHIFT))&FSL_NVIC_IP_PRI28_MASK)
-#define FSL_NVIC_IP_PRI29_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI29_SHIFT                  0u
-#define FSL_NVIC_IP_PRI29_WIDTH                  8u
-#define FSL_NVIC_IP_PRI29(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI29_SHIFT))&FSL_NVIC_IP_PRI29_MASK)
-#define FSL_NVIC_IP_PRI30_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI30_SHIFT                  0u
-#define FSL_NVIC_IP_PRI30_WIDTH                  8u
-#define FSL_NVIC_IP_PRI30(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI30_SHIFT))&FSL_NVIC_IP_PRI30_MASK)
-#define FSL_NVIC_IP_PRI31_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI31_SHIFT                  0u
-#define FSL_NVIC_IP_PRI31_WIDTH                  8u
-#define FSL_NVIC_IP_PRI31(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI31_SHIFT))&FSL_NVIC_IP_PRI31_MASK)
-#define FSL_NVIC_IP_PRI32_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI32_SHIFT                  0u
-#define FSL_NVIC_IP_PRI32_WIDTH                  8u
-#define FSL_NVIC_IP_PRI32(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI32_SHIFT))&FSL_NVIC_IP_PRI32_MASK)
-#define FSL_NVIC_IP_PRI33_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI33_SHIFT                  0u
-#define FSL_NVIC_IP_PRI33_WIDTH                  8u
-#define FSL_NVIC_IP_PRI33(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI33_SHIFT))&FSL_NVIC_IP_PRI33_MASK)
-#define FSL_NVIC_IP_PRI34_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI34_SHIFT                  0u
-#define FSL_NVIC_IP_PRI34_WIDTH                  8u
-#define FSL_NVIC_IP_PRI34(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI34_SHIFT))&FSL_NVIC_IP_PRI34_MASK)
-#define FSL_NVIC_IP_PRI35_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI35_SHIFT                  0u
-#define FSL_NVIC_IP_PRI35_WIDTH                  8u
-#define FSL_NVIC_IP_PRI35(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI35_SHIFT))&FSL_NVIC_IP_PRI35_MASK)
-#define FSL_NVIC_IP_PRI36_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI36_SHIFT                  0u
-#define FSL_NVIC_IP_PRI36_WIDTH                  8u
-#define FSL_NVIC_IP_PRI36(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI36_SHIFT))&FSL_NVIC_IP_PRI36_MASK)
-#define FSL_NVIC_IP_PRI37_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI37_SHIFT                  0u
-#define FSL_NVIC_IP_PRI37_WIDTH                  8u
-#define FSL_NVIC_IP_PRI37(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI37_SHIFT))&FSL_NVIC_IP_PRI37_MASK)
-#define FSL_NVIC_IP_PRI38_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI38_SHIFT                  0u
-#define FSL_NVIC_IP_PRI38_WIDTH                  8u
-#define FSL_NVIC_IP_PRI38(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI38_SHIFT))&FSL_NVIC_IP_PRI38_MASK)
-#define FSL_NVIC_IP_PRI39_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI39_SHIFT                  0u
-#define FSL_NVIC_IP_PRI39_WIDTH                  8u
-#define FSL_NVIC_IP_PRI39(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI39_SHIFT))&FSL_NVIC_IP_PRI39_MASK)
-#define FSL_NVIC_IP_PRI40_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI40_SHIFT                  0u
-#define FSL_NVIC_IP_PRI40_WIDTH                  8u
-#define FSL_NVIC_IP_PRI40(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI40_SHIFT))&FSL_NVIC_IP_PRI40_MASK)
-#define FSL_NVIC_IP_PRI41_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI41_SHIFT                  0u
-#define FSL_NVIC_IP_PRI41_WIDTH                  8u
-#define FSL_NVIC_IP_PRI41(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI41_SHIFT))&FSL_NVIC_IP_PRI41_MASK)
-#define FSL_NVIC_IP_PRI42_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI42_SHIFT                  0u
-#define FSL_NVIC_IP_PRI42_WIDTH                  8u
-#define FSL_NVIC_IP_PRI42(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI42_SHIFT))&FSL_NVIC_IP_PRI42_MASK)
-#define FSL_NVIC_IP_PRI43_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI43_SHIFT                  0u
-#define FSL_NVIC_IP_PRI43_WIDTH                  8u
-#define FSL_NVIC_IP_PRI43(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI43_SHIFT))&FSL_NVIC_IP_PRI43_MASK)
-#define FSL_NVIC_IP_PRI44_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI44_SHIFT                  0u
-#define FSL_NVIC_IP_PRI44_WIDTH                  8u
-#define FSL_NVIC_IP_PRI44(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI44_SHIFT))&FSL_NVIC_IP_PRI44_MASK)
-#define FSL_NVIC_IP_PRI45_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI45_SHIFT                  0u
-#define FSL_NVIC_IP_PRI45_WIDTH                  8u
-#define FSL_NVIC_IP_PRI45(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI45_SHIFT))&FSL_NVIC_IP_PRI45_MASK)
-#define FSL_NVIC_IP_PRI46_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI46_SHIFT                  0u
-#define FSL_NVIC_IP_PRI46_WIDTH                  8u
-#define FSL_NVIC_IP_PRI46(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI46_SHIFT))&FSL_NVIC_IP_PRI46_MASK)
-#define FSL_NVIC_IP_PRI47_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI47_SHIFT                  0u
-#define FSL_NVIC_IP_PRI47_WIDTH                  8u
-#define FSL_NVIC_IP_PRI47(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI47_SHIFT))&FSL_NVIC_IP_PRI47_MASK)
-#define FSL_NVIC_IP_PRI48_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI48_SHIFT                  0u
-#define FSL_NVIC_IP_PRI48_WIDTH                  8u
-#define FSL_NVIC_IP_PRI48(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI48_SHIFT))&FSL_NVIC_IP_PRI48_MASK)
-#define FSL_NVIC_IP_PRI49_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI49_SHIFT                  0u
-#define FSL_NVIC_IP_PRI49_WIDTH                  8u
-#define FSL_NVIC_IP_PRI49(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI49_SHIFT))&FSL_NVIC_IP_PRI49_MASK)
-#define FSL_NVIC_IP_PRI50_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI50_SHIFT                  0u
-#define FSL_NVIC_IP_PRI50_WIDTH                  8u
-#define FSL_NVIC_IP_PRI50(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI50_SHIFT))&FSL_NVIC_IP_PRI50_MASK)
-#define FSL_NVIC_IP_PRI51_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI51_SHIFT                  0u
-#define FSL_NVIC_IP_PRI51_WIDTH                  8u
-#define FSL_NVIC_IP_PRI51(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI51_SHIFT))&FSL_NVIC_IP_PRI51_MASK)
-#define FSL_NVIC_IP_PRI52_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI52_SHIFT                  0u
-#define FSL_NVIC_IP_PRI52_WIDTH                  8u
-#define FSL_NVIC_IP_PRI52(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI52_SHIFT))&FSL_NVIC_IP_PRI52_MASK)
-#define FSL_NVIC_IP_PRI53_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI53_SHIFT                  0u
-#define FSL_NVIC_IP_PRI53_WIDTH                  8u
-#define FSL_NVIC_IP_PRI53(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI53_SHIFT))&FSL_NVIC_IP_PRI53_MASK)
-#define FSL_NVIC_IP_PRI54_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI54_SHIFT                  0u
-#define FSL_NVIC_IP_PRI54_WIDTH                  8u
-#define FSL_NVIC_IP_PRI54(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI54_SHIFT))&FSL_NVIC_IP_PRI54_MASK)
-#define FSL_NVIC_IP_PRI55_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI55_SHIFT                  0u
-#define FSL_NVIC_IP_PRI55_WIDTH                  8u
-#define FSL_NVIC_IP_PRI55(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI55_SHIFT))&FSL_NVIC_IP_PRI55_MASK)
-#define FSL_NVIC_IP_PRI56_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI56_SHIFT                  0u
-#define FSL_NVIC_IP_PRI56_WIDTH                  8u
-#define FSL_NVIC_IP_PRI56(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI56_SHIFT))&FSL_NVIC_IP_PRI56_MASK)
-#define FSL_NVIC_IP_PRI57_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI57_SHIFT                  0u
-#define FSL_NVIC_IP_PRI57_WIDTH                  8u
-#define FSL_NVIC_IP_PRI57(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI57_SHIFT))&FSL_NVIC_IP_PRI57_MASK)
-#define FSL_NVIC_IP_PRI58_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI58_SHIFT                  0u
-#define FSL_NVIC_IP_PRI58_WIDTH                  8u
-#define FSL_NVIC_IP_PRI58(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI58_SHIFT))&FSL_NVIC_IP_PRI58_MASK)
-#define FSL_NVIC_IP_PRI59_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI59_SHIFT                  0u
-#define FSL_NVIC_IP_PRI59_WIDTH                  8u
-#define FSL_NVIC_IP_PRI59(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI59_SHIFT))&FSL_NVIC_IP_PRI59_MASK)
-#define FSL_NVIC_IP_PRI60_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI60_SHIFT                  0u
-#define FSL_NVIC_IP_PRI60_WIDTH                  8u
-#define FSL_NVIC_IP_PRI60(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI60_SHIFT))&FSL_NVIC_IP_PRI60_MASK)
-#define FSL_NVIC_IP_PRI61_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI61_SHIFT                  0u
-#define FSL_NVIC_IP_PRI61_WIDTH                  8u
-#define FSL_NVIC_IP_PRI61(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI61_SHIFT))&FSL_NVIC_IP_PRI61_MASK)
-#define FSL_NVIC_IP_PRI62_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI62_SHIFT                  0u
-#define FSL_NVIC_IP_PRI62_WIDTH                  8u
-#define FSL_NVIC_IP_PRI62(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI62_SHIFT))&FSL_NVIC_IP_PRI62_MASK)
-#define FSL_NVIC_IP_PRI63_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI63_SHIFT                  0u
-#define FSL_NVIC_IP_PRI63_WIDTH                  8u
-#define FSL_NVIC_IP_PRI63(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI63_SHIFT))&FSL_NVIC_IP_PRI63_MASK)
-#define FSL_NVIC_IP_PRI64_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI64_SHIFT                  0u
-#define FSL_NVIC_IP_PRI64_WIDTH                  8u
-#define FSL_NVIC_IP_PRI64(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI64_SHIFT))&FSL_NVIC_IP_PRI64_MASK)
-#define FSL_NVIC_IP_PRI65_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI65_SHIFT                  0u
-#define FSL_NVIC_IP_PRI65_WIDTH                  8u
-#define FSL_NVIC_IP_PRI65(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI65_SHIFT))&FSL_NVIC_IP_PRI65_MASK)
-#define FSL_NVIC_IP_PRI66_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI66_SHIFT                  0u
-#define FSL_NVIC_IP_PRI66_WIDTH                  8u
-#define FSL_NVIC_IP_PRI66(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI66_SHIFT))&FSL_NVIC_IP_PRI66_MASK)
-#define FSL_NVIC_IP_PRI67_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI67_SHIFT                  0u
-#define FSL_NVIC_IP_PRI67_WIDTH                  8u
-#define FSL_NVIC_IP_PRI67(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI67_SHIFT))&FSL_NVIC_IP_PRI67_MASK)
-#define FSL_NVIC_IP_PRI68_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI68_SHIFT                  0u
-#define FSL_NVIC_IP_PRI68_WIDTH                  8u
-#define FSL_NVIC_IP_PRI68(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI68_SHIFT))&FSL_NVIC_IP_PRI68_MASK)
-#define FSL_NVIC_IP_PRI69_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI69_SHIFT                  0u
-#define FSL_NVIC_IP_PRI69_WIDTH                  8u
-#define FSL_NVIC_IP_PRI69(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI69_SHIFT))&FSL_NVIC_IP_PRI69_MASK)
-#define FSL_NVIC_IP_PRI70_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI70_SHIFT                  0u
-#define FSL_NVIC_IP_PRI70_WIDTH                  8u
-#define FSL_NVIC_IP_PRI70(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI70_SHIFT))&FSL_NVIC_IP_PRI70_MASK)
-#define FSL_NVIC_IP_PRI71_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI71_SHIFT                  0u
-#define FSL_NVIC_IP_PRI71_WIDTH                  8u
-#define FSL_NVIC_IP_PRI71(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI71_SHIFT))&FSL_NVIC_IP_PRI71_MASK)
-#define FSL_NVIC_IP_PRI72_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI72_SHIFT                  0u
-#define FSL_NVIC_IP_PRI72_WIDTH                  8u
-#define FSL_NVIC_IP_PRI72(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI72_SHIFT))&FSL_NVIC_IP_PRI72_MASK)
-#define FSL_NVIC_IP_PRI73_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI73_SHIFT                  0u
-#define FSL_NVIC_IP_PRI73_WIDTH                  8u
-#define FSL_NVIC_IP_PRI73(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI73_SHIFT))&FSL_NVIC_IP_PRI73_MASK)
-#define FSL_NVIC_IP_PRI74_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI74_SHIFT                  0u
-#define FSL_NVIC_IP_PRI74_WIDTH                  8u
-#define FSL_NVIC_IP_PRI74(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI74_SHIFT))&FSL_NVIC_IP_PRI74_MASK)
-#define FSL_NVIC_IP_PRI75_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI75_SHIFT                  0u
-#define FSL_NVIC_IP_PRI75_WIDTH                  8u
-#define FSL_NVIC_IP_PRI75(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI75_SHIFT))&FSL_NVIC_IP_PRI75_MASK)
-#define FSL_NVIC_IP_PRI76_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI76_SHIFT                  0u
-#define FSL_NVIC_IP_PRI76_WIDTH                  8u
-#define FSL_NVIC_IP_PRI76(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI76_SHIFT))&FSL_NVIC_IP_PRI76_MASK)
-#define FSL_NVIC_IP_PRI77_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI77_SHIFT                  0u
-#define FSL_NVIC_IP_PRI77_WIDTH                  8u
-#define FSL_NVIC_IP_PRI77(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI77_SHIFT))&FSL_NVIC_IP_PRI77_MASK)
-#define FSL_NVIC_IP_PRI78_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI78_SHIFT                  0u
-#define FSL_NVIC_IP_PRI78_WIDTH                  8u
-#define FSL_NVIC_IP_PRI78(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI78_SHIFT))&FSL_NVIC_IP_PRI78_MASK)
-#define FSL_NVIC_IP_PRI79_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI79_SHIFT                  0u
-#define FSL_NVIC_IP_PRI79_WIDTH                  8u
-#define FSL_NVIC_IP_PRI79(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI79_SHIFT))&FSL_NVIC_IP_PRI79_MASK)
-#define FSL_NVIC_IP_PRI80_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI80_SHIFT                  0u
-#define FSL_NVIC_IP_PRI80_WIDTH                  8u
-#define FSL_NVIC_IP_PRI80(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI80_SHIFT))&FSL_NVIC_IP_PRI80_MASK)
-#define FSL_NVIC_IP_PRI81_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI81_SHIFT                  0u
-#define FSL_NVIC_IP_PRI81_WIDTH                  8u
-#define FSL_NVIC_IP_PRI81(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI81_SHIFT))&FSL_NVIC_IP_PRI81_MASK)
-#define FSL_NVIC_IP_PRI82_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI82_SHIFT                  0u
-#define FSL_NVIC_IP_PRI82_WIDTH                  8u
-#define FSL_NVIC_IP_PRI82(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI82_SHIFT))&FSL_NVIC_IP_PRI82_MASK)
-#define FSL_NVIC_IP_PRI83_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI83_SHIFT                  0u
-#define FSL_NVIC_IP_PRI83_WIDTH                  8u
-#define FSL_NVIC_IP_PRI83(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI83_SHIFT))&FSL_NVIC_IP_PRI83_MASK)
-#define FSL_NVIC_IP_PRI84_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI84_SHIFT                  0u
-#define FSL_NVIC_IP_PRI84_WIDTH                  8u
-#define FSL_NVIC_IP_PRI84(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI84_SHIFT))&FSL_NVIC_IP_PRI84_MASK)
-#define FSL_NVIC_IP_PRI85_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI85_SHIFT                  0u
-#define FSL_NVIC_IP_PRI85_WIDTH                  8u
-#define FSL_NVIC_IP_PRI85(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI85_SHIFT))&FSL_NVIC_IP_PRI85_MASK)
-#define FSL_NVIC_IP_PRI86_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI86_SHIFT                  0u
-#define FSL_NVIC_IP_PRI86_WIDTH                  8u
-#define FSL_NVIC_IP_PRI86(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI86_SHIFT))&FSL_NVIC_IP_PRI86_MASK)
-#define FSL_NVIC_IP_PRI87_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI87_SHIFT                  0u
-#define FSL_NVIC_IP_PRI87_WIDTH                  8u
-#define FSL_NVIC_IP_PRI87(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI87_SHIFT))&FSL_NVIC_IP_PRI87_MASK)
-#define FSL_NVIC_IP_PRI88_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI88_SHIFT                  0u
-#define FSL_NVIC_IP_PRI88_WIDTH                  8u
-#define FSL_NVIC_IP_PRI88(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI88_SHIFT))&FSL_NVIC_IP_PRI88_MASK)
-#define FSL_NVIC_IP_PRI89_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI89_SHIFT                  0u
-#define FSL_NVIC_IP_PRI89_WIDTH                  8u
-#define FSL_NVIC_IP_PRI89(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI89_SHIFT))&FSL_NVIC_IP_PRI89_MASK)
-#define FSL_NVIC_IP_PRI90_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI90_SHIFT                  0u
-#define FSL_NVIC_IP_PRI90_WIDTH                  8u
-#define FSL_NVIC_IP_PRI90(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI90_SHIFT))&FSL_NVIC_IP_PRI90_MASK)
-#define FSL_NVIC_IP_PRI91_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI91_SHIFT                  0u
-#define FSL_NVIC_IP_PRI91_WIDTH                  8u
-#define FSL_NVIC_IP_PRI91(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI91_SHIFT))&FSL_NVIC_IP_PRI91_MASK)
-#define FSL_NVIC_IP_PRI92_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI92_SHIFT                  0u
-#define FSL_NVIC_IP_PRI92_WIDTH                  8u
-#define FSL_NVIC_IP_PRI92(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI92_SHIFT))&FSL_NVIC_IP_PRI92_MASK)
-#define FSL_NVIC_IP_PRI93_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI93_SHIFT                  0u
-#define FSL_NVIC_IP_PRI93_WIDTH                  8u
-#define FSL_NVIC_IP_PRI93(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI93_SHIFT))&FSL_NVIC_IP_PRI93_MASK)
-#define FSL_NVIC_IP_PRI94_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI94_SHIFT                  0u
-#define FSL_NVIC_IP_PRI94_WIDTH                  8u
-#define FSL_NVIC_IP_PRI94(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI94_SHIFT))&FSL_NVIC_IP_PRI94_MASK)
-#define FSL_NVIC_IP_PRI95_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI95_SHIFT                  0u
-#define FSL_NVIC_IP_PRI95_WIDTH                  8u
-#define FSL_NVIC_IP_PRI95(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI95_SHIFT))&FSL_NVIC_IP_PRI95_MASK)
-#define FSL_NVIC_IP_PRI96_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI96_SHIFT                  0u
-#define FSL_NVIC_IP_PRI96_WIDTH                  8u
-#define FSL_NVIC_IP_PRI96(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI96_SHIFT))&FSL_NVIC_IP_PRI96_MASK)
-#define FSL_NVIC_IP_PRI97_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI97_SHIFT                  0u
-#define FSL_NVIC_IP_PRI97_WIDTH                  8u
-#define FSL_NVIC_IP_PRI97(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI97_SHIFT))&FSL_NVIC_IP_PRI97_MASK)
-#define FSL_NVIC_IP_PRI98_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI98_SHIFT                  0u
-#define FSL_NVIC_IP_PRI98_WIDTH                  8u
-#define FSL_NVIC_IP_PRI98(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI98_SHIFT))&FSL_NVIC_IP_PRI98_MASK)
-#define FSL_NVIC_IP_PRI99_MASK                   0xFFu
-#define FSL_NVIC_IP_PRI99_SHIFT                  0u
-#define FSL_NVIC_IP_PRI99_WIDTH                  8u
-#define FSL_NVIC_IP_PRI99(x)                     (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI99_SHIFT))&FSL_NVIC_IP_PRI99_MASK)
-#define FSL_NVIC_IP_PRI100_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI100_SHIFT                 0u
-#define FSL_NVIC_IP_PRI100_WIDTH                 8u
-#define FSL_NVIC_IP_PRI100(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI100_SHIFT))&FSL_NVIC_IP_PRI100_MASK)
-#define FSL_NVIC_IP_PRI101_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI101_SHIFT                 0u
-#define FSL_NVIC_IP_PRI101_WIDTH                 8u
-#define FSL_NVIC_IP_PRI101(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI101_SHIFT))&FSL_NVIC_IP_PRI101_MASK)
-#define FSL_NVIC_IP_PRI102_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI102_SHIFT                 0u
-#define FSL_NVIC_IP_PRI102_WIDTH                 8u
-#define FSL_NVIC_IP_PRI102(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI102_SHIFT))&FSL_NVIC_IP_PRI102_MASK)
-#define FSL_NVIC_IP_PRI103_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI103_SHIFT                 0u
-#define FSL_NVIC_IP_PRI103_WIDTH                 8u
-#define FSL_NVIC_IP_PRI103(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI103_SHIFT))&FSL_NVIC_IP_PRI103_MASK)
-#define FSL_NVIC_IP_PRI104_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI104_SHIFT                 0u
-#define FSL_NVIC_IP_PRI104_WIDTH                 8u
-#define FSL_NVIC_IP_PRI104(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI104_SHIFT))&FSL_NVIC_IP_PRI104_MASK)
-#define FSL_NVIC_IP_PRI105_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI105_SHIFT                 0u
-#define FSL_NVIC_IP_PRI105_WIDTH                 8u
-#define FSL_NVIC_IP_PRI105(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI105_SHIFT))&FSL_NVIC_IP_PRI105_MASK)
-#define FSL_NVIC_IP_PRI106_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI106_SHIFT                 0u
-#define FSL_NVIC_IP_PRI106_WIDTH                 8u
-#define FSL_NVIC_IP_PRI106(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI106_SHIFT))&FSL_NVIC_IP_PRI106_MASK)
-#define FSL_NVIC_IP_PRI107_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI107_SHIFT                 0u
-#define FSL_NVIC_IP_PRI107_WIDTH                 8u
-#define FSL_NVIC_IP_PRI107(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI107_SHIFT))&FSL_NVIC_IP_PRI107_MASK)
-#define FSL_NVIC_IP_PRI108_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI108_SHIFT                 0u
-#define FSL_NVIC_IP_PRI108_WIDTH                 8u
-#define FSL_NVIC_IP_PRI108(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI108_SHIFT))&FSL_NVIC_IP_PRI108_MASK)
-#define FSL_NVIC_IP_PRI109_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI109_SHIFT                 0u
-#define FSL_NVIC_IP_PRI109_WIDTH                 8u
-#define FSL_NVIC_IP_PRI109(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI109_SHIFT))&FSL_NVIC_IP_PRI109_MASK)
-#define FSL_NVIC_IP_PRI110_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI110_SHIFT                 0u
-#define FSL_NVIC_IP_PRI110_WIDTH                 8u
-#define FSL_NVIC_IP_PRI110(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI110_SHIFT))&FSL_NVIC_IP_PRI110_MASK)
-#define FSL_NVIC_IP_PRI111_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI111_SHIFT                 0u
-#define FSL_NVIC_IP_PRI111_WIDTH                 8u
-#define FSL_NVIC_IP_PRI111(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI111_SHIFT))&FSL_NVIC_IP_PRI111_MASK)
-#define FSL_NVIC_IP_PRI112_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI112_SHIFT                 0u
-#define FSL_NVIC_IP_PRI112_WIDTH                 8u
-#define FSL_NVIC_IP_PRI112(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI112_SHIFT))&FSL_NVIC_IP_PRI112_MASK)
-#define FSL_NVIC_IP_PRI113_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI113_SHIFT                 0u
-#define FSL_NVIC_IP_PRI113_WIDTH                 8u
-#define FSL_NVIC_IP_PRI113(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI113_SHIFT))&FSL_NVIC_IP_PRI113_MASK)
-#define FSL_NVIC_IP_PRI114_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI114_SHIFT                 0u
-#define FSL_NVIC_IP_PRI114_WIDTH                 8u
-#define FSL_NVIC_IP_PRI114(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI114_SHIFT))&FSL_NVIC_IP_PRI114_MASK)
-#define FSL_NVIC_IP_PRI115_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI115_SHIFT                 0u
-#define FSL_NVIC_IP_PRI115_WIDTH                 8u
-#define FSL_NVIC_IP_PRI115(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI115_SHIFT))&FSL_NVIC_IP_PRI115_MASK)
-#define FSL_NVIC_IP_PRI116_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI116_SHIFT                 0u
-#define FSL_NVIC_IP_PRI116_WIDTH                 8u
-#define FSL_NVIC_IP_PRI116(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI116_SHIFT))&FSL_NVIC_IP_PRI116_MASK)
-#define FSL_NVIC_IP_PRI117_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI117_SHIFT                 0u
-#define FSL_NVIC_IP_PRI117_WIDTH                 8u
-#define FSL_NVIC_IP_PRI117(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI117_SHIFT))&FSL_NVIC_IP_PRI117_MASK)
-#define FSL_NVIC_IP_PRI118_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI118_SHIFT                 0u
-#define FSL_NVIC_IP_PRI118_WIDTH                 8u
-#define FSL_NVIC_IP_PRI118(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI118_SHIFT))&FSL_NVIC_IP_PRI118_MASK)
-#define FSL_NVIC_IP_PRI119_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI119_SHIFT                 0u
-#define FSL_NVIC_IP_PRI119_WIDTH                 8u
-#define FSL_NVIC_IP_PRI119(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI119_SHIFT))&FSL_NVIC_IP_PRI119_MASK)
-#define FSL_NVIC_IP_PRI120_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI120_SHIFT                 0u
-#define FSL_NVIC_IP_PRI120_WIDTH                 8u
-#define FSL_NVIC_IP_PRI120(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI120_SHIFT))&FSL_NVIC_IP_PRI120_MASK)
-#define FSL_NVIC_IP_PRI121_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI121_SHIFT                 0u
-#define FSL_NVIC_IP_PRI121_WIDTH                 8u
-#define FSL_NVIC_IP_PRI121(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI121_SHIFT))&FSL_NVIC_IP_PRI121_MASK)
-#define FSL_NVIC_IP_PRI122_MASK                  0xFFu
-#define FSL_NVIC_IP_PRI122_SHIFT                 0u
-#define FSL_NVIC_IP_PRI122_WIDTH                 8u
-#define FSL_NVIC_IP_PRI122(x)                    (((uint8_t)(((uint8_t)(x))<<FSL_NVIC_IP_PRI122_SHIFT))&FSL_NVIC_IP_PRI122_MASK)
-/* STIR Bit Fields */
-#define FSL_NVIC_STIR_INTID_MASK                 0x1FFu
-#define FSL_NVIC_STIR_INTID_SHIFT                0u
-#define FSL_NVIC_STIR_INTID_WIDTH                9u
-#define FSL_NVIC_STIR_INTID(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_NVIC_STIR_INTID_SHIFT))&FSL_NVIC_STIR_INTID_MASK)
-
-/*!
- * @}
- */ /* end of group FSL_NVIC_Register_Masks */
-
-
-/*!
- * @}
- */ /* end of group FSL_NVIC_Peripheral_Access_Layer */
-
-
-/* ----------------------------------------------------------------------------
-   -- FSL_SCB Peripheral Access Layer
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_SCB_Peripheral_Access_Layer FSL_SCB Peripheral Access Layer
- * @{
- */
-
-
-/** FSL_SCB - Size of Registers Arrays */
-
-/** FSL_SCB - Register Layout Typedef */
-typedef struct {
-       uint8_t RESERVED_0[8];
-  __IO uint32_t ACTLR;                             /**< Auxiliary Control Register,, offset: 0x8 */
-       uint8_t RESERVED_1[3316];
-  __I  uint32_t CPUID;                             /**< CPUID Base Register, offset: 0xD00 */
-  __IO uint32_t ICSR;                              /**< Interrupt Control and State Register, offset: 0xD04 */
-  __IO uint32_t VTOR;                              /**< Vector Table Offset Register, offset: 0xD08 */
-  __IO uint32_t AIRCR;                             /**< Application Interrupt and Reset Control Register, offset: 0xD0C */
-  __IO uint32_t SCR;                               /**< System Control Register, offset: 0xD10 */
-  __IO uint32_t CCR;                               /**< Configuration and Control Register, offset: 0xD14 */
-  __IO uint32_t SHPR1;                             /**< System Handler Priority Register 1, offset: 0xD18 */
-  __IO uint32_t SHPR2;                             /**< System Handler Priority Register 2, offset: 0xD1C */
-  __IO uint32_t SHPR3;                             /**< System Handler Priority Register 3, offset: 0xD20 */
-  __IO uint32_t SHCSR;                             /**< System Handler Control and State Register, offset: 0xD24 */
-  __IO uint32_t CFSR;                              /**< Configurable Fault Status Registers, offset: 0xD28 */
-  __IO uint32_t HFSR;                              /**< HardFault Status register, offset: 0xD2C */
-  __IO uint32_t DFSR;                              /**< Debug Fault Status Register, offset: 0xD30 */
-  __IO uint32_t MMFAR;                             /**< MemManage Address Register, offset: 0xD34 */
-  __IO uint32_t BFAR;                              /**< BusFault Address Register, offset: 0xD38 */
-  __IO uint32_t AFSR;                              /**< Auxiliary Fault Status Register, offset: 0xD3C */
-       uint8_t RESERVED_2[72];
-  __IO uint32_t CPACR;                             /**< Coprocessor Access Control Register, offset: 0xD88 */
-       uint8_t RESERVED_3[424];
-  __IO uint32_t FPCCR;                             /**< Floating-point Context Control Register, offset: 0xF34 */
-  __IO uint32_t FPCAR;                             /**< Floating-point Context Address Register, offset: 0xF38 */
-  __IO uint32_t FPDSCR;                            /**< Floating-point Default Status Control Register, offset: 0xF3C */
-} FSL_SCB_Type, *FSL_SCB_MemMapPtr;
-
- /** Number of instances of the FSL_SCB module. */
-#define FSL_SCB_INSTANCE_COUNT                   (1u)
-
-
-/* FSL_SCB - Peripheral instance base addresses */
-/** Peripheral FSL_SCB base address */
-#define FSL_SCB_BASE                             (0xE000E000u)
-/** Peripheral FSL_SCB base pointer */
-#define FSL_SCB                                  ((FSL_SCB_Type *)FSL_SCB_BASE)
-/** Array initializer of FSL_SCB peripheral base addresses */
-#define FSL_SCB_BASE_ADDRS                       { FSL_SCB_BASE }
-/** Array initializer of FSL_SCB peripheral base pointers */
-#define FSL_SCB_BASE_PTRS                        { FSL_SCB }
-
-/* ----------------------------------------------------------------------------
-   -- FSL_SCB Register Masks
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_SCB_Register_Masks FSL_SCB Register Masks
- * @{
- */
-
-/* ACTLR Bit Fields */
-#define FSL_SCB_ACTLR_DISMCYCINT_MASK            0x1u
-#define FSL_SCB_ACTLR_DISMCYCINT_SHIFT           0u
-#define FSL_SCB_ACTLR_DISMCYCINT_WIDTH           1u
-#define FSL_SCB_ACTLR_DISMCYCINT(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ACTLR_DISMCYCINT_SHIFT))&FSL_SCB_ACTLR_DISMCYCINT_MASK)
-#define FSL_SCB_ACTLR_DISDEFWBUF_MASK            0x2u
-#define FSL_SCB_ACTLR_DISDEFWBUF_SHIFT           1u
-#define FSL_SCB_ACTLR_DISDEFWBUF_WIDTH           1u
-#define FSL_SCB_ACTLR_DISDEFWBUF(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ACTLR_DISDEFWBUF_SHIFT))&FSL_SCB_ACTLR_DISDEFWBUF_MASK)
-#define FSL_SCB_ACTLR_DISFOLD_MASK               0x4u
-#define FSL_SCB_ACTLR_DISFOLD_SHIFT              2u
-#define FSL_SCB_ACTLR_DISFOLD_WIDTH              1u
-#define FSL_SCB_ACTLR_DISFOLD(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ACTLR_DISFOLD_SHIFT))&FSL_SCB_ACTLR_DISFOLD_MASK)
-/* CPUID Bit Fields */
-#define FSL_SCB_CPUID_REVISION_MASK              0xFu
-#define FSL_SCB_CPUID_REVISION_SHIFT             0u
-#define FSL_SCB_CPUID_REVISION_WIDTH             4u
-#define FSL_SCB_CPUID_REVISION(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPUID_REVISION_SHIFT))&FSL_SCB_CPUID_REVISION_MASK)
-#define FSL_SCB_CPUID_PARTNO_MASK                0xFFF0u
-#define FSL_SCB_CPUID_PARTNO_SHIFT               4u
-#define FSL_SCB_CPUID_PARTNO_WIDTH               12u
-#define FSL_SCB_CPUID_PARTNO(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPUID_PARTNO_SHIFT))&FSL_SCB_CPUID_PARTNO_MASK)
-#define FSL_SCB_CPUID_VARIANT_MASK               0xF00000u
-#define FSL_SCB_CPUID_VARIANT_SHIFT              20u
-#define FSL_SCB_CPUID_VARIANT_WIDTH              4u
-#define FSL_SCB_CPUID_VARIANT(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPUID_VARIANT_SHIFT))&FSL_SCB_CPUID_VARIANT_MASK)
-#define FSL_SCB_CPUID_IMPLEMENTER_MASK           0xFF000000u
-#define FSL_SCB_CPUID_IMPLEMENTER_SHIFT          24u
-#define FSL_SCB_CPUID_IMPLEMENTER_WIDTH          8u
-#define FSL_SCB_CPUID_IMPLEMENTER(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPUID_IMPLEMENTER_SHIFT))&FSL_SCB_CPUID_IMPLEMENTER_MASK)
-/* ICSR Bit Fields */
-#define FSL_SCB_ICSR_VECTACTIVE_MASK             0x1FFu
-#define FSL_SCB_ICSR_VECTACTIVE_SHIFT            0u
-#define FSL_SCB_ICSR_VECTACTIVE_WIDTH            9u
-#define FSL_SCB_ICSR_VECTACTIVE(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_VECTACTIVE_SHIFT))&FSL_SCB_ICSR_VECTACTIVE_MASK)
-#define FSL_SCB_ICSR_RETTOBASE_MASK              0x800u
-#define FSL_SCB_ICSR_RETTOBASE_SHIFT             11u
-#define FSL_SCB_ICSR_RETTOBASE_WIDTH             1u
-#define FSL_SCB_ICSR_RETTOBASE(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_RETTOBASE_SHIFT))&FSL_SCB_ICSR_RETTOBASE_MASK)
-#define FSL_SCB_ICSR_VECTPENDING_MASK            0x3F000u
-#define FSL_SCB_ICSR_VECTPENDING_SHIFT           12u
-#define FSL_SCB_ICSR_VECTPENDING_WIDTH           6u
-#define FSL_SCB_ICSR_VECTPENDING(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_VECTPENDING_SHIFT))&FSL_SCB_ICSR_VECTPENDING_MASK)
-#define FSL_SCB_ICSR_ISRPENDING_MASK             0x400000u
-#define FSL_SCB_ICSR_ISRPENDING_SHIFT            22u
-#define FSL_SCB_ICSR_ISRPENDING_WIDTH            1u
-#define FSL_SCB_ICSR_ISRPENDING(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_ISRPENDING_SHIFT))&FSL_SCB_ICSR_ISRPENDING_MASK)
-#define FSL_SCB_ICSR_ISRPREEMPT_MASK             0x800000u
-#define FSL_SCB_ICSR_ISRPREEMPT_SHIFT            23u
-#define FSL_SCB_ICSR_ISRPREEMPT_WIDTH            1u
-#define FSL_SCB_ICSR_ISRPREEMPT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_ISRPREEMPT_SHIFT))&FSL_SCB_ICSR_ISRPREEMPT_MASK)
-#define FSL_SCB_ICSR_PENDSTCLR_MASK              0x2000000u
-#define FSL_SCB_ICSR_PENDSTCLR_SHIFT             25u
-#define FSL_SCB_ICSR_PENDSTCLR_WIDTH             1u
-#define FSL_SCB_ICSR_PENDSTCLR(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_PENDSTCLR_SHIFT))&FSL_SCB_ICSR_PENDSTCLR_MASK)
-#define FSL_SCB_ICSR_PENDSTSET_MASK              0x4000000u
-#define FSL_SCB_ICSR_PENDSTSET_SHIFT             26u
-#define FSL_SCB_ICSR_PENDSTSET_WIDTH             1u
-#define FSL_SCB_ICSR_PENDSTSET(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_PENDSTSET_SHIFT))&FSL_SCB_ICSR_PENDSTSET_MASK)
-#define FSL_SCB_ICSR_PENDSVCLR_MASK              0x8000000u
-#define FSL_SCB_ICSR_PENDSVCLR_SHIFT             27u
-#define FSL_SCB_ICSR_PENDSVCLR_WIDTH             1u
-#define FSL_SCB_ICSR_PENDSVCLR(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_PENDSVCLR_SHIFT))&FSL_SCB_ICSR_PENDSVCLR_MASK)
-#define FSL_SCB_ICSR_PENDSVSET_MASK              0x10000000u
-#define FSL_SCB_ICSR_PENDSVSET_SHIFT             28u
-#define FSL_SCB_ICSR_PENDSVSET_WIDTH             1u
-#define FSL_SCB_ICSR_PENDSVSET(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_PENDSVSET_SHIFT))&FSL_SCB_ICSR_PENDSVSET_MASK)
-#define FSL_SCB_ICSR_NMIPENDSET_MASK             0x80000000u
-#define FSL_SCB_ICSR_NMIPENDSET_SHIFT            31u
-#define FSL_SCB_ICSR_NMIPENDSET_WIDTH            1u
-#define FSL_SCB_ICSR_NMIPENDSET(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_ICSR_NMIPENDSET_SHIFT))&FSL_SCB_ICSR_NMIPENDSET_MASK)
-/* VTOR Bit Fields */
-#define FSL_SCB_VTOR_TBLOFF_MASK                 0xFFFFFF80u
-#define FSL_SCB_VTOR_TBLOFF_SHIFT                7u
-#define FSL_SCB_VTOR_TBLOFF_WIDTH                25u
-#define FSL_SCB_VTOR_TBLOFF(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_VTOR_TBLOFF_SHIFT))&FSL_SCB_VTOR_TBLOFF_MASK)
-/* AIRCR Bit Fields */
-#define FSL_SCB_AIRCR_VECTRESET_MASK             0x1u
-#define FSL_SCB_AIRCR_VECTRESET_SHIFT            0u
-#define FSL_SCB_AIRCR_VECTRESET_WIDTH            1u
-#define FSL_SCB_AIRCR_VECTRESET(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_VECTRESET_SHIFT))&FSL_SCB_AIRCR_VECTRESET_MASK)
-#define FSL_SCB_AIRCR_VECTCLRACTIVE_MASK         0x2u
-#define FSL_SCB_AIRCR_VECTCLRACTIVE_SHIFT        1u
-#define FSL_SCB_AIRCR_VECTCLRACTIVE_WIDTH        1u
-#define FSL_SCB_AIRCR_VECTCLRACTIVE(x)           (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_VECTCLRACTIVE_SHIFT))&FSL_SCB_AIRCR_VECTCLRACTIVE_MASK)
-#define FSL_SCB_AIRCR_SYSRESETREQ_MASK           0x4u
-#define FSL_SCB_AIRCR_SYSRESETREQ_SHIFT          2u
-#define FSL_SCB_AIRCR_SYSRESETREQ_WIDTH          1u
-#define FSL_SCB_AIRCR_SYSRESETREQ(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_SYSRESETREQ_SHIFT))&FSL_SCB_AIRCR_SYSRESETREQ_MASK)
-#define FSL_SCB_AIRCR_PRIGROUP_MASK              0x700u
-#define FSL_SCB_AIRCR_PRIGROUP_SHIFT             8u
-#define FSL_SCB_AIRCR_PRIGROUP_WIDTH             3u
-#define FSL_SCB_AIRCR_PRIGROUP(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_PRIGROUP_SHIFT))&FSL_SCB_AIRCR_PRIGROUP_MASK)
-#define FSL_SCB_AIRCR_ENDIANNESS_MASK            0x8000u
-#define FSL_SCB_AIRCR_ENDIANNESS_SHIFT           15u
-#define FSL_SCB_AIRCR_ENDIANNESS_WIDTH           1u
-#define FSL_SCB_AIRCR_ENDIANNESS(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_ENDIANNESS_SHIFT))&FSL_SCB_AIRCR_ENDIANNESS_MASK)
-#define FSL_SCB_AIRCR_VECTKEY_MASK               0xFFFF0000u
-#define FSL_SCB_AIRCR_VECTKEY_SHIFT              16u
-#define FSL_SCB_AIRCR_VECTKEY_WIDTH              16u
-#define FSL_SCB_AIRCR_VECTKEY(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AIRCR_VECTKEY_SHIFT))&FSL_SCB_AIRCR_VECTKEY_MASK)
-/* SCR Bit Fields */
-#define FSL_SCB_SCR_SLEEPONEXIT_MASK             0x2u
-#define FSL_SCB_SCR_SLEEPONEXIT_SHIFT            1u
-#define FSL_SCB_SCR_SLEEPONEXIT_WIDTH            1u
-#define FSL_SCB_SCR_SLEEPONEXIT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SCR_SLEEPONEXIT_SHIFT))&FSL_SCB_SCR_SLEEPONEXIT_MASK)
-#define FSL_SCB_SCR_SLEEPDEEP_MASK               0x4u
-#define FSL_SCB_SCR_SLEEPDEEP_SHIFT              2u
-#define FSL_SCB_SCR_SLEEPDEEP_WIDTH              1u
-#define FSL_SCB_SCR_SLEEPDEEP(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SCR_SLEEPDEEP_SHIFT))&FSL_SCB_SCR_SLEEPDEEP_MASK)
-#define FSL_SCB_SCR_SEVONPEND_MASK               0x10u
-#define FSL_SCB_SCR_SEVONPEND_SHIFT              4u
-#define FSL_SCB_SCR_SEVONPEND_WIDTH              1u
-#define FSL_SCB_SCR_SEVONPEND(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SCR_SEVONPEND_SHIFT))&FSL_SCB_SCR_SEVONPEND_MASK)
-/* CCR Bit Fields */
-#define FSL_SCB_CCR_NONBASETHRDENA_MASK          0x1u
-#define FSL_SCB_CCR_NONBASETHRDENA_SHIFT         0u
-#define FSL_SCB_CCR_NONBASETHRDENA_WIDTH         1u
-#define FSL_SCB_CCR_NONBASETHRDENA(x)            (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_NONBASETHRDENA_SHIFT))&FSL_SCB_CCR_NONBASETHRDENA_MASK)
-#define FSL_SCB_CCR_USERSETMPEND_MASK            0x2u
-#define FSL_SCB_CCR_USERSETMPEND_SHIFT           1u
-#define FSL_SCB_CCR_USERSETMPEND_WIDTH           1u
-#define FSL_SCB_CCR_USERSETMPEND(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_USERSETMPEND_SHIFT))&FSL_SCB_CCR_USERSETMPEND_MASK)
-#define FSL_SCB_CCR_UNALIGN_TRP_MASK             0x8u
-#define FSL_SCB_CCR_UNALIGN_TRP_SHIFT            3u
-#define FSL_SCB_CCR_UNALIGN_TRP_WIDTH            1u
-#define FSL_SCB_CCR_UNALIGN_TRP(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_UNALIGN_TRP_SHIFT))&FSL_SCB_CCR_UNALIGN_TRP_MASK)
-#define FSL_SCB_CCR_DIV_0_TRP_MASK               0x10u
-#define FSL_SCB_CCR_DIV_0_TRP_SHIFT              4u
-#define FSL_SCB_CCR_DIV_0_TRP_WIDTH              1u
-#define FSL_SCB_CCR_DIV_0_TRP(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_DIV_0_TRP_SHIFT))&FSL_SCB_CCR_DIV_0_TRP_MASK)
-#define FSL_SCB_CCR_BFHFNMIGN_MASK               0x100u
-#define FSL_SCB_CCR_BFHFNMIGN_SHIFT              8u
-#define FSL_SCB_CCR_BFHFNMIGN_WIDTH              1u
-#define FSL_SCB_CCR_BFHFNMIGN(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_BFHFNMIGN_SHIFT))&FSL_SCB_CCR_BFHFNMIGN_MASK)
-#define FSL_SCB_CCR_STKALIGN_MASK                0x200u
-#define FSL_SCB_CCR_STKALIGN_SHIFT               9u
-#define FSL_SCB_CCR_STKALIGN_WIDTH               1u
-#define FSL_SCB_CCR_STKALIGN(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CCR_STKALIGN_SHIFT))&FSL_SCB_CCR_STKALIGN_MASK)
-/* SHPR1 Bit Fields */
-#define FSL_SCB_SHPR1_PRI_4_MASK                 0xFFu
-#define FSL_SCB_SHPR1_PRI_4_SHIFT                0u
-#define FSL_SCB_SHPR1_PRI_4_WIDTH                8u
-#define FSL_SCB_SHPR1_PRI_4(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR1_PRI_4_SHIFT))&FSL_SCB_SHPR1_PRI_4_MASK)
-#define FSL_SCB_SHPR1_PRI_5_MASK                 0xFF00u
-#define FSL_SCB_SHPR1_PRI_5_SHIFT                8u
-#define FSL_SCB_SHPR1_PRI_5_WIDTH                8u
-#define FSL_SCB_SHPR1_PRI_5(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR1_PRI_5_SHIFT))&FSL_SCB_SHPR1_PRI_5_MASK)
-#define FSL_SCB_SHPR1_PRI_6_MASK                 0xFF0000u
-#define FSL_SCB_SHPR1_PRI_6_SHIFT                16u
-#define FSL_SCB_SHPR1_PRI_6_WIDTH                8u
-#define FSL_SCB_SHPR1_PRI_6(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR1_PRI_6_SHIFT))&FSL_SCB_SHPR1_PRI_6_MASK)
-/* SHPR2 Bit Fields */
-#define FSL_SCB_SHPR2_PRI_11_MASK                0xFF000000u
-#define FSL_SCB_SHPR2_PRI_11_SHIFT               24u
-#define FSL_SCB_SHPR2_PRI_11_WIDTH               8u
-#define FSL_SCB_SHPR2_PRI_11(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR2_PRI_11_SHIFT))&FSL_SCB_SHPR2_PRI_11_MASK)
-/* SHPR3 Bit Fields */
-#define FSL_SCB_SHPR3_PRI_14_MASK                0xFF0000u
-#define FSL_SCB_SHPR3_PRI_14_SHIFT               16u
-#define FSL_SCB_SHPR3_PRI_14_WIDTH               8u
-#define FSL_SCB_SHPR3_PRI_14(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR3_PRI_14_SHIFT))&FSL_SCB_SHPR3_PRI_14_MASK)
-#define FSL_SCB_SHPR3_PRI_15_MASK                0xFF000000u
-#define FSL_SCB_SHPR3_PRI_15_SHIFT               24u
-#define FSL_SCB_SHPR3_PRI_15_WIDTH               8u
-#define FSL_SCB_SHPR3_PRI_15(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHPR3_PRI_15_SHIFT))&FSL_SCB_SHPR3_PRI_15_MASK)
-/* SHCSR Bit Fields */
-#define FSL_SCB_SHCSR_MEMFAULTACT_MASK           0x1u
-#define FSL_SCB_SHCSR_MEMFAULTACT_SHIFT          0u
-#define FSL_SCB_SHCSR_MEMFAULTACT_WIDTH          1u
-#define FSL_SCB_SHCSR_MEMFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_MEMFAULTACT_SHIFT))&FSL_SCB_SHCSR_MEMFAULTACT_MASK)
-#define FSL_SCB_SHCSR_BUSFAULTACT_MASK           0x2u
-#define FSL_SCB_SHCSR_BUSFAULTACT_SHIFT          1u
-#define FSL_SCB_SHCSR_BUSFAULTACT_WIDTH          1u
-#define FSL_SCB_SHCSR_BUSFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_BUSFAULTACT_SHIFT))&FSL_SCB_SHCSR_BUSFAULTACT_MASK)
-#define FSL_SCB_SHCSR_USGFAULTACT_MASK           0x8u
-#define FSL_SCB_SHCSR_USGFAULTACT_SHIFT          3u
-#define FSL_SCB_SHCSR_USGFAULTACT_WIDTH          1u
-#define FSL_SCB_SHCSR_USGFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_USGFAULTACT_SHIFT))&FSL_SCB_SHCSR_USGFAULTACT_MASK)
-#define FSL_SCB_SHCSR_SVCALLACT_MASK             0x80u
-#define FSL_SCB_SHCSR_SVCALLACT_SHIFT            7u
-#define FSL_SCB_SHCSR_SVCALLACT_WIDTH            1u
-#define FSL_SCB_SHCSR_SVCALLACT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_SVCALLACT_SHIFT))&FSL_SCB_SHCSR_SVCALLACT_MASK)
-#define FSL_SCB_SHCSR_MONITORACT_MASK            0x100u
-#define FSL_SCB_SHCSR_MONITORACT_SHIFT           8u
-#define FSL_SCB_SHCSR_MONITORACT_WIDTH           1u
-#define FSL_SCB_SHCSR_MONITORACT(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_MONITORACT_SHIFT))&FSL_SCB_SHCSR_MONITORACT_MASK)
-#define FSL_SCB_SHCSR_PENDSVACT_MASK             0x400u
-#define FSL_SCB_SHCSR_PENDSVACT_SHIFT            10u
-#define FSL_SCB_SHCSR_PENDSVACT_WIDTH            1u
-#define FSL_SCB_SHCSR_PENDSVACT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_PENDSVACT_SHIFT))&FSL_SCB_SHCSR_PENDSVACT_MASK)
-#define FSL_SCB_SHCSR_SYSTICKACT_MASK            0x800u
-#define FSL_SCB_SHCSR_SYSTICKACT_SHIFT           11u
-#define FSL_SCB_SHCSR_SYSTICKACT_WIDTH           1u
-#define FSL_SCB_SHCSR_SYSTICKACT(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_SYSTICKACT_SHIFT))&FSL_SCB_SHCSR_SYSTICKACT_MASK)
-#define FSL_SCB_SHCSR_USGFAULTPENDED_MASK        0x1000u
-#define FSL_SCB_SHCSR_USGFAULTPENDED_SHIFT       12u
-#define FSL_SCB_SHCSR_USGFAULTPENDED_WIDTH       1u
-#define FSL_SCB_SHCSR_USGFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_USGFAULTPENDED_SHIFT))&FSL_SCB_SHCSR_USGFAULTPENDED_MASK)
-#define FSL_SCB_SHCSR_MEMFAULTPENDED_MASK        0x2000u
-#define FSL_SCB_SHCSR_MEMFAULTPENDED_SHIFT       13u
-#define FSL_SCB_SHCSR_MEMFAULTPENDED_WIDTH       1u
-#define FSL_SCB_SHCSR_MEMFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_MEMFAULTPENDED_SHIFT))&FSL_SCB_SHCSR_MEMFAULTPENDED_MASK)
-#define FSL_SCB_SHCSR_BUSFAULTPENDED_MASK        0x4000u
-#define FSL_SCB_SHCSR_BUSFAULTPENDED_SHIFT       14u
-#define FSL_SCB_SHCSR_BUSFAULTPENDED_WIDTH       1u
-#define FSL_SCB_SHCSR_BUSFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_BUSFAULTPENDED_SHIFT))&FSL_SCB_SHCSR_BUSFAULTPENDED_MASK)
-#define FSL_SCB_SHCSR_SVCALLPENDED_MASK          0x8000u
-#define FSL_SCB_SHCSR_SVCALLPENDED_SHIFT         15u
-#define FSL_SCB_SHCSR_SVCALLPENDED_WIDTH         1u
-#define FSL_SCB_SHCSR_SVCALLPENDED(x)            (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_SVCALLPENDED_SHIFT))&FSL_SCB_SHCSR_SVCALLPENDED_MASK)
-#define FSL_SCB_SHCSR_MEMFAULTENA_MASK           0x10000u
-#define FSL_SCB_SHCSR_MEMFAULTENA_SHIFT          16u
-#define FSL_SCB_SHCSR_MEMFAULTENA_WIDTH          1u
-#define FSL_SCB_SHCSR_MEMFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_MEMFAULTENA_SHIFT))&FSL_SCB_SHCSR_MEMFAULTENA_MASK)
-#define FSL_SCB_SHCSR_BUSFAULTENA_MASK           0x20000u
-#define FSL_SCB_SHCSR_BUSFAULTENA_SHIFT          17u
-#define FSL_SCB_SHCSR_BUSFAULTENA_WIDTH          1u
-#define FSL_SCB_SHCSR_BUSFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_BUSFAULTENA_SHIFT))&FSL_SCB_SHCSR_BUSFAULTENA_MASK)
-#define FSL_SCB_SHCSR_USGFAULTENA_MASK           0x40000u
-#define FSL_SCB_SHCSR_USGFAULTENA_SHIFT          18u
-#define FSL_SCB_SHCSR_USGFAULTENA_WIDTH          1u
-#define FSL_SCB_SHCSR_USGFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SCB_SHCSR_USGFAULTENA_SHIFT))&FSL_SCB_SHCSR_USGFAULTENA_MASK)
-/* CFSR Bit Fields */
-#define FSL_SCB_CFSR_IACCVIOL_MASK               0x1u
-#define FSL_SCB_CFSR_IACCVIOL_SHIFT              0u
-#define FSL_SCB_CFSR_IACCVIOL_WIDTH              1u
-#define FSL_SCB_CFSR_IACCVIOL(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_IACCVIOL_SHIFT))&FSL_SCB_CFSR_IACCVIOL_MASK)
-#define FSL_SCB_CFSR_DACCVIOL_MASK               0x2u
-#define FSL_SCB_CFSR_DACCVIOL_SHIFT              1u
-#define FSL_SCB_CFSR_DACCVIOL_WIDTH              1u
-#define FSL_SCB_CFSR_DACCVIOL(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_DACCVIOL_SHIFT))&FSL_SCB_CFSR_DACCVIOL_MASK)
-#define FSL_SCB_CFSR_MUNSTKERR_MASK              0x8u
-#define FSL_SCB_CFSR_MUNSTKERR_SHIFT             3u
-#define FSL_SCB_CFSR_MUNSTKERR_WIDTH             1u
-#define FSL_SCB_CFSR_MUNSTKERR(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_MUNSTKERR_SHIFT))&FSL_SCB_CFSR_MUNSTKERR_MASK)
-#define FSL_SCB_CFSR_MSTKERR_MASK                0x10u
-#define FSL_SCB_CFSR_MSTKERR_SHIFT               4u
-#define FSL_SCB_CFSR_MSTKERR_WIDTH               1u
-#define FSL_SCB_CFSR_MSTKERR(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_MSTKERR_SHIFT))&FSL_SCB_CFSR_MSTKERR_MASK)
-#define FSL_SCB_CFSR_MLSPERR_MASK                0x20u
-#define FSL_SCB_CFSR_MLSPERR_SHIFT               5u
-#define FSL_SCB_CFSR_MLSPERR_WIDTH               1u
-#define FSL_SCB_CFSR_MLSPERR(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_MLSPERR_SHIFT))&FSL_SCB_CFSR_MLSPERR_MASK)
-#define FSL_SCB_CFSR_MMARVALID_MASK              0x80u
-#define FSL_SCB_CFSR_MMARVALID_SHIFT             7u
-#define FSL_SCB_CFSR_MMARVALID_WIDTH             1u
-#define FSL_SCB_CFSR_MMARVALID(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_MMARVALID_SHIFT))&FSL_SCB_CFSR_MMARVALID_MASK)
-#define FSL_SCB_CFSR_IBUSERR_MASK                0x100u
-#define FSL_SCB_CFSR_IBUSERR_SHIFT               8u
-#define FSL_SCB_CFSR_IBUSERR_WIDTH               1u
-#define FSL_SCB_CFSR_IBUSERR(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_IBUSERR_SHIFT))&FSL_SCB_CFSR_IBUSERR_MASK)
-#define FSL_SCB_CFSR_PRECISERR_MASK              0x200u
-#define FSL_SCB_CFSR_PRECISERR_SHIFT             9u
-#define FSL_SCB_CFSR_PRECISERR_WIDTH             1u
-#define FSL_SCB_CFSR_PRECISERR(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_PRECISERR_SHIFT))&FSL_SCB_CFSR_PRECISERR_MASK)
-#define FSL_SCB_CFSR_IMPRECISERR_MASK            0x400u
-#define FSL_SCB_CFSR_IMPRECISERR_SHIFT           10u
-#define FSL_SCB_CFSR_IMPRECISERR_WIDTH           1u
-#define FSL_SCB_CFSR_IMPRECISERR(x)              (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_IMPRECISERR_SHIFT))&FSL_SCB_CFSR_IMPRECISERR_MASK)
-#define FSL_SCB_CFSR_UNSTKERR_MASK               0x800u
-#define FSL_SCB_CFSR_UNSTKERR_SHIFT              11u
-#define FSL_SCB_CFSR_UNSTKERR_WIDTH              1u
-#define FSL_SCB_CFSR_UNSTKERR(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_UNSTKERR_SHIFT))&FSL_SCB_CFSR_UNSTKERR_MASK)
-#define FSL_SCB_CFSR_STKERR_MASK                 0x1000u
-#define FSL_SCB_CFSR_STKERR_SHIFT                12u
-#define FSL_SCB_CFSR_STKERR_WIDTH                1u
-#define FSL_SCB_CFSR_STKERR(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_STKERR_SHIFT))&FSL_SCB_CFSR_STKERR_MASK)
-#define FSL_SCB_CFSR_LSPERR_MASK                 0x2000u
-#define FSL_SCB_CFSR_LSPERR_SHIFT                13u
-#define FSL_SCB_CFSR_LSPERR_WIDTH                1u
-#define FSL_SCB_CFSR_LSPERR(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_LSPERR_SHIFT))&FSL_SCB_CFSR_LSPERR_MASK)
-#define FSL_SCB_CFSR_BFARVALID_MASK              0x8000u
-#define FSL_SCB_CFSR_BFARVALID_SHIFT             15u
-#define FSL_SCB_CFSR_BFARVALID_WIDTH             1u
-#define FSL_SCB_CFSR_BFARVALID(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_BFARVALID_SHIFT))&FSL_SCB_CFSR_BFARVALID_MASK)
-#define FSL_SCB_CFSR_UNDEFINSTR_MASK             0x10000u
-#define FSL_SCB_CFSR_UNDEFINSTR_SHIFT            16u
-#define FSL_SCB_CFSR_UNDEFINSTR_WIDTH            1u
-#define FSL_SCB_CFSR_UNDEFINSTR(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_UNDEFINSTR_SHIFT))&FSL_SCB_CFSR_UNDEFINSTR_MASK)
-#define FSL_SCB_CFSR_INVSTATE_MASK               0x20000u
-#define FSL_SCB_CFSR_INVSTATE_SHIFT              17u
-#define FSL_SCB_CFSR_INVSTATE_WIDTH              1u
-#define FSL_SCB_CFSR_INVSTATE(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_INVSTATE_SHIFT))&FSL_SCB_CFSR_INVSTATE_MASK)
-#define FSL_SCB_CFSR_INVPC_MASK                  0x40000u
-#define FSL_SCB_CFSR_INVPC_SHIFT                 18u
-#define FSL_SCB_CFSR_INVPC_WIDTH                 1u
-#define FSL_SCB_CFSR_INVPC(x)                    (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_INVPC_SHIFT))&FSL_SCB_CFSR_INVPC_MASK)
-#define FSL_SCB_CFSR_NOCP_MASK                   0x80000u
-#define FSL_SCB_CFSR_NOCP_SHIFT                  19u
-#define FSL_SCB_CFSR_NOCP_WIDTH                  1u
-#define FSL_SCB_CFSR_NOCP(x)                     (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_NOCP_SHIFT))&FSL_SCB_CFSR_NOCP_MASK)
-#define FSL_SCB_CFSR_UNALIGNED_MASK              0x1000000u
-#define FSL_SCB_CFSR_UNALIGNED_SHIFT             24u
-#define FSL_SCB_CFSR_UNALIGNED_WIDTH             1u
-#define FSL_SCB_CFSR_UNALIGNED(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_UNALIGNED_SHIFT))&FSL_SCB_CFSR_UNALIGNED_MASK)
-#define FSL_SCB_CFSR_DIVBYZERO_MASK              0x2000000u
-#define FSL_SCB_CFSR_DIVBYZERO_SHIFT             25u
-#define FSL_SCB_CFSR_DIVBYZERO_WIDTH             1u
-#define FSL_SCB_CFSR_DIVBYZERO(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CFSR_DIVBYZERO_SHIFT))&FSL_SCB_CFSR_DIVBYZERO_MASK)
-/* HFSR Bit Fields */
-#define FSL_SCB_HFSR_VECTTBL_MASK                0x2u
-#define FSL_SCB_HFSR_VECTTBL_SHIFT               1u
-#define FSL_SCB_HFSR_VECTTBL_WIDTH               1u
-#define FSL_SCB_HFSR_VECTTBL(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_HFSR_VECTTBL_SHIFT))&FSL_SCB_HFSR_VECTTBL_MASK)
-#define FSL_SCB_HFSR_FORCED_MASK                 0x40000000u
-#define FSL_SCB_HFSR_FORCED_SHIFT                30u
-#define FSL_SCB_HFSR_FORCED_WIDTH                1u
-#define FSL_SCB_HFSR_FORCED(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_HFSR_FORCED_SHIFT))&FSL_SCB_HFSR_FORCED_MASK)
-#define FSL_SCB_HFSR_DEBUGEVT_MASK               0x80000000u
-#define FSL_SCB_HFSR_DEBUGEVT_SHIFT              31u
-#define FSL_SCB_HFSR_DEBUGEVT_WIDTH              1u
-#define FSL_SCB_HFSR_DEBUGEVT(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_HFSR_DEBUGEVT_SHIFT))&FSL_SCB_HFSR_DEBUGEVT_MASK)
-/* DFSR Bit Fields */
-#define FSL_SCB_DFSR_HALTED_MASK                 0x1u
-#define FSL_SCB_DFSR_HALTED_SHIFT                0u
-#define FSL_SCB_DFSR_HALTED_WIDTH                1u
-#define FSL_SCB_DFSR_HALTED(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_DFSR_HALTED_SHIFT))&FSL_SCB_DFSR_HALTED_MASK)
-#define FSL_SCB_DFSR_BKPT_MASK                   0x2u
-#define FSL_SCB_DFSR_BKPT_SHIFT                  1u
-#define FSL_SCB_DFSR_BKPT_WIDTH                  1u
-#define FSL_SCB_DFSR_BKPT(x)                     (((uint32_t)(((uint32_t)(x))<<FSL_SCB_DFSR_BKPT_SHIFT))&FSL_SCB_DFSR_BKPT_MASK)
-#define FSL_SCB_DFSR_DWTTRAP_MASK                0x4u
-#define FSL_SCB_DFSR_DWTTRAP_SHIFT               2u
-#define FSL_SCB_DFSR_DWTTRAP_WIDTH               1u
-#define FSL_SCB_DFSR_DWTTRAP(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_DFSR_DWTTRAP_SHIFT))&FSL_SCB_DFSR_DWTTRAP_MASK)
-#define FSL_SCB_DFSR_VCATCH_MASK                 0x8u
-#define FSL_SCB_DFSR_VCATCH_SHIFT                3u
-#define FSL_SCB_DFSR_VCATCH_WIDTH                1u
-#define FSL_SCB_DFSR_VCATCH(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_DFSR_VCATCH_SHIFT))&FSL_SCB_DFSR_VCATCH_MASK)
-#define FSL_SCB_DFSR_EXTERNAL_MASK               0x10u
-#define FSL_SCB_DFSR_EXTERNAL_SHIFT              4u
-#define FSL_SCB_DFSR_EXTERNAL_WIDTH              1u
-#define FSL_SCB_DFSR_EXTERNAL(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_DFSR_EXTERNAL_SHIFT))&FSL_SCB_DFSR_EXTERNAL_MASK)
-/* MMFAR Bit Fields */
-#define FSL_SCB_MMFAR_ADDRESS_MASK               0xFFFFFFFFu
-#define FSL_SCB_MMFAR_ADDRESS_SHIFT              0u
-#define FSL_SCB_MMFAR_ADDRESS_WIDTH              32u
-#define FSL_SCB_MMFAR_ADDRESS(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_MMFAR_ADDRESS_SHIFT))&FSL_SCB_MMFAR_ADDRESS_MASK)
-/* BFAR Bit Fields */
-#define FSL_SCB_BFAR_ADDRESS_MASK                0xFFFFFFFFu
-#define FSL_SCB_BFAR_ADDRESS_SHIFT               0u
-#define FSL_SCB_BFAR_ADDRESS_WIDTH               32u
-#define FSL_SCB_BFAR_ADDRESS(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_BFAR_ADDRESS_SHIFT))&FSL_SCB_BFAR_ADDRESS_MASK)
-/* AFSR Bit Fields */
-#define FSL_SCB_AFSR_AUXFAULT_MASK               0xFFFFFFFFu
-#define FSL_SCB_AFSR_AUXFAULT_SHIFT              0u
-#define FSL_SCB_AFSR_AUXFAULT_WIDTH              32u
-#define FSL_SCB_AFSR_AUXFAULT(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_AFSR_AUXFAULT_SHIFT))&FSL_SCB_AFSR_AUXFAULT_MASK)
-/* CPACR Bit Fields */
-#define FSL_SCB_CPACR_CP10_MASK                  0x300000u
-#define FSL_SCB_CPACR_CP10_SHIFT                 20u
-#define FSL_SCB_CPACR_CP10_WIDTH                 2u
-#define FSL_SCB_CPACR_CP10(x)                    (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPACR_CP10_SHIFT))&FSL_SCB_CPACR_CP10_MASK)
-#define FSL_SCB_CPACR_CP11_MASK                  0xC00000u
-#define FSL_SCB_CPACR_CP11_SHIFT                 22u
-#define FSL_SCB_CPACR_CP11_WIDTH                 2u
-#define FSL_SCB_CPACR_CP11(x)                    (((uint32_t)(((uint32_t)(x))<<FSL_SCB_CPACR_CP11_SHIFT))&FSL_SCB_CPACR_CP11_MASK)
-/* FPCCR Bit Fields */
-#define FSL_SCB_FPCCR_LSPACT_MASK                0x1u
-#define FSL_SCB_FPCCR_LSPACT_SHIFT               0u
-#define FSL_SCB_FPCCR_LSPACT_WIDTH               1u
-#define FSL_SCB_FPCCR_LSPACT(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_LSPACT_SHIFT))&FSL_SCB_FPCCR_LSPACT_MASK)
-#define FSL_SCB_FPCCR_USER_MASK                  0x2u
-#define FSL_SCB_FPCCR_USER_SHIFT                 1u
-#define FSL_SCB_FPCCR_USER_WIDTH                 1u
-#define FSL_SCB_FPCCR_USER(x)                    (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_USER_SHIFT))&FSL_SCB_FPCCR_USER_MASK)
-#define FSL_SCB_FPCCR_THREAD_MASK                0x8u
-#define FSL_SCB_FPCCR_THREAD_SHIFT               3u
-#define FSL_SCB_FPCCR_THREAD_WIDTH               1u
-#define FSL_SCB_FPCCR_THREAD(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_THREAD_SHIFT))&FSL_SCB_FPCCR_THREAD_MASK)
-#define FSL_SCB_FPCCR_HFRDY_MASK                 0x10u
-#define FSL_SCB_FPCCR_HFRDY_SHIFT                4u
-#define FSL_SCB_FPCCR_HFRDY_WIDTH                1u
-#define FSL_SCB_FPCCR_HFRDY(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_HFRDY_SHIFT))&FSL_SCB_FPCCR_HFRDY_MASK)
-#define FSL_SCB_FPCCR_MMRDY_MASK                 0x20u
-#define FSL_SCB_FPCCR_MMRDY_SHIFT                5u
-#define FSL_SCB_FPCCR_MMRDY_WIDTH                1u
-#define FSL_SCB_FPCCR_MMRDY(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_MMRDY_SHIFT))&FSL_SCB_FPCCR_MMRDY_MASK)
-#define FSL_SCB_FPCCR_BFRDY_MASK                 0x40u
-#define FSL_SCB_FPCCR_BFRDY_SHIFT                6u
-#define FSL_SCB_FPCCR_BFRDY_WIDTH                1u
-#define FSL_SCB_FPCCR_BFRDY(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_BFRDY_SHIFT))&FSL_SCB_FPCCR_BFRDY_MASK)
-#define FSL_SCB_FPCCR_MONRDY_MASK                0x100u
-#define FSL_SCB_FPCCR_MONRDY_SHIFT               8u
-#define FSL_SCB_FPCCR_MONRDY_WIDTH               1u
-#define FSL_SCB_FPCCR_MONRDY(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_MONRDY_SHIFT))&FSL_SCB_FPCCR_MONRDY_MASK)
-#define FSL_SCB_FPCCR_LSPEN_MASK                 0x40000000u
-#define FSL_SCB_FPCCR_LSPEN_SHIFT                30u
-#define FSL_SCB_FPCCR_LSPEN_WIDTH                1u
-#define FSL_SCB_FPCCR_LSPEN(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_LSPEN_SHIFT))&FSL_SCB_FPCCR_LSPEN_MASK)
-#define FSL_SCB_FPCCR_ASPEN_MASK                 0x80000000u
-#define FSL_SCB_FPCCR_ASPEN_SHIFT                31u
-#define FSL_SCB_FPCCR_ASPEN_WIDTH                1u
-#define FSL_SCB_FPCCR_ASPEN(x)                   (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCCR_ASPEN_SHIFT))&FSL_SCB_FPCCR_ASPEN_MASK)
-/* FPCAR Bit Fields */
-#define FSL_SCB_FPCAR_ADDRESS_MASK               0xFFFFFFF8u
-#define FSL_SCB_FPCAR_ADDRESS_SHIFT              3u
-#define FSL_SCB_FPCAR_ADDRESS_WIDTH              29u
-#define FSL_SCB_FPCAR_ADDRESS(x)                 (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPCAR_ADDRESS_SHIFT))&FSL_SCB_FPCAR_ADDRESS_MASK)
-/* FPDSCR Bit Fields */
-#define FSL_SCB_FPDSCR_RMode_MASK                0xC00000u
-#define FSL_SCB_FPDSCR_RMode_SHIFT               22u
-#define FSL_SCB_FPDSCR_RMode_WIDTH               2u
-#define FSL_SCB_FPDSCR_RMode(x)                  (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPDSCR_RMode_SHIFT))&FSL_SCB_FPDSCR_RMode_MASK)
-#define FSL_SCB_FPDSCR_FZ_MASK                   0x1000000u
-#define FSL_SCB_FPDSCR_FZ_SHIFT                  24u
-#define FSL_SCB_FPDSCR_FZ_WIDTH                  1u
-#define FSL_SCB_FPDSCR_FZ(x)                     (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPDSCR_FZ_SHIFT))&FSL_SCB_FPDSCR_FZ_MASK)
-#define FSL_SCB_FPDSCR_DN_MASK                   0x2000000u
-#define FSL_SCB_FPDSCR_DN_SHIFT                  25u
-#define FSL_SCB_FPDSCR_DN_WIDTH                  1u
-#define FSL_SCB_FPDSCR_DN(x)                     (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPDSCR_DN_SHIFT))&FSL_SCB_FPDSCR_DN_MASK)
-#define FSL_SCB_FPDSCR_AHP_MASK                  0x4000000u
-#define FSL_SCB_FPDSCR_AHP_SHIFT                 26u
-#define FSL_SCB_FPDSCR_AHP_WIDTH                 1u
-#define FSL_SCB_FPDSCR_AHP(x)                    (((uint32_t)(((uint32_t)(x))<<FSL_SCB_FPDSCR_AHP_SHIFT))&FSL_SCB_FPDSCR_AHP_MASK)
-
-/*!
- * @}
- */ /* end of group FSL_SCB_Register_Masks */
-
-
-/*!
- * @}
- */ /* end of group FSL_SCB_Peripheral_Access_Layer */
-
-
-/* ----------------------------------------------------------------------------
-   -- FSL_SysTick Peripheral Access Layer
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_SysTick_Peripheral_Access_Layer FSL_SysTick Peripheral Access Layer
- * @{
- */
-
-
-/** FSL_SysTick - Size of Registers Arrays */
-
-/** FSL_SysTick - Register Layout Typedef */
-typedef struct {
-  __IO uint32_t CSR;                               /**< SysTick Control and Status Register, offset: 0x0 */
-  __IO uint32_t RVR;                               /**< SysTick Reload Value Register, offset: 0x4 */
-  __IO uint32_t CVR;                               /**< SysTick Current Value Register, offset: 0x8 */
-  __I  uint32_t CALIB;                             /**< SysTick Calibration Value Register, offset: 0xC */
-} FSL_SysTick_Type, *FSL_SysTick_MemMapPtr;
-
- /** Number of instances of the FSL_SysTick module. */
-#define FSL_SysTick_INSTANCE_COUNT               (1u)
-
-
-/* FSL_SysTick - Peripheral instance base addresses */
-/** Peripheral FSL_SysTick base address */
-#define FSL_SysTick_BASE                         (0xE000E010u)
-/** Peripheral FSL_SysTick base pointer */
-#define FSL_SysTick                              ((FSL_SysTick_Type *)FSL_SysTick_BASE)
-/** Array initializer of FSL_SysTick peripheral base addresses */
-#define FSL_SysTick_BASE_ADDRS                   { FSL_SysTick_BASE }
-/** Array initializer of FSL_SysTick peripheral base pointers */
-#define FSL_SysTick_BASE_PTRS                    { FSL_SysTick }
- /** Number of interrupt vector arrays for the FSL_SysTick module. */
-#define FSL_SysTick_IRQS_ARR_COUNT               (1u)
- /** Number of interrupt channels for the FSL_SysTick module. */
-#define FSL_SysTick_IRQS_CH_COUNT                (1u)
-/** Interrupt vectors for the FSL_SysTick peripheral type */
-#define FSL_SysTick_IRQS                         { SysTick_IRQn }
-
-/* ----------------------------------------------------------------------------
-   -- FSL_SysTick Register Masks
-   ---------------------------------------------------------------------------- */
-
-/*!
- * @addtogroup FSL_SysTick_Register_Masks FSL_SysTick Register Masks
- * @{
- */
-
-/* CSR Bit Fields */
-#define FSL_SysTick_CSR_ENABLE_MASK              0x1u
-#define FSL_SysTick_CSR_ENABLE_SHIFT             0u
-#define FSL_SysTick_CSR_ENABLE_WIDTH             1u
-#define FSL_SysTick_CSR_ENABLE(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CSR_ENABLE_SHIFT))&FSL_SysTick_CSR_ENABLE_MASK)
-#define FSL_SysTick_CSR_TICKINT_MASK             0x2u
-#define FSL_SysTick_CSR_TICKINT_SHIFT            1u
-#define FSL_SysTick_CSR_TICKINT_WIDTH            1u
-#define FSL_SysTick_CSR_TICKINT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CSR_TICKINT_SHIFT))&FSL_SysTick_CSR_TICKINT_MASK)
-#define FSL_SysTick_CSR_CLKSOURCE_MASK           0x4u
-#define FSL_SysTick_CSR_CLKSOURCE_SHIFT          2u
-#define FSL_SysTick_CSR_CLKSOURCE_WIDTH          1u
-#define FSL_SysTick_CSR_CLKSOURCE(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CSR_CLKSOURCE_SHIFT))&FSL_SysTick_CSR_CLKSOURCE_MASK)
-#define FSL_SysTick_CSR_COUNTFLAG_MASK           0x10000u
-#define FSL_SysTick_CSR_COUNTFLAG_SHIFT          16u
-#define FSL_SysTick_CSR_COUNTFLAG_WIDTH          1u
-#define FSL_SysTick_CSR_COUNTFLAG(x)             (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CSR_COUNTFLAG_SHIFT))&FSL_SysTick_CSR_COUNTFLAG_MASK)
-/* RVR Bit Fields */
-#define FSL_SysTick_RVR_RELOAD_MASK              0xFFFFFFu
-#define FSL_SysTick_RVR_RELOAD_SHIFT             0u
-#define FSL_SysTick_RVR_RELOAD_WIDTH             24u
-#define FSL_SysTick_RVR_RELOAD(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_RVR_RELOAD_SHIFT))&FSL_SysTick_RVR_RELOAD_MASK)
-/* CVR Bit Fields */
-#define FSL_SysTick_CVR_CURRENT_MASK             0xFFFFFFu
-#define FSL_SysTick_CVR_CURRENT_SHIFT            0u
-#define FSL_SysTick_CVR_CURRENT_WIDTH            24u
-#define FSL_SysTick_CVR_CURRENT(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CVR_CURRENT_SHIFT))&FSL_SysTick_CVR_CURRENT_MASK)
-/* CALIB Bit Fields */
-#define FSL_SysTick_CALIB_TENMS_MASK             0xFFFFFFu
-#define FSL_SysTick_CALIB_TENMS_SHIFT            0u
-#define FSL_SysTick_CALIB_TENMS_WIDTH            24u
-#define FSL_SysTick_CALIB_TENMS(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CALIB_TENMS_SHIFT))&FSL_SysTick_CALIB_TENMS_MASK)
-#define FSL_SysTick_CALIB_SKEW_MASK              0x40000000u
-#define FSL_SysTick_CALIB_SKEW_SHIFT             30u
-#define FSL_SysTick_CALIB_SKEW_WIDTH             1u
-#define FSL_SysTick_CALIB_SKEW(x)                (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CALIB_SKEW_SHIFT))&FSL_SysTick_CALIB_SKEW_MASK)
-#define FSL_SysTick_CALIB_NOREF_MASK             0x80000000u
-#define FSL_SysTick_CALIB_NOREF_SHIFT            31u
-#define FSL_SysTick_CALIB_NOREF_WIDTH            1u
-#define FSL_SysTick_CALIB_NOREF(x)               (((uint32_t)(((uint32_t)(x))<<FSL_SysTick_CALIB_NOREF_SHIFT))&FSL_SysTick_CALIB_NOREF_MASK)
-
-/*!
- * @}
- */ /* end of group FSL_SysTick_Register_Masks */
-
-
-/*!
- * @}
- */ /* end of group FSL_SysTick_Peripheral_Access_Layer */
-
-
-/* ----------------------------------------------------------------------------
    -- FTFC Peripheral Access Layer
    ---------------------------------------------------------------------------- */
 
@@ -5188,38 +4021,38 @@ typedef struct {
 #define FTFC_FDPROT_DPROT_WIDTH                  8u
 #define FTFC_FDPROT_DPROT(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FDPROT_DPROT_SHIFT))&FTFC_FDPROT_DPROT_MASK)
 /* FCSESTAT Bit Fields */
-#define FTFC_FCSESTAT_IDB_MASK                   0x1u
-#define FTFC_FCSESTAT_IDB_SHIFT                  0u
-#define FTFC_FCSESTAT_IDB_WIDTH                  1u
-#define FTFC_FCSESTAT_IDB(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_IDB_SHIFT))&FTFC_FCSESTAT_IDB_MASK)
-#define FTFC_FCSESTAT_EDB_MASK                   0x2u
-#define FTFC_FCSESTAT_EDB_SHIFT                  1u
-#define FTFC_FCSESTAT_EDB_WIDTH                  1u
-#define FTFC_FCSESTAT_EDB(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_EDB_SHIFT))&FTFC_FCSESTAT_EDB_MASK)
-#define FTFC_FCSESTAT_RIN_MASK                   0x4u
-#define FTFC_FCSESTAT_RIN_SHIFT                  2u
-#define FTFC_FCSESTAT_RIN_WIDTH                  1u
-#define FTFC_FCSESTAT_RIN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_RIN_SHIFT))&FTFC_FCSESTAT_RIN_MASK)
-#define FTFC_FCSESTAT_BOK_MASK                   0x8u
-#define FTFC_FCSESTAT_BOK_SHIFT                  3u
-#define FTFC_FCSESTAT_BOK_WIDTH                  1u
-#define FTFC_FCSESTAT_BOK(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BOK_SHIFT))&FTFC_FCSESTAT_BOK_MASK)
-#define FTFC_FCSESTAT_BFN_MASK                   0x10u
-#define FTFC_FCSESTAT_BFN_SHIFT                  4u
-#define FTFC_FCSESTAT_BFN_WIDTH                  1u
-#define FTFC_FCSESTAT_BFN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BFN_SHIFT))&FTFC_FCSESTAT_BFN_MASK)
-#define FTFC_FCSESTAT_BIN_MASK                   0x20u
-#define FTFC_FCSESTAT_BIN_SHIFT                  5u
-#define FTFC_FCSESTAT_BIN_WIDTH                  1u
-#define FTFC_FCSESTAT_BIN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BIN_SHIFT))&FTFC_FCSESTAT_BIN_MASK)
-#define FTFC_FCSESTAT_SB_MASK                    0x40u
-#define FTFC_FCSESTAT_SB_SHIFT                   6u
-#define FTFC_FCSESTAT_SB_WIDTH                   1u
-#define FTFC_FCSESTAT_SB(x)                      (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_SB_SHIFT))&FTFC_FCSESTAT_SB_MASK)
-#define FTFC_FCSESTAT_BSY_MASK                   0x80u
-#define FTFC_FCSESTAT_BSY_SHIFT                  7u
+#define FTFC_FCSESTAT_BSY_MASK                   0x1u
+#define FTFC_FCSESTAT_BSY_SHIFT                  0u
 #define FTFC_FCSESTAT_BSY_WIDTH                  1u
 #define FTFC_FCSESTAT_BSY(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BSY_SHIFT))&FTFC_FCSESTAT_BSY_MASK)
+#define FTFC_FCSESTAT_SB_MASK                    0x2u
+#define FTFC_FCSESTAT_SB_SHIFT                   1u
+#define FTFC_FCSESTAT_SB_WIDTH                   1u
+#define FTFC_FCSESTAT_SB(x)                      (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_SB_SHIFT))&FTFC_FCSESTAT_SB_MASK)
+#define FTFC_FCSESTAT_BIN_MASK                   0x4u
+#define FTFC_FCSESTAT_BIN_SHIFT                  2u
+#define FTFC_FCSESTAT_BIN_WIDTH                  1u
+#define FTFC_FCSESTAT_BIN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BIN_SHIFT))&FTFC_FCSESTAT_BIN_MASK)
+#define FTFC_FCSESTAT_BFN_MASK                   0x8u
+#define FTFC_FCSESTAT_BFN_SHIFT                  3u
+#define FTFC_FCSESTAT_BFN_WIDTH                  1u
+#define FTFC_FCSESTAT_BFN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BFN_SHIFT))&FTFC_FCSESTAT_BFN_MASK)
+#define FTFC_FCSESTAT_BOK_MASK                   0x10u
+#define FTFC_FCSESTAT_BOK_SHIFT                  4u
+#define FTFC_FCSESTAT_BOK_WIDTH                  1u
+#define FTFC_FCSESTAT_BOK(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_BOK_SHIFT))&FTFC_FCSESTAT_BOK_MASK)
+#define FTFC_FCSESTAT_RIN_MASK                   0x20u
+#define FTFC_FCSESTAT_RIN_SHIFT                  5u
+#define FTFC_FCSESTAT_RIN_WIDTH                  1u
+#define FTFC_FCSESTAT_RIN(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_RIN_SHIFT))&FTFC_FCSESTAT_RIN_MASK)
+#define FTFC_FCSESTAT_EDB_MASK                   0x40u
+#define FTFC_FCSESTAT_EDB_SHIFT                  6u
+#define FTFC_FCSESTAT_EDB_WIDTH                  1u
+#define FTFC_FCSESTAT_EDB(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_EDB_SHIFT))&FTFC_FCSESTAT_EDB_MASK)
+#define FTFC_FCSESTAT_IDB_MASK                   0x80u
+#define FTFC_FCSESTAT_IDB_SHIFT                  7u
+#define FTFC_FCSESTAT_IDB_WIDTH                  1u
+#define FTFC_FCSESTAT_IDB(x)                     (((uint8_t)(((uint8_t)(x))<<FTFC_FCSESTAT_IDB_SHIFT))&FTFC_FCSESTAT_IDB_MASK)
 /* FERSTAT Bit Fields */
 #define FTFC_FERSTAT_DFDIF_MASK                  0x2u
 #define FTFC_FERSTAT_DFDIF_SHIFT                 1u
@@ -8491,7 +7324,7 @@ typedef struct {
   __IO uint32_t CPCR;                              /**< Core Platform Control Register, offset: 0xC */
   __IO uint32_t ISCR;                              /**< Interrupt Status and Control Register, offset: 0x10 */
        uint8_t RESERVED_1[28];
-  __IO uint32_t PID;                               /**< Process ID register, offset: 0x30 */
+  __IO uint32_t PID;                               /**< Process ID Register, offset: 0x30 */
        uint8_t RESERVED_2[12];
   __IO uint32_t CPO;                               /**< Compute Operation Control Register, offset: 0x40 */
        uint8_t RESERVED_3[956];
@@ -9086,7 +7919,11 @@ typedef struct {
   __I  uint32_t CP0NUM;                            /**< Processor 0 Number Register, offset: 0x24 */
   __I  uint32_t CP0MASTER;                         /**< Processor 0 Master Register, offset: 0x28 */
   __I  uint32_t CP0COUNT;                          /**< Processor 0 Count Register, offset: 0x2C */
-       uint8_t RESERVED_0[976];
+  __I  uint32_t CP0CFG0;                           /**< Processor 0 Configuration 0 Register, offset: 0x30 */
+  __I  uint32_t CP0CFG1;                           /**< Processor 0 Configuration 1 Register, offset: 0x34 */
+  __I  uint32_t CP0CFG2;                           /**< Processor 0 Configuration 2 Register, offset: 0x38 */
+  __I  uint32_t CP0CFG3;                           /**< Processor 0 Configuration 3 Register, offset: 0x3C */
+       uint8_t RESERVED_0[960];
   __IO uint32_t OCMDR[MSCM_OCMDR_COUNT];           /**< On-Chip Memory Descriptor Register, array offset: 0x400, array step: 0x4 */
 } MSCM_Type, *MSCM_MemMapPtr;
 
@@ -9229,6 +8066,74 @@ typedef struct {
 #define MSCM_CP0COUNT_PCNT_SHIFT                 0u
 #define MSCM_CP0COUNT_PCNT_WIDTH                 2u
 #define MSCM_CP0COUNT_PCNT(x)                    (((uint32_t)(((uint32_t)(x))<<MSCM_CP0COUNT_PCNT_SHIFT))&MSCM_CP0COUNT_PCNT_MASK)
+/* CP0CFG0 Bit Fields */
+#define MSCM_CP0CFG0_DCWY_MASK                   0xFFu
+#define MSCM_CP0CFG0_DCWY_SHIFT                  0u
+#define MSCM_CP0CFG0_DCWY_WIDTH                  8u
+#define MSCM_CP0CFG0_DCWY(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG0_DCWY_SHIFT))&MSCM_CP0CFG0_DCWY_MASK)
+#define MSCM_CP0CFG0_DCSZ_MASK                   0xFF00u
+#define MSCM_CP0CFG0_DCSZ_SHIFT                  8u
+#define MSCM_CP0CFG0_DCSZ_WIDTH                  8u
+#define MSCM_CP0CFG0_DCSZ(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG0_DCSZ_SHIFT))&MSCM_CP0CFG0_DCSZ_MASK)
+#define MSCM_CP0CFG0_ICWY_MASK                   0xFF0000u
+#define MSCM_CP0CFG0_ICWY_SHIFT                  16u
+#define MSCM_CP0CFG0_ICWY_WIDTH                  8u
+#define MSCM_CP0CFG0_ICWY(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG0_ICWY_SHIFT))&MSCM_CP0CFG0_ICWY_MASK)
+#define MSCM_CP0CFG0_ICSZ_MASK                   0xFF000000u
+#define MSCM_CP0CFG0_ICSZ_SHIFT                  24u
+#define MSCM_CP0CFG0_ICSZ_WIDTH                  8u
+#define MSCM_CP0CFG0_ICSZ(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG0_ICSZ_SHIFT))&MSCM_CP0CFG0_ICSZ_MASK)
+/* CP0CFG1 Bit Fields */
+#define MSCM_CP0CFG1_L2WY_MASK                   0xFF0000u
+#define MSCM_CP0CFG1_L2WY_SHIFT                  16u
+#define MSCM_CP0CFG1_L2WY_WIDTH                  8u
+#define MSCM_CP0CFG1_L2WY(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG1_L2WY_SHIFT))&MSCM_CP0CFG1_L2WY_MASK)
+#define MSCM_CP0CFG1_L2SZ_MASK                   0xFF000000u
+#define MSCM_CP0CFG1_L2SZ_SHIFT                  24u
+#define MSCM_CP0CFG1_L2SZ_WIDTH                  8u
+#define MSCM_CP0CFG1_L2SZ(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG1_L2SZ_SHIFT))&MSCM_CP0CFG1_L2SZ_MASK)
+/* CP0CFG2 Bit Fields */
+#define MSCM_CP0CFG2_TMUSZ_MASK                  0xFF00u
+#define MSCM_CP0CFG2_TMUSZ_SHIFT                 8u
+#define MSCM_CP0CFG2_TMUSZ_WIDTH                 8u
+#define MSCM_CP0CFG2_TMUSZ(x)                    (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG2_TMUSZ_SHIFT))&MSCM_CP0CFG2_TMUSZ_MASK)
+#define MSCM_CP0CFG2_TMLSZ_MASK                  0xFF000000u
+#define MSCM_CP0CFG2_TMLSZ_SHIFT                 24u
+#define MSCM_CP0CFG2_TMLSZ_WIDTH                 8u
+#define MSCM_CP0CFG2_TMLSZ(x)                    (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG2_TMLSZ_SHIFT))&MSCM_CP0CFG2_TMLSZ_MASK)
+/* CP0CFG3 Bit Fields */
+#define MSCM_CP0CFG3_FPU_MASK                    0x1u
+#define MSCM_CP0CFG3_FPU_SHIFT                   0u
+#define MSCM_CP0CFG3_FPU_WIDTH                   1u
+#define MSCM_CP0CFG3_FPU(x)                      (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_FPU_SHIFT))&MSCM_CP0CFG3_FPU_MASK)
+#define MSCM_CP0CFG3_SIMD_MASK                   0x2u
+#define MSCM_CP0CFG3_SIMD_SHIFT                  1u
+#define MSCM_CP0CFG3_SIMD_WIDTH                  1u
+#define MSCM_CP0CFG3_SIMD(x)                     (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_SIMD_SHIFT))&MSCM_CP0CFG3_SIMD_MASK)
+#define MSCM_CP0CFG3_JAZ_MASK                    0x4u
+#define MSCM_CP0CFG3_JAZ_SHIFT                   2u
+#define MSCM_CP0CFG3_JAZ_WIDTH                   1u
+#define MSCM_CP0CFG3_JAZ(x)                      (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_JAZ_SHIFT))&MSCM_CP0CFG3_JAZ_MASK)
+#define MSCM_CP0CFG3_MMU_MASK                    0x8u
+#define MSCM_CP0CFG3_MMU_SHIFT                   3u
+#define MSCM_CP0CFG3_MMU_WIDTH                   1u
+#define MSCM_CP0CFG3_MMU(x)                      (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_MMU_SHIFT))&MSCM_CP0CFG3_MMU_MASK)
+#define MSCM_CP0CFG3_TZ_MASK                     0x10u
+#define MSCM_CP0CFG3_TZ_SHIFT                    4u
+#define MSCM_CP0CFG3_TZ_WIDTH                    1u
+#define MSCM_CP0CFG3_TZ(x)                       (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_TZ_SHIFT))&MSCM_CP0CFG3_TZ_MASK)
+#define MSCM_CP0CFG3_CMP_MASK                    0x20u
+#define MSCM_CP0CFG3_CMP_SHIFT                   5u
+#define MSCM_CP0CFG3_CMP_WIDTH                   1u
+#define MSCM_CP0CFG3_CMP(x)                      (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_CMP_SHIFT))&MSCM_CP0CFG3_CMP_MASK)
+#define MSCM_CP0CFG3_BB_MASK                     0x40u
+#define MSCM_CP0CFG3_BB_SHIFT                    6u
+#define MSCM_CP0CFG3_BB_WIDTH                    1u
+#define MSCM_CP0CFG3_BB(x)                       (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_BB_SHIFT))&MSCM_CP0CFG3_BB_MASK)
+#define MSCM_CP0CFG3_SBP_MASK                    0x300u
+#define MSCM_CP0CFG3_SBP_SHIFT                   8u
+#define MSCM_CP0CFG3_SBP_WIDTH                   2u
+#define MSCM_CP0CFG3_SBP(x)                      (((uint32_t)(((uint32_t)(x))<<MSCM_CP0CFG3_SBP_SHIFT))&MSCM_CP0CFG3_SBP_MASK)
 /* OCMDR Bit Fields */
 #define MSCM_OCMDR_OCM0_MASK                     0xFu
 #define MSCM_OCMDR_OCM0_SHIFT                    0u
@@ -9357,12 +8262,12 @@ typedef struct {
  */
 
 /* PCCn Bit Fields */
-#define PCC_PCCn_PCD_MASK                        0xFu
+#define PCC_PCCn_PCD_MASK                        0x7u
 #define PCC_PCCn_PCD_SHIFT                       0u
-#define PCC_PCCn_PCD_WIDTH                       4u
+#define PCC_PCCn_PCD_WIDTH                       3u
 #define PCC_PCCn_PCD(x)                          (((uint32_t)(((uint32_t)(x))<<PCC_PCCn_PCD_SHIFT))&PCC_PCCn_PCD_MASK)
-#define PCC_PCCn_FRAC_MASK                       0x10u
-#define PCC_PCCn_FRAC_SHIFT                      4u
+#define PCC_PCCn_FRAC_MASK                       0x8u
+#define PCC_PCCn_FRAC_SHIFT                      3u
 #define PCC_PCCn_FRAC_WIDTH                      1u
 #define PCC_PCCn_FRAC(x)                         (((uint32_t)(((uint32_t)(x))<<PCC_PCCn_FRAC_SHIFT))&PCC_PCCn_FRAC_MASK)
 #define PCC_PCCn_PCS_MASK                        0x7000000u
@@ -10312,6 +9217,1208 @@ typedef struct {
 /*!
  * @}
  */ /* end of group RTC_Peripheral_Access_Layer */
+
+
+/* ----------------------------------------------------------------------------
+   -- S32_NVIC Peripheral Access Layer
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_NVIC_Peripheral_Access_Layer S32_NVIC Peripheral Access Layer
+ * @{
+ */
+
+
+/** S32_NVIC - Size of Registers Arrays */
+#define S32_NVIC_ISER_COUNT                      4u
+#define S32_NVIC_ICER_COUNT                      4u
+#define S32_NVIC_ISPR_COUNT                      4u
+#define S32_NVIC_ICPR_COUNT                      4u
+#define S32_NVIC_IABR_COUNT                      4u
+#define S32_NVIC_IP_COUNT                        123u
+
+/** S32_NVIC - Register Layout Typedef */
+typedef struct {
+  __IO uint32_t ISER[S32_NVIC_ISER_COUNT];         /**< Interrupt Set Enable Register n, array offset: 0x0, array step: 0x4 */
+       uint8_t RESERVED_0[112];
+  __IO uint32_t ICER[S32_NVIC_ICER_COUNT];         /**< Interrupt Clear Enable Register n, array offset: 0x80, array step: 0x4 */
+       uint8_t RESERVED_1[112];
+  __IO uint32_t ISPR[S32_NVIC_ISPR_COUNT];         /**< Interrupt Set Pending Register n, array offset: 0x100, array step: 0x4 */
+       uint8_t RESERVED_2[112];
+  __IO uint32_t ICPR[S32_NVIC_ICPR_COUNT];         /**< Interrupt Clear Pending Register n, array offset: 0x180, array step: 0x4 */
+       uint8_t RESERVED_3[112];
+  __IO uint32_t IABR[S32_NVIC_IABR_COUNT];         /**< Interrupt Active bit Register n, array offset: 0x200, array step: 0x4 */
+       uint8_t RESERVED_4[240];
+  __IO uint8_t IP[S32_NVIC_IP_COUNT];              /**< Interrupt Priority Register n, array offset: 0x300, array step: 0x1 */
+       uint8_t RESERVED_5[2693];
+  __O  uint32_t STIR;                              /**< Software Trigger Interrupt Register, offset: 0xE00 */
+} S32_NVIC_Type, *S32_NVIC_MemMapPtr;
+
+ /** Number of instances of the S32_NVIC module. */
+#define S32_NVIC_INSTANCE_COUNT                  (1u)
+
+
+/* S32_NVIC - Peripheral instance base addresses */
+/** Peripheral S32_NVIC base address */
+#define S32_NVIC_BASE                            (0xE000E100u)
+/** Peripheral S32_NVIC base pointer */
+#define S32_NVIC                                 ((S32_NVIC_Type *)S32_NVIC_BASE)
+/** Array initializer of S32_NVIC peripheral base addresses */
+#define S32_NVIC_BASE_ADDRS                      { S32_NVIC_BASE }
+/** Array initializer of S32_NVIC peripheral base pointers */
+#define S32_NVIC_BASE_PTRS                       { S32_NVIC }
+ /** Number of interrupt vector arrays for the S32_NVIC module. */
+#define S32_NVIC_IRQS_ARR_COUNT                  (1u)
+ /** Number of interrupt channels for the S32_NVIC module. */
+#define S32_NVIC_IRQS_CH_COUNT                   (1u)
+/** Interrupt vectors for the S32_NVIC peripheral type */
+#define S32_NVIC_IRQS                            { SWI_IRQn }
+
+/* ----------------------------------------------------------------------------
+   -- S32_NVIC Register Masks
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_NVIC_Register_Masks S32_NVIC Register Masks
+ * @{
+ */
+
+/* ISER Bit Fields */
+#define S32_NVIC_ISER_SETENA_MASK                0xFFFFFFFFu
+#define S32_NVIC_ISER_SETENA_SHIFT               0u
+#define S32_NVIC_ISER_SETENA_WIDTH               32u
+#define S32_NVIC_ISER_SETENA(x)                  (((uint32_t)(((uint32_t)(x))<<S32_NVIC_ISER_SETENA_SHIFT))&S32_NVIC_ISER_SETENA_MASK)
+/* ICER Bit Fields */
+#define S32_NVIC_ICER_CLRENA_MASK                0xFFFFFFFFu
+#define S32_NVIC_ICER_CLRENA_SHIFT               0u
+#define S32_NVIC_ICER_CLRENA_WIDTH               32u
+#define S32_NVIC_ICER_CLRENA(x)                  (((uint32_t)(((uint32_t)(x))<<S32_NVIC_ICER_CLRENA_SHIFT))&S32_NVIC_ICER_CLRENA_MASK)
+/* ISPR Bit Fields */
+#define S32_NVIC_ISPR_SETPEND_MASK               0xFFFFFFFFu
+#define S32_NVIC_ISPR_SETPEND_SHIFT              0u
+#define S32_NVIC_ISPR_SETPEND_WIDTH              32u
+#define S32_NVIC_ISPR_SETPEND(x)                 (((uint32_t)(((uint32_t)(x))<<S32_NVIC_ISPR_SETPEND_SHIFT))&S32_NVIC_ISPR_SETPEND_MASK)
+/* ICPR Bit Fields */
+#define S32_NVIC_ICPR_CLRPEND_MASK               0xFFFFFFFFu
+#define S32_NVIC_ICPR_CLRPEND_SHIFT              0u
+#define S32_NVIC_ICPR_CLRPEND_WIDTH              32u
+#define S32_NVIC_ICPR_CLRPEND(x)                 (((uint32_t)(((uint32_t)(x))<<S32_NVIC_ICPR_CLRPEND_SHIFT))&S32_NVIC_ICPR_CLRPEND_MASK)
+/* IABR Bit Fields */
+#define S32_NVIC_IABR_ACTIVE_MASK                0xFFFFFFFFu
+#define S32_NVIC_IABR_ACTIVE_SHIFT               0u
+#define S32_NVIC_IABR_ACTIVE_WIDTH               32u
+#define S32_NVIC_IABR_ACTIVE(x)                  (((uint32_t)(((uint32_t)(x))<<S32_NVIC_IABR_ACTIVE_SHIFT))&S32_NVIC_IABR_ACTIVE_MASK)
+/* IP Bit Fields */
+#define S32_NVIC_IP_PRI0_MASK                    0xFFu
+#define S32_NVIC_IP_PRI0_SHIFT                   0u
+#define S32_NVIC_IP_PRI0_WIDTH                   8u
+#define S32_NVIC_IP_PRI0(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI0_SHIFT))&S32_NVIC_IP_PRI0_MASK)
+#define S32_NVIC_IP_PRI1_MASK                    0xFFu
+#define S32_NVIC_IP_PRI1_SHIFT                   0u
+#define S32_NVIC_IP_PRI1_WIDTH                   8u
+#define S32_NVIC_IP_PRI1(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI1_SHIFT))&S32_NVIC_IP_PRI1_MASK)
+#define S32_NVIC_IP_PRI2_MASK                    0xFFu
+#define S32_NVIC_IP_PRI2_SHIFT                   0u
+#define S32_NVIC_IP_PRI2_WIDTH                   8u
+#define S32_NVIC_IP_PRI2(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI2_SHIFT))&S32_NVIC_IP_PRI2_MASK)
+#define S32_NVIC_IP_PRI3_MASK                    0xFFu
+#define S32_NVIC_IP_PRI3_SHIFT                   0u
+#define S32_NVIC_IP_PRI3_WIDTH                   8u
+#define S32_NVIC_IP_PRI3(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI3_SHIFT))&S32_NVIC_IP_PRI3_MASK)
+#define S32_NVIC_IP_PRI4_MASK                    0xFFu
+#define S32_NVIC_IP_PRI4_SHIFT                   0u
+#define S32_NVIC_IP_PRI4_WIDTH                   8u
+#define S32_NVIC_IP_PRI4(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI4_SHIFT))&S32_NVIC_IP_PRI4_MASK)
+#define S32_NVIC_IP_PRI5_MASK                    0xFFu
+#define S32_NVIC_IP_PRI5_SHIFT                   0u
+#define S32_NVIC_IP_PRI5_WIDTH                   8u
+#define S32_NVIC_IP_PRI5(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI5_SHIFT))&S32_NVIC_IP_PRI5_MASK)
+#define S32_NVIC_IP_PRI6_MASK                    0xFFu
+#define S32_NVIC_IP_PRI6_SHIFT                   0u
+#define S32_NVIC_IP_PRI6_WIDTH                   8u
+#define S32_NVIC_IP_PRI6(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI6_SHIFT))&S32_NVIC_IP_PRI6_MASK)
+#define S32_NVIC_IP_PRI7_MASK                    0xFFu
+#define S32_NVIC_IP_PRI7_SHIFT                   0u
+#define S32_NVIC_IP_PRI7_WIDTH                   8u
+#define S32_NVIC_IP_PRI7(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI7_SHIFT))&S32_NVIC_IP_PRI7_MASK)
+#define S32_NVIC_IP_PRI8_MASK                    0xFFu
+#define S32_NVIC_IP_PRI8_SHIFT                   0u
+#define S32_NVIC_IP_PRI8_WIDTH                   8u
+#define S32_NVIC_IP_PRI8(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI8_SHIFT))&S32_NVIC_IP_PRI8_MASK)
+#define S32_NVIC_IP_PRI9_MASK                    0xFFu
+#define S32_NVIC_IP_PRI9_SHIFT                   0u
+#define S32_NVIC_IP_PRI9_WIDTH                   8u
+#define S32_NVIC_IP_PRI9(x)                      (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI9_SHIFT))&S32_NVIC_IP_PRI9_MASK)
+#define S32_NVIC_IP_PRI10_MASK                   0xFFu
+#define S32_NVIC_IP_PRI10_SHIFT                  0u
+#define S32_NVIC_IP_PRI10_WIDTH                  8u
+#define S32_NVIC_IP_PRI10(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI10_SHIFT))&S32_NVIC_IP_PRI10_MASK)
+#define S32_NVIC_IP_PRI11_MASK                   0xFFu
+#define S32_NVIC_IP_PRI11_SHIFT                  0u
+#define S32_NVIC_IP_PRI11_WIDTH                  8u
+#define S32_NVIC_IP_PRI11(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI11_SHIFT))&S32_NVIC_IP_PRI11_MASK)
+#define S32_NVIC_IP_PRI12_MASK                   0xFFu
+#define S32_NVIC_IP_PRI12_SHIFT                  0u
+#define S32_NVIC_IP_PRI12_WIDTH                  8u
+#define S32_NVIC_IP_PRI12(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI12_SHIFT))&S32_NVIC_IP_PRI12_MASK)
+#define S32_NVIC_IP_PRI13_MASK                   0xFFu
+#define S32_NVIC_IP_PRI13_SHIFT                  0u
+#define S32_NVIC_IP_PRI13_WIDTH                  8u
+#define S32_NVIC_IP_PRI13(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI13_SHIFT))&S32_NVIC_IP_PRI13_MASK)
+#define S32_NVIC_IP_PRI14_MASK                   0xFFu
+#define S32_NVIC_IP_PRI14_SHIFT                  0u
+#define S32_NVIC_IP_PRI14_WIDTH                  8u
+#define S32_NVIC_IP_PRI14(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI14_SHIFT))&S32_NVIC_IP_PRI14_MASK)
+#define S32_NVIC_IP_PRI15_MASK                   0xFFu
+#define S32_NVIC_IP_PRI15_SHIFT                  0u
+#define S32_NVIC_IP_PRI15_WIDTH                  8u
+#define S32_NVIC_IP_PRI15(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI15_SHIFT))&S32_NVIC_IP_PRI15_MASK)
+#define S32_NVIC_IP_PRI16_MASK                   0xFFu
+#define S32_NVIC_IP_PRI16_SHIFT                  0u
+#define S32_NVIC_IP_PRI16_WIDTH                  8u
+#define S32_NVIC_IP_PRI16(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI16_SHIFT))&S32_NVIC_IP_PRI16_MASK)
+#define S32_NVIC_IP_PRI17_MASK                   0xFFu
+#define S32_NVIC_IP_PRI17_SHIFT                  0u
+#define S32_NVIC_IP_PRI17_WIDTH                  8u
+#define S32_NVIC_IP_PRI17(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI17_SHIFT))&S32_NVIC_IP_PRI17_MASK)
+#define S32_NVIC_IP_PRI18_MASK                   0xFFu
+#define S32_NVIC_IP_PRI18_SHIFT                  0u
+#define S32_NVIC_IP_PRI18_WIDTH                  8u
+#define S32_NVIC_IP_PRI18(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI18_SHIFT))&S32_NVIC_IP_PRI18_MASK)
+#define S32_NVIC_IP_PRI19_MASK                   0xFFu
+#define S32_NVIC_IP_PRI19_SHIFT                  0u
+#define S32_NVIC_IP_PRI19_WIDTH                  8u
+#define S32_NVIC_IP_PRI19(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI19_SHIFT))&S32_NVIC_IP_PRI19_MASK)
+#define S32_NVIC_IP_PRI20_MASK                   0xFFu
+#define S32_NVIC_IP_PRI20_SHIFT                  0u
+#define S32_NVIC_IP_PRI20_WIDTH                  8u
+#define S32_NVIC_IP_PRI20(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI20_SHIFT))&S32_NVIC_IP_PRI20_MASK)
+#define S32_NVIC_IP_PRI21_MASK                   0xFFu
+#define S32_NVIC_IP_PRI21_SHIFT                  0u
+#define S32_NVIC_IP_PRI21_WIDTH                  8u
+#define S32_NVIC_IP_PRI21(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI21_SHIFT))&S32_NVIC_IP_PRI21_MASK)
+#define S32_NVIC_IP_PRI22_MASK                   0xFFu
+#define S32_NVIC_IP_PRI22_SHIFT                  0u
+#define S32_NVIC_IP_PRI22_WIDTH                  8u
+#define S32_NVIC_IP_PRI22(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI22_SHIFT))&S32_NVIC_IP_PRI22_MASK)
+#define S32_NVIC_IP_PRI23_MASK                   0xFFu
+#define S32_NVIC_IP_PRI23_SHIFT                  0u
+#define S32_NVIC_IP_PRI23_WIDTH                  8u
+#define S32_NVIC_IP_PRI23(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI23_SHIFT))&S32_NVIC_IP_PRI23_MASK)
+#define S32_NVIC_IP_PRI24_MASK                   0xFFu
+#define S32_NVIC_IP_PRI24_SHIFT                  0u
+#define S32_NVIC_IP_PRI24_WIDTH                  8u
+#define S32_NVIC_IP_PRI24(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI24_SHIFT))&S32_NVIC_IP_PRI24_MASK)
+#define S32_NVIC_IP_PRI25_MASK                   0xFFu
+#define S32_NVIC_IP_PRI25_SHIFT                  0u
+#define S32_NVIC_IP_PRI25_WIDTH                  8u
+#define S32_NVIC_IP_PRI25(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI25_SHIFT))&S32_NVIC_IP_PRI25_MASK)
+#define S32_NVIC_IP_PRI26_MASK                   0xFFu
+#define S32_NVIC_IP_PRI26_SHIFT                  0u
+#define S32_NVIC_IP_PRI26_WIDTH                  8u
+#define S32_NVIC_IP_PRI26(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI26_SHIFT))&S32_NVIC_IP_PRI26_MASK)
+#define S32_NVIC_IP_PRI27_MASK                   0xFFu
+#define S32_NVIC_IP_PRI27_SHIFT                  0u
+#define S32_NVIC_IP_PRI27_WIDTH                  8u
+#define S32_NVIC_IP_PRI27(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI27_SHIFT))&S32_NVIC_IP_PRI27_MASK)
+#define S32_NVIC_IP_PRI28_MASK                   0xFFu
+#define S32_NVIC_IP_PRI28_SHIFT                  0u
+#define S32_NVIC_IP_PRI28_WIDTH                  8u
+#define S32_NVIC_IP_PRI28(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI28_SHIFT))&S32_NVIC_IP_PRI28_MASK)
+#define S32_NVIC_IP_PRI29_MASK                   0xFFu
+#define S32_NVIC_IP_PRI29_SHIFT                  0u
+#define S32_NVIC_IP_PRI29_WIDTH                  8u
+#define S32_NVIC_IP_PRI29(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI29_SHIFT))&S32_NVIC_IP_PRI29_MASK)
+#define S32_NVIC_IP_PRI30_MASK                   0xFFu
+#define S32_NVIC_IP_PRI30_SHIFT                  0u
+#define S32_NVIC_IP_PRI30_WIDTH                  8u
+#define S32_NVIC_IP_PRI30(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI30_SHIFT))&S32_NVIC_IP_PRI30_MASK)
+#define S32_NVIC_IP_PRI31_MASK                   0xFFu
+#define S32_NVIC_IP_PRI31_SHIFT                  0u
+#define S32_NVIC_IP_PRI31_WIDTH                  8u
+#define S32_NVIC_IP_PRI31(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI31_SHIFT))&S32_NVIC_IP_PRI31_MASK)
+#define S32_NVIC_IP_PRI32_MASK                   0xFFu
+#define S32_NVIC_IP_PRI32_SHIFT                  0u
+#define S32_NVIC_IP_PRI32_WIDTH                  8u
+#define S32_NVIC_IP_PRI32(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI32_SHIFT))&S32_NVIC_IP_PRI32_MASK)
+#define S32_NVIC_IP_PRI33_MASK                   0xFFu
+#define S32_NVIC_IP_PRI33_SHIFT                  0u
+#define S32_NVIC_IP_PRI33_WIDTH                  8u
+#define S32_NVIC_IP_PRI33(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI33_SHIFT))&S32_NVIC_IP_PRI33_MASK)
+#define S32_NVIC_IP_PRI34_MASK                   0xFFu
+#define S32_NVIC_IP_PRI34_SHIFT                  0u
+#define S32_NVIC_IP_PRI34_WIDTH                  8u
+#define S32_NVIC_IP_PRI34(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI34_SHIFT))&S32_NVIC_IP_PRI34_MASK)
+#define S32_NVIC_IP_PRI35_MASK                   0xFFu
+#define S32_NVIC_IP_PRI35_SHIFT                  0u
+#define S32_NVIC_IP_PRI35_WIDTH                  8u
+#define S32_NVIC_IP_PRI35(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI35_SHIFT))&S32_NVIC_IP_PRI35_MASK)
+#define S32_NVIC_IP_PRI36_MASK                   0xFFu
+#define S32_NVIC_IP_PRI36_SHIFT                  0u
+#define S32_NVIC_IP_PRI36_WIDTH                  8u
+#define S32_NVIC_IP_PRI36(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI36_SHIFT))&S32_NVIC_IP_PRI36_MASK)
+#define S32_NVIC_IP_PRI37_MASK                   0xFFu
+#define S32_NVIC_IP_PRI37_SHIFT                  0u
+#define S32_NVIC_IP_PRI37_WIDTH                  8u
+#define S32_NVIC_IP_PRI37(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI37_SHIFT))&S32_NVIC_IP_PRI37_MASK)
+#define S32_NVIC_IP_PRI38_MASK                   0xFFu
+#define S32_NVIC_IP_PRI38_SHIFT                  0u
+#define S32_NVIC_IP_PRI38_WIDTH                  8u
+#define S32_NVIC_IP_PRI38(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI38_SHIFT))&S32_NVIC_IP_PRI38_MASK)
+#define S32_NVIC_IP_PRI39_MASK                   0xFFu
+#define S32_NVIC_IP_PRI39_SHIFT                  0u
+#define S32_NVIC_IP_PRI39_WIDTH                  8u
+#define S32_NVIC_IP_PRI39(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI39_SHIFT))&S32_NVIC_IP_PRI39_MASK)
+#define S32_NVIC_IP_PRI40_MASK                   0xFFu
+#define S32_NVIC_IP_PRI40_SHIFT                  0u
+#define S32_NVIC_IP_PRI40_WIDTH                  8u
+#define S32_NVIC_IP_PRI40(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI40_SHIFT))&S32_NVIC_IP_PRI40_MASK)
+#define S32_NVIC_IP_PRI41_MASK                   0xFFu
+#define S32_NVIC_IP_PRI41_SHIFT                  0u
+#define S32_NVIC_IP_PRI41_WIDTH                  8u
+#define S32_NVIC_IP_PRI41(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI41_SHIFT))&S32_NVIC_IP_PRI41_MASK)
+#define S32_NVIC_IP_PRI42_MASK                   0xFFu
+#define S32_NVIC_IP_PRI42_SHIFT                  0u
+#define S32_NVIC_IP_PRI42_WIDTH                  8u
+#define S32_NVIC_IP_PRI42(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI42_SHIFT))&S32_NVIC_IP_PRI42_MASK)
+#define S32_NVIC_IP_PRI43_MASK                   0xFFu
+#define S32_NVIC_IP_PRI43_SHIFT                  0u
+#define S32_NVIC_IP_PRI43_WIDTH                  8u
+#define S32_NVIC_IP_PRI43(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI43_SHIFT))&S32_NVIC_IP_PRI43_MASK)
+#define S32_NVIC_IP_PRI44_MASK                   0xFFu
+#define S32_NVIC_IP_PRI44_SHIFT                  0u
+#define S32_NVIC_IP_PRI44_WIDTH                  8u
+#define S32_NVIC_IP_PRI44(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI44_SHIFT))&S32_NVIC_IP_PRI44_MASK)
+#define S32_NVIC_IP_PRI45_MASK                   0xFFu
+#define S32_NVIC_IP_PRI45_SHIFT                  0u
+#define S32_NVIC_IP_PRI45_WIDTH                  8u
+#define S32_NVIC_IP_PRI45(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI45_SHIFT))&S32_NVIC_IP_PRI45_MASK)
+#define S32_NVIC_IP_PRI46_MASK                   0xFFu
+#define S32_NVIC_IP_PRI46_SHIFT                  0u
+#define S32_NVIC_IP_PRI46_WIDTH                  8u
+#define S32_NVIC_IP_PRI46(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI46_SHIFT))&S32_NVIC_IP_PRI46_MASK)
+#define S32_NVIC_IP_PRI47_MASK                   0xFFu
+#define S32_NVIC_IP_PRI47_SHIFT                  0u
+#define S32_NVIC_IP_PRI47_WIDTH                  8u
+#define S32_NVIC_IP_PRI47(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI47_SHIFT))&S32_NVIC_IP_PRI47_MASK)
+#define S32_NVIC_IP_PRI48_MASK                   0xFFu
+#define S32_NVIC_IP_PRI48_SHIFT                  0u
+#define S32_NVIC_IP_PRI48_WIDTH                  8u
+#define S32_NVIC_IP_PRI48(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI48_SHIFT))&S32_NVIC_IP_PRI48_MASK)
+#define S32_NVIC_IP_PRI49_MASK                   0xFFu
+#define S32_NVIC_IP_PRI49_SHIFT                  0u
+#define S32_NVIC_IP_PRI49_WIDTH                  8u
+#define S32_NVIC_IP_PRI49(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI49_SHIFT))&S32_NVIC_IP_PRI49_MASK)
+#define S32_NVIC_IP_PRI50_MASK                   0xFFu
+#define S32_NVIC_IP_PRI50_SHIFT                  0u
+#define S32_NVIC_IP_PRI50_WIDTH                  8u
+#define S32_NVIC_IP_PRI50(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI50_SHIFT))&S32_NVIC_IP_PRI50_MASK)
+#define S32_NVIC_IP_PRI51_MASK                   0xFFu
+#define S32_NVIC_IP_PRI51_SHIFT                  0u
+#define S32_NVIC_IP_PRI51_WIDTH                  8u
+#define S32_NVIC_IP_PRI51(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI51_SHIFT))&S32_NVIC_IP_PRI51_MASK)
+#define S32_NVIC_IP_PRI52_MASK                   0xFFu
+#define S32_NVIC_IP_PRI52_SHIFT                  0u
+#define S32_NVIC_IP_PRI52_WIDTH                  8u
+#define S32_NVIC_IP_PRI52(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI52_SHIFT))&S32_NVIC_IP_PRI52_MASK)
+#define S32_NVIC_IP_PRI53_MASK                   0xFFu
+#define S32_NVIC_IP_PRI53_SHIFT                  0u
+#define S32_NVIC_IP_PRI53_WIDTH                  8u
+#define S32_NVIC_IP_PRI53(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI53_SHIFT))&S32_NVIC_IP_PRI53_MASK)
+#define S32_NVIC_IP_PRI54_MASK                   0xFFu
+#define S32_NVIC_IP_PRI54_SHIFT                  0u
+#define S32_NVIC_IP_PRI54_WIDTH                  8u
+#define S32_NVIC_IP_PRI54(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI54_SHIFT))&S32_NVIC_IP_PRI54_MASK)
+#define S32_NVIC_IP_PRI55_MASK                   0xFFu
+#define S32_NVIC_IP_PRI55_SHIFT                  0u
+#define S32_NVIC_IP_PRI55_WIDTH                  8u
+#define S32_NVIC_IP_PRI55(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI55_SHIFT))&S32_NVIC_IP_PRI55_MASK)
+#define S32_NVIC_IP_PRI56_MASK                   0xFFu
+#define S32_NVIC_IP_PRI56_SHIFT                  0u
+#define S32_NVIC_IP_PRI56_WIDTH                  8u
+#define S32_NVIC_IP_PRI56(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI56_SHIFT))&S32_NVIC_IP_PRI56_MASK)
+#define S32_NVIC_IP_PRI57_MASK                   0xFFu
+#define S32_NVIC_IP_PRI57_SHIFT                  0u
+#define S32_NVIC_IP_PRI57_WIDTH                  8u
+#define S32_NVIC_IP_PRI57(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI57_SHIFT))&S32_NVIC_IP_PRI57_MASK)
+#define S32_NVIC_IP_PRI58_MASK                   0xFFu
+#define S32_NVIC_IP_PRI58_SHIFT                  0u
+#define S32_NVIC_IP_PRI58_WIDTH                  8u
+#define S32_NVIC_IP_PRI58(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI58_SHIFT))&S32_NVIC_IP_PRI58_MASK)
+#define S32_NVIC_IP_PRI59_MASK                   0xFFu
+#define S32_NVIC_IP_PRI59_SHIFT                  0u
+#define S32_NVIC_IP_PRI59_WIDTH                  8u
+#define S32_NVIC_IP_PRI59(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI59_SHIFT))&S32_NVIC_IP_PRI59_MASK)
+#define S32_NVIC_IP_PRI60_MASK                   0xFFu
+#define S32_NVIC_IP_PRI60_SHIFT                  0u
+#define S32_NVIC_IP_PRI60_WIDTH                  8u
+#define S32_NVIC_IP_PRI60(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI60_SHIFT))&S32_NVIC_IP_PRI60_MASK)
+#define S32_NVIC_IP_PRI61_MASK                   0xFFu
+#define S32_NVIC_IP_PRI61_SHIFT                  0u
+#define S32_NVIC_IP_PRI61_WIDTH                  8u
+#define S32_NVIC_IP_PRI61(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI61_SHIFT))&S32_NVIC_IP_PRI61_MASK)
+#define S32_NVIC_IP_PRI62_MASK                   0xFFu
+#define S32_NVIC_IP_PRI62_SHIFT                  0u
+#define S32_NVIC_IP_PRI62_WIDTH                  8u
+#define S32_NVIC_IP_PRI62(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI62_SHIFT))&S32_NVIC_IP_PRI62_MASK)
+#define S32_NVIC_IP_PRI63_MASK                   0xFFu
+#define S32_NVIC_IP_PRI63_SHIFT                  0u
+#define S32_NVIC_IP_PRI63_WIDTH                  8u
+#define S32_NVIC_IP_PRI63(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI63_SHIFT))&S32_NVIC_IP_PRI63_MASK)
+#define S32_NVIC_IP_PRI64_MASK                   0xFFu
+#define S32_NVIC_IP_PRI64_SHIFT                  0u
+#define S32_NVIC_IP_PRI64_WIDTH                  8u
+#define S32_NVIC_IP_PRI64(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI64_SHIFT))&S32_NVIC_IP_PRI64_MASK)
+#define S32_NVIC_IP_PRI65_MASK                   0xFFu
+#define S32_NVIC_IP_PRI65_SHIFT                  0u
+#define S32_NVIC_IP_PRI65_WIDTH                  8u
+#define S32_NVIC_IP_PRI65(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI65_SHIFT))&S32_NVIC_IP_PRI65_MASK)
+#define S32_NVIC_IP_PRI66_MASK                   0xFFu
+#define S32_NVIC_IP_PRI66_SHIFT                  0u
+#define S32_NVIC_IP_PRI66_WIDTH                  8u
+#define S32_NVIC_IP_PRI66(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI66_SHIFT))&S32_NVIC_IP_PRI66_MASK)
+#define S32_NVIC_IP_PRI67_MASK                   0xFFu
+#define S32_NVIC_IP_PRI67_SHIFT                  0u
+#define S32_NVIC_IP_PRI67_WIDTH                  8u
+#define S32_NVIC_IP_PRI67(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI67_SHIFT))&S32_NVIC_IP_PRI67_MASK)
+#define S32_NVIC_IP_PRI68_MASK                   0xFFu
+#define S32_NVIC_IP_PRI68_SHIFT                  0u
+#define S32_NVIC_IP_PRI68_WIDTH                  8u
+#define S32_NVIC_IP_PRI68(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI68_SHIFT))&S32_NVIC_IP_PRI68_MASK)
+#define S32_NVIC_IP_PRI69_MASK                   0xFFu
+#define S32_NVIC_IP_PRI69_SHIFT                  0u
+#define S32_NVIC_IP_PRI69_WIDTH                  8u
+#define S32_NVIC_IP_PRI69(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI69_SHIFT))&S32_NVIC_IP_PRI69_MASK)
+#define S32_NVIC_IP_PRI70_MASK                   0xFFu
+#define S32_NVIC_IP_PRI70_SHIFT                  0u
+#define S32_NVIC_IP_PRI70_WIDTH                  8u
+#define S32_NVIC_IP_PRI70(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI70_SHIFT))&S32_NVIC_IP_PRI70_MASK)
+#define S32_NVIC_IP_PRI71_MASK                   0xFFu
+#define S32_NVIC_IP_PRI71_SHIFT                  0u
+#define S32_NVIC_IP_PRI71_WIDTH                  8u
+#define S32_NVIC_IP_PRI71(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI71_SHIFT))&S32_NVIC_IP_PRI71_MASK)
+#define S32_NVIC_IP_PRI72_MASK                   0xFFu
+#define S32_NVIC_IP_PRI72_SHIFT                  0u
+#define S32_NVIC_IP_PRI72_WIDTH                  8u
+#define S32_NVIC_IP_PRI72(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI72_SHIFT))&S32_NVIC_IP_PRI72_MASK)
+#define S32_NVIC_IP_PRI73_MASK                   0xFFu
+#define S32_NVIC_IP_PRI73_SHIFT                  0u
+#define S32_NVIC_IP_PRI73_WIDTH                  8u
+#define S32_NVIC_IP_PRI73(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI73_SHIFT))&S32_NVIC_IP_PRI73_MASK)
+#define S32_NVIC_IP_PRI74_MASK                   0xFFu
+#define S32_NVIC_IP_PRI74_SHIFT                  0u
+#define S32_NVIC_IP_PRI74_WIDTH                  8u
+#define S32_NVIC_IP_PRI74(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI74_SHIFT))&S32_NVIC_IP_PRI74_MASK)
+#define S32_NVIC_IP_PRI75_MASK                   0xFFu
+#define S32_NVIC_IP_PRI75_SHIFT                  0u
+#define S32_NVIC_IP_PRI75_WIDTH                  8u
+#define S32_NVIC_IP_PRI75(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI75_SHIFT))&S32_NVIC_IP_PRI75_MASK)
+#define S32_NVIC_IP_PRI76_MASK                   0xFFu
+#define S32_NVIC_IP_PRI76_SHIFT                  0u
+#define S32_NVIC_IP_PRI76_WIDTH                  8u
+#define S32_NVIC_IP_PRI76(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI76_SHIFT))&S32_NVIC_IP_PRI76_MASK)
+#define S32_NVIC_IP_PRI77_MASK                   0xFFu
+#define S32_NVIC_IP_PRI77_SHIFT                  0u
+#define S32_NVIC_IP_PRI77_WIDTH                  8u
+#define S32_NVIC_IP_PRI77(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI77_SHIFT))&S32_NVIC_IP_PRI77_MASK)
+#define S32_NVIC_IP_PRI78_MASK                   0xFFu
+#define S32_NVIC_IP_PRI78_SHIFT                  0u
+#define S32_NVIC_IP_PRI78_WIDTH                  8u
+#define S32_NVIC_IP_PRI78(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI78_SHIFT))&S32_NVIC_IP_PRI78_MASK)
+#define S32_NVIC_IP_PRI79_MASK                   0xFFu
+#define S32_NVIC_IP_PRI79_SHIFT                  0u
+#define S32_NVIC_IP_PRI79_WIDTH                  8u
+#define S32_NVIC_IP_PRI79(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI79_SHIFT))&S32_NVIC_IP_PRI79_MASK)
+#define S32_NVIC_IP_PRI80_MASK                   0xFFu
+#define S32_NVIC_IP_PRI80_SHIFT                  0u
+#define S32_NVIC_IP_PRI80_WIDTH                  8u
+#define S32_NVIC_IP_PRI80(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI80_SHIFT))&S32_NVIC_IP_PRI80_MASK)
+#define S32_NVIC_IP_PRI81_MASK                   0xFFu
+#define S32_NVIC_IP_PRI81_SHIFT                  0u
+#define S32_NVIC_IP_PRI81_WIDTH                  8u
+#define S32_NVIC_IP_PRI81(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI81_SHIFT))&S32_NVIC_IP_PRI81_MASK)
+#define S32_NVIC_IP_PRI82_MASK                   0xFFu
+#define S32_NVIC_IP_PRI82_SHIFT                  0u
+#define S32_NVIC_IP_PRI82_WIDTH                  8u
+#define S32_NVIC_IP_PRI82(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI82_SHIFT))&S32_NVIC_IP_PRI82_MASK)
+#define S32_NVIC_IP_PRI83_MASK                   0xFFu
+#define S32_NVIC_IP_PRI83_SHIFT                  0u
+#define S32_NVIC_IP_PRI83_WIDTH                  8u
+#define S32_NVIC_IP_PRI83(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI83_SHIFT))&S32_NVIC_IP_PRI83_MASK)
+#define S32_NVIC_IP_PRI84_MASK                   0xFFu
+#define S32_NVIC_IP_PRI84_SHIFT                  0u
+#define S32_NVIC_IP_PRI84_WIDTH                  8u
+#define S32_NVIC_IP_PRI84(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI84_SHIFT))&S32_NVIC_IP_PRI84_MASK)
+#define S32_NVIC_IP_PRI85_MASK                   0xFFu
+#define S32_NVIC_IP_PRI85_SHIFT                  0u
+#define S32_NVIC_IP_PRI85_WIDTH                  8u
+#define S32_NVIC_IP_PRI85(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI85_SHIFT))&S32_NVIC_IP_PRI85_MASK)
+#define S32_NVIC_IP_PRI86_MASK                   0xFFu
+#define S32_NVIC_IP_PRI86_SHIFT                  0u
+#define S32_NVIC_IP_PRI86_WIDTH                  8u
+#define S32_NVIC_IP_PRI86(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI86_SHIFT))&S32_NVIC_IP_PRI86_MASK)
+#define S32_NVIC_IP_PRI87_MASK                   0xFFu
+#define S32_NVIC_IP_PRI87_SHIFT                  0u
+#define S32_NVIC_IP_PRI87_WIDTH                  8u
+#define S32_NVIC_IP_PRI87(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI87_SHIFT))&S32_NVIC_IP_PRI87_MASK)
+#define S32_NVIC_IP_PRI88_MASK                   0xFFu
+#define S32_NVIC_IP_PRI88_SHIFT                  0u
+#define S32_NVIC_IP_PRI88_WIDTH                  8u
+#define S32_NVIC_IP_PRI88(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI88_SHIFT))&S32_NVIC_IP_PRI88_MASK)
+#define S32_NVIC_IP_PRI89_MASK                   0xFFu
+#define S32_NVIC_IP_PRI89_SHIFT                  0u
+#define S32_NVIC_IP_PRI89_WIDTH                  8u
+#define S32_NVIC_IP_PRI89(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI89_SHIFT))&S32_NVIC_IP_PRI89_MASK)
+#define S32_NVIC_IP_PRI90_MASK                   0xFFu
+#define S32_NVIC_IP_PRI90_SHIFT                  0u
+#define S32_NVIC_IP_PRI90_WIDTH                  8u
+#define S32_NVIC_IP_PRI90(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI90_SHIFT))&S32_NVIC_IP_PRI90_MASK)
+#define S32_NVIC_IP_PRI91_MASK                   0xFFu
+#define S32_NVIC_IP_PRI91_SHIFT                  0u
+#define S32_NVIC_IP_PRI91_WIDTH                  8u
+#define S32_NVIC_IP_PRI91(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI91_SHIFT))&S32_NVIC_IP_PRI91_MASK)
+#define S32_NVIC_IP_PRI92_MASK                   0xFFu
+#define S32_NVIC_IP_PRI92_SHIFT                  0u
+#define S32_NVIC_IP_PRI92_WIDTH                  8u
+#define S32_NVIC_IP_PRI92(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI92_SHIFT))&S32_NVIC_IP_PRI92_MASK)
+#define S32_NVIC_IP_PRI93_MASK                   0xFFu
+#define S32_NVIC_IP_PRI93_SHIFT                  0u
+#define S32_NVIC_IP_PRI93_WIDTH                  8u
+#define S32_NVIC_IP_PRI93(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI93_SHIFT))&S32_NVIC_IP_PRI93_MASK)
+#define S32_NVIC_IP_PRI94_MASK                   0xFFu
+#define S32_NVIC_IP_PRI94_SHIFT                  0u
+#define S32_NVIC_IP_PRI94_WIDTH                  8u
+#define S32_NVIC_IP_PRI94(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI94_SHIFT))&S32_NVIC_IP_PRI94_MASK)
+#define S32_NVIC_IP_PRI95_MASK                   0xFFu
+#define S32_NVIC_IP_PRI95_SHIFT                  0u
+#define S32_NVIC_IP_PRI95_WIDTH                  8u
+#define S32_NVIC_IP_PRI95(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI95_SHIFT))&S32_NVIC_IP_PRI95_MASK)
+#define S32_NVIC_IP_PRI96_MASK                   0xFFu
+#define S32_NVIC_IP_PRI96_SHIFT                  0u
+#define S32_NVIC_IP_PRI96_WIDTH                  8u
+#define S32_NVIC_IP_PRI96(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI96_SHIFT))&S32_NVIC_IP_PRI96_MASK)
+#define S32_NVIC_IP_PRI97_MASK                   0xFFu
+#define S32_NVIC_IP_PRI97_SHIFT                  0u
+#define S32_NVIC_IP_PRI97_WIDTH                  8u
+#define S32_NVIC_IP_PRI97(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI97_SHIFT))&S32_NVIC_IP_PRI97_MASK)
+#define S32_NVIC_IP_PRI98_MASK                   0xFFu
+#define S32_NVIC_IP_PRI98_SHIFT                  0u
+#define S32_NVIC_IP_PRI98_WIDTH                  8u
+#define S32_NVIC_IP_PRI98(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI98_SHIFT))&S32_NVIC_IP_PRI98_MASK)
+#define S32_NVIC_IP_PRI99_MASK                   0xFFu
+#define S32_NVIC_IP_PRI99_SHIFT                  0u
+#define S32_NVIC_IP_PRI99_WIDTH                  8u
+#define S32_NVIC_IP_PRI99(x)                     (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI99_SHIFT))&S32_NVIC_IP_PRI99_MASK)
+#define S32_NVIC_IP_PRI100_MASK                  0xFFu
+#define S32_NVIC_IP_PRI100_SHIFT                 0u
+#define S32_NVIC_IP_PRI100_WIDTH                 8u
+#define S32_NVIC_IP_PRI100(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI100_SHIFT))&S32_NVIC_IP_PRI100_MASK)
+#define S32_NVIC_IP_PRI101_MASK                  0xFFu
+#define S32_NVIC_IP_PRI101_SHIFT                 0u
+#define S32_NVIC_IP_PRI101_WIDTH                 8u
+#define S32_NVIC_IP_PRI101(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI101_SHIFT))&S32_NVIC_IP_PRI101_MASK)
+#define S32_NVIC_IP_PRI102_MASK                  0xFFu
+#define S32_NVIC_IP_PRI102_SHIFT                 0u
+#define S32_NVIC_IP_PRI102_WIDTH                 8u
+#define S32_NVIC_IP_PRI102(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI102_SHIFT))&S32_NVIC_IP_PRI102_MASK)
+#define S32_NVIC_IP_PRI103_MASK                  0xFFu
+#define S32_NVIC_IP_PRI103_SHIFT                 0u
+#define S32_NVIC_IP_PRI103_WIDTH                 8u
+#define S32_NVIC_IP_PRI103(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI103_SHIFT))&S32_NVIC_IP_PRI103_MASK)
+#define S32_NVIC_IP_PRI104_MASK                  0xFFu
+#define S32_NVIC_IP_PRI104_SHIFT                 0u
+#define S32_NVIC_IP_PRI104_WIDTH                 8u
+#define S32_NVIC_IP_PRI104(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI104_SHIFT))&S32_NVIC_IP_PRI104_MASK)
+#define S32_NVIC_IP_PRI105_MASK                  0xFFu
+#define S32_NVIC_IP_PRI105_SHIFT                 0u
+#define S32_NVIC_IP_PRI105_WIDTH                 8u
+#define S32_NVIC_IP_PRI105(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI105_SHIFT))&S32_NVIC_IP_PRI105_MASK)
+#define S32_NVIC_IP_PRI106_MASK                  0xFFu
+#define S32_NVIC_IP_PRI106_SHIFT                 0u
+#define S32_NVIC_IP_PRI106_WIDTH                 8u
+#define S32_NVIC_IP_PRI106(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI106_SHIFT))&S32_NVIC_IP_PRI106_MASK)
+#define S32_NVIC_IP_PRI107_MASK                  0xFFu
+#define S32_NVIC_IP_PRI107_SHIFT                 0u
+#define S32_NVIC_IP_PRI107_WIDTH                 8u
+#define S32_NVIC_IP_PRI107(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI107_SHIFT))&S32_NVIC_IP_PRI107_MASK)
+#define S32_NVIC_IP_PRI108_MASK                  0xFFu
+#define S32_NVIC_IP_PRI108_SHIFT                 0u
+#define S32_NVIC_IP_PRI108_WIDTH                 8u
+#define S32_NVIC_IP_PRI108(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI108_SHIFT))&S32_NVIC_IP_PRI108_MASK)
+#define S32_NVIC_IP_PRI109_MASK                  0xFFu
+#define S32_NVIC_IP_PRI109_SHIFT                 0u
+#define S32_NVIC_IP_PRI109_WIDTH                 8u
+#define S32_NVIC_IP_PRI109(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI109_SHIFT))&S32_NVIC_IP_PRI109_MASK)
+#define S32_NVIC_IP_PRI110_MASK                  0xFFu
+#define S32_NVIC_IP_PRI110_SHIFT                 0u
+#define S32_NVIC_IP_PRI110_WIDTH                 8u
+#define S32_NVIC_IP_PRI110(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI110_SHIFT))&S32_NVIC_IP_PRI110_MASK)
+#define S32_NVIC_IP_PRI111_MASK                  0xFFu
+#define S32_NVIC_IP_PRI111_SHIFT                 0u
+#define S32_NVIC_IP_PRI111_WIDTH                 8u
+#define S32_NVIC_IP_PRI111(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI111_SHIFT))&S32_NVIC_IP_PRI111_MASK)
+#define S32_NVIC_IP_PRI112_MASK                  0xFFu
+#define S32_NVIC_IP_PRI112_SHIFT                 0u
+#define S32_NVIC_IP_PRI112_WIDTH                 8u
+#define S32_NVIC_IP_PRI112(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI112_SHIFT))&S32_NVIC_IP_PRI112_MASK)
+#define S32_NVIC_IP_PRI113_MASK                  0xFFu
+#define S32_NVIC_IP_PRI113_SHIFT                 0u
+#define S32_NVIC_IP_PRI113_WIDTH                 8u
+#define S32_NVIC_IP_PRI113(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI113_SHIFT))&S32_NVIC_IP_PRI113_MASK)
+#define S32_NVIC_IP_PRI114_MASK                  0xFFu
+#define S32_NVIC_IP_PRI114_SHIFT                 0u
+#define S32_NVIC_IP_PRI114_WIDTH                 8u
+#define S32_NVIC_IP_PRI114(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI114_SHIFT))&S32_NVIC_IP_PRI114_MASK)
+#define S32_NVIC_IP_PRI115_MASK                  0xFFu
+#define S32_NVIC_IP_PRI115_SHIFT                 0u
+#define S32_NVIC_IP_PRI115_WIDTH                 8u
+#define S32_NVIC_IP_PRI115(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI115_SHIFT))&S32_NVIC_IP_PRI115_MASK)
+#define S32_NVIC_IP_PRI116_MASK                  0xFFu
+#define S32_NVIC_IP_PRI116_SHIFT                 0u
+#define S32_NVIC_IP_PRI116_WIDTH                 8u
+#define S32_NVIC_IP_PRI116(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI116_SHIFT))&S32_NVIC_IP_PRI116_MASK)
+#define S32_NVIC_IP_PRI117_MASK                  0xFFu
+#define S32_NVIC_IP_PRI117_SHIFT                 0u
+#define S32_NVIC_IP_PRI117_WIDTH                 8u
+#define S32_NVIC_IP_PRI117(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI117_SHIFT))&S32_NVIC_IP_PRI117_MASK)
+#define S32_NVIC_IP_PRI118_MASK                  0xFFu
+#define S32_NVIC_IP_PRI118_SHIFT                 0u
+#define S32_NVIC_IP_PRI118_WIDTH                 8u
+#define S32_NVIC_IP_PRI118(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI118_SHIFT))&S32_NVIC_IP_PRI118_MASK)
+#define S32_NVIC_IP_PRI119_MASK                  0xFFu
+#define S32_NVIC_IP_PRI119_SHIFT                 0u
+#define S32_NVIC_IP_PRI119_WIDTH                 8u
+#define S32_NVIC_IP_PRI119(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI119_SHIFT))&S32_NVIC_IP_PRI119_MASK)
+#define S32_NVIC_IP_PRI120_MASK                  0xFFu
+#define S32_NVIC_IP_PRI120_SHIFT                 0u
+#define S32_NVIC_IP_PRI120_WIDTH                 8u
+#define S32_NVIC_IP_PRI120(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI120_SHIFT))&S32_NVIC_IP_PRI120_MASK)
+#define S32_NVIC_IP_PRI121_MASK                  0xFFu
+#define S32_NVIC_IP_PRI121_SHIFT                 0u
+#define S32_NVIC_IP_PRI121_WIDTH                 8u
+#define S32_NVIC_IP_PRI121(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI121_SHIFT))&S32_NVIC_IP_PRI121_MASK)
+#define S32_NVIC_IP_PRI122_MASK                  0xFFu
+#define S32_NVIC_IP_PRI122_SHIFT                 0u
+#define S32_NVIC_IP_PRI122_WIDTH                 8u
+#define S32_NVIC_IP_PRI122(x)                    (((uint8_t)(((uint8_t)(x))<<S32_NVIC_IP_PRI122_SHIFT))&S32_NVIC_IP_PRI122_MASK)
+/* STIR Bit Fields */
+#define S32_NVIC_STIR_INTID_MASK                 0x1FFu
+#define S32_NVIC_STIR_INTID_SHIFT                0u
+#define S32_NVIC_STIR_INTID_WIDTH                9u
+#define S32_NVIC_STIR_INTID(x)                   (((uint32_t)(((uint32_t)(x))<<S32_NVIC_STIR_INTID_SHIFT))&S32_NVIC_STIR_INTID_MASK)
+
+/*!
+ * @}
+ */ /* end of group S32_NVIC_Register_Masks */
+
+
+/*!
+ * @}
+ */ /* end of group S32_NVIC_Peripheral_Access_Layer */
+
+
+/* ----------------------------------------------------------------------------
+   -- S32_SCB Peripheral Access Layer
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_SCB_Peripheral_Access_Layer S32_SCB Peripheral Access Layer
+ * @{
+ */
+
+
+/** S32_SCB - Size of Registers Arrays */
+
+/** S32_SCB - Register Layout Typedef */
+typedef struct {
+       uint8_t RESERVED_0[8];
+  __IO uint32_t ACTLR;                             /**< Auxiliary Control Register,, offset: 0x8 */
+       uint8_t RESERVED_1[3316];
+  __I  uint32_t CPUID;                             /**< CPUID Base Register, offset: 0xD00 */
+  __IO uint32_t ICSR;                              /**< Interrupt Control and State Register, offset: 0xD04 */
+  __IO uint32_t VTOR;                              /**< Vector Table Offset Register, offset: 0xD08 */
+  __IO uint32_t AIRCR;                             /**< Application Interrupt and Reset Control Register, offset: 0xD0C */
+  __IO uint32_t SCR;                               /**< System Control Register, offset: 0xD10 */
+  __IO uint32_t CCR;                               /**< Configuration and Control Register, offset: 0xD14 */
+  __IO uint32_t SHPR1;                             /**< System Handler Priority Register 1, offset: 0xD18 */
+  __IO uint32_t SHPR2;                             /**< System Handler Priority Register 2, offset: 0xD1C */
+  __IO uint32_t SHPR3;                             /**< System Handler Priority Register 3, offset: 0xD20 */
+  __IO uint32_t SHCSR;                             /**< System Handler Control and State Register, offset: 0xD24 */
+  __IO uint32_t CFSR;                              /**< Configurable Fault Status Registers, offset: 0xD28 */
+  __IO uint32_t HFSR;                              /**< HardFault Status register, offset: 0xD2C */
+  __IO uint32_t DFSR;                              /**< Debug Fault Status Register, offset: 0xD30 */
+  __IO uint32_t MMFAR;                             /**< MemManage Address Register, offset: 0xD34 */
+  __IO uint32_t BFAR;                              /**< BusFault Address Register, offset: 0xD38 */
+  __IO uint32_t AFSR;                              /**< Auxiliary Fault Status Register, offset: 0xD3C */
+       uint8_t RESERVED_2[72];
+  __IO uint32_t CPACR;                             /**< Coprocessor Access Control Register, offset: 0xD88 */
+       uint8_t RESERVED_3[424];
+  __IO uint32_t FPCCR;                             /**< Floating-point Context Control Register, offset: 0xF34 */
+  __IO uint32_t FPCAR;                             /**< Floating-point Context Address Register, offset: 0xF38 */
+  __IO uint32_t FPDSCR;                            /**< Floating-point Default Status Control Register, offset: 0xF3C */
+} S32_SCB_Type, *S32_SCB_MemMapPtr;
+
+ /** Number of instances of the S32_SCB module. */
+#define S32_SCB_INSTANCE_COUNT                   (1u)
+
+
+/* S32_SCB - Peripheral instance base addresses */
+/** Peripheral S32_SCB base address */
+#define S32_SCB_BASE                             (0xE000E000u)
+/** Peripheral S32_SCB base pointer */
+#define S32_SCB                                  ((S32_SCB_Type *)S32_SCB_BASE)
+/** Array initializer of S32_SCB peripheral base addresses */
+#define S32_SCB_BASE_ADDRS                       { S32_SCB_BASE }
+/** Array initializer of S32_SCB peripheral base pointers */
+#define S32_SCB_BASE_PTRS                        { S32_SCB }
+
+/* ----------------------------------------------------------------------------
+   -- S32_SCB Register Masks
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_SCB_Register_Masks S32_SCB Register Masks
+ * @{
+ */
+
+/* ACTLR Bit Fields */
+#define S32_SCB_ACTLR_DISMCYCINT_MASK            0x1u
+#define S32_SCB_ACTLR_DISMCYCINT_SHIFT           0u
+#define S32_SCB_ACTLR_DISMCYCINT_WIDTH           1u
+#define S32_SCB_ACTLR_DISMCYCINT(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_ACTLR_DISMCYCINT_SHIFT))&S32_SCB_ACTLR_DISMCYCINT_MASK)
+#define S32_SCB_ACTLR_DISDEFWBUF_MASK            0x2u
+#define S32_SCB_ACTLR_DISDEFWBUF_SHIFT           1u
+#define S32_SCB_ACTLR_DISDEFWBUF_WIDTH           1u
+#define S32_SCB_ACTLR_DISDEFWBUF(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_ACTLR_DISDEFWBUF_SHIFT))&S32_SCB_ACTLR_DISDEFWBUF_MASK)
+#define S32_SCB_ACTLR_DISFOLD_MASK               0x4u
+#define S32_SCB_ACTLR_DISFOLD_SHIFT              2u
+#define S32_SCB_ACTLR_DISFOLD_WIDTH              1u
+#define S32_SCB_ACTLR_DISFOLD(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_ACTLR_DISFOLD_SHIFT))&S32_SCB_ACTLR_DISFOLD_MASK)
+#define S32_SCB_ACTLR_DISFPCA_MASK               0x100u
+#define S32_SCB_ACTLR_DISFPCA_SHIFT              8u
+#define S32_SCB_ACTLR_DISFPCA_WIDTH              1u
+#define S32_SCB_ACTLR_DISFPCA(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_ACTLR_DISFPCA_SHIFT))&S32_SCB_ACTLR_DISFPCA_MASK)
+#define S32_SCB_ACTLR_DISOOFP_MASK               0x200u
+#define S32_SCB_ACTLR_DISOOFP_SHIFT              9u
+#define S32_SCB_ACTLR_DISOOFP_WIDTH              1u
+#define S32_SCB_ACTLR_DISOOFP(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_ACTLR_DISOOFP_SHIFT))&S32_SCB_ACTLR_DISOOFP_MASK)
+/* CPUID Bit Fields */
+#define S32_SCB_CPUID_REVISION_MASK              0xFu
+#define S32_SCB_CPUID_REVISION_SHIFT             0u
+#define S32_SCB_CPUID_REVISION_WIDTH             4u
+#define S32_SCB_CPUID_REVISION(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPUID_REVISION_SHIFT))&S32_SCB_CPUID_REVISION_MASK)
+#define S32_SCB_CPUID_PARTNO_MASK                0xFFF0u
+#define S32_SCB_CPUID_PARTNO_SHIFT               4u
+#define S32_SCB_CPUID_PARTNO_WIDTH               12u
+#define S32_SCB_CPUID_PARTNO(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPUID_PARTNO_SHIFT))&S32_SCB_CPUID_PARTNO_MASK)
+#define S32_SCB_CPUID_VARIANT_MASK               0xF00000u
+#define S32_SCB_CPUID_VARIANT_SHIFT              20u
+#define S32_SCB_CPUID_VARIANT_WIDTH              4u
+#define S32_SCB_CPUID_VARIANT(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPUID_VARIANT_SHIFT))&S32_SCB_CPUID_VARIANT_MASK)
+#define S32_SCB_CPUID_IMPLEMENTER_MASK           0xFF000000u
+#define S32_SCB_CPUID_IMPLEMENTER_SHIFT          24u
+#define S32_SCB_CPUID_IMPLEMENTER_WIDTH          8u
+#define S32_SCB_CPUID_IMPLEMENTER(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPUID_IMPLEMENTER_SHIFT))&S32_SCB_CPUID_IMPLEMENTER_MASK)
+/* ICSR Bit Fields */
+#define S32_SCB_ICSR_VECTACTIVE_MASK             0x1FFu
+#define S32_SCB_ICSR_VECTACTIVE_SHIFT            0u
+#define S32_SCB_ICSR_VECTACTIVE_WIDTH            9u
+#define S32_SCB_ICSR_VECTACTIVE(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_VECTACTIVE_SHIFT))&S32_SCB_ICSR_VECTACTIVE_MASK)
+#define S32_SCB_ICSR_RETTOBASE_MASK              0x800u
+#define S32_SCB_ICSR_RETTOBASE_SHIFT             11u
+#define S32_SCB_ICSR_RETTOBASE_WIDTH             1u
+#define S32_SCB_ICSR_RETTOBASE(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_RETTOBASE_SHIFT))&S32_SCB_ICSR_RETTOBASE_MASK)
+#define S32_SCB_ICSR_VECTPENDING_MASK            0x3F000u
+#define S32_SCB_ICSR_VECTPENDING_SHIFT           12u
+#define S32_SCB_ICSR_VECTPENDING_WIDTH           6u
+#define S32_SCB_ICSR_VECTPENDING(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_VECTPENDING_SHIFT))&S32_SCB_ICSR_VECTPENDING_MASK)
+#define S32_SCB_ICSR_ISRPENDING_MASK             0x400000u
+#define S32_SCB_ICSR_ISRPENDING_SHIFT            22u
+#define S32_SCB_ICSR_ISRPENDING_WIDTH            1u
+#define S32_SCB_ICSR_ISRPENDING(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_ISRPENDING_SHIFT))&S32_SCB_ICSR_ISRPENDING_MASK)
+#define S32_SCB_ICSR_ISRPREEMPT_MASK             0x800000u
+#define S32_SCB_ICSR_ISRPREEMPT_SHIFT            23u
+#define S32_SCB_ICSR_ISRPREEMPT_WIDTH            1u
+#define S32_SCB_ICSR_ISRPREEMPT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_ISRPREEMPT_SHIFT))&S32_SCB_ICSR_ISRPREEMPT_MASK)
+#define S32_SCB_ICSR_PENDSTCLR_MASK              0x2000000u
+#define S32_SCB_ICSR_PENDSTCLR_SHIFT             25u
+#define S32_SCB_ICSR_PENDSTCLR_WIDTH             1u
+#define S32_SCB_ICSR_PENDSTCLR(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_PENDSTCLR_SHIFT))&S32_SCB_ICSR_PENDSTCLR_MASK)
+#define S32_SCB_ICSR_PENDSTSET_MASK              0x4000000u
+#define S32_SCB_ICSR_PENDSTSET_SHIFT             26u
+#define S32_SCB_ICSR_PENDSTSET_WIDTH             1u
+#define S32_SCB_ICSR_PENDSTSET(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_PENDSTSET_SHIFT))&S32_SCB_ICSR_PENDSTSET_MASK)
+#define S32_SCB_ICSR_PENDSVCLR_MASK              0x8000000u
+#define S32_SCB_ICSR_PENDSVCLR_SHIFT             27u
+#define S32_SCB_ICSR_PENDSVCLR_WIDTH             1u
+#define S32_SCB_ICSR_PENDSVCLR(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_PENDSVCLR_SHIFT))&S32_SCB_ICSR_PENDSVCLR_MASK)
+#define S32_SCB_ICSR_PENDSVSET_MASK              0x10000000u
+#define S32_SCB_ICSR_PENDSVSET_SHIFT             28u
+#define S32_SCB_ICSR_PENDSVSET_WIDTH             1u
+#define S32_SCB_ICSR_PENDSVSET(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_PENDSVSET_SHIFT))&S32_SCB_ICSR_PENDSVSET_MASK)
+#define S32_SCB_ICSR_NMIPENDSET_MASK             0x80000000u
+#define S32_SCB_ICSR_NMIPENDSET_SHIFT            31u
+#define S32_SCB_ICSR_NMIPENDSET_WIDTH            1u
+#define S32_SCB_ICSR_NMIPENDSET(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_ICSR_NMIPENDSET_SHIFT))&S32_SCB_ICSR_NMIPENDSET_MASK)
+/* VTOR Bit Fields */
+#define S32_SCB_VTOR_TBLOFF_MASK                 0xFFFFFF80u
+#define S32_SCB_VTOR_TBLOFF_SHIFT                7u
+#define S32_SCB_VTOR_TBLOFF_WIDTH                25u
+#define S32_SCB_VTOR_TBLOFF(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_VTOR_TBLOFF_SHIFT))&S32_SCB_VTOR_TBLOFF_MASK)
+/* AIRCR Bit Fields */
+#define S32_SCB_AIRCR_VECTRESET_MASK             0x1u
+#define S32_SCB_AIRCR_VECTRESET_SHIFT            0u
+#define S32_SCB_AIRCR_VECTRESET_WIDTH            1u
+#define S32_SCB_AIRCR_VECTRESET(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_VECTRESET_SHIFT))&S32_SCB_AIRCR_VECTRESET_MASK)
+#define S32_SCB_AIRCR_VECTCLRACTIVE_MASK         0x2u
+#define S32_SCB_AIRCR_VECTCLRACTIVE_SHIFT        1u
+#define S32_SCB_AIRCR_VECTCLRACTIVE_WIDTH        1u
+#define S32_SCB_AIRCR_VECTCLRACTIVE(x)           (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_VECTCLRACTIVE_SHIFT))&S32_SCB_AIRCR_VECTCLRACTIVE_MASK)
+#define S32_SCB_AIRCR_SYSRESETREQ_MASK           0x4u
+#define S32_SCB_AIRCR_SYSRESETREQ_SHIFT          2u
+#define S32_SCB_AIRCR_SYSRESETREQ_WIDTH          1u
+#define S32_SCB_AIRCR_SYSRESETREQ(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_SYSRESETREQ_SHIFT))&S32_SCB_AIRCR_SYSRESETREQ_MASK)
+#define S32_SCB_AIRCR_PRIGROUP_MASK              0x700u
+#define S32_SCB_AIRCR_PRIGROUP_SHIFT             8u
+#define S32_SCB_AIRCR_PRIGROUP_WIDTH             3u
+#define S32_SCB_AIRCR_PRIGROUP(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_PRIGROUP_SHIFT))&S32_SCB_AIRCR_PRIGROUP_MASK)
+#define S32_SCB_AIRCR_ENDIANNESS_MASK            0x8000u
+#define S32_SCB_AIRCR_ENDIANNESS_SHIFT           15u
+#define S32_SCB_AIRCR_ENDIANNESS_WIDTH           1u
+#define S32_SCB_AIRCR_ENDIANNESS(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_ENDIANNESS_SHIFT))&S32_SCB_AIRCR_ENDIANNESS_MASK)
+#define S32_SCB_AIRCR_VECTKEY_MASK               0xFFFF0000u
+#define S32_SCB_AIRCR_VECTKEY_SHIFT              16u
+#define S32_SCB_AIRCR_VECTKEY_WIDTH              16u
+#define S32_SCB_AIRCR_VECTKEY(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_AIRCR_VECTKEY_SHIFT))&S32_SCB_AIRCR_VECTKEY_MASK)
+/* SCR Bit Fields */
+#define S32_SCB_SCR_SLEEPONEXIT_MASK             0x2u
+#define S32_SCB_SCR_SLEEPONEXIT_SHIFT            1u
+#define S32_SCB_SCR_SLEEPONEXIT_WIDTH            1u
+#define S32_SCB_SCR_SLEEPONEXIT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_SCR_SLEEPONEXIT_SHIFT))&S32_SCB_SCR_SLEEPONEXIT_MASK)
+#define S32_SCB_SCR_SLEEPDEEP_MASK               0x4u
+#define S32_SCB_SCR_SLEEPDEEP_SHIFT              2u
+#define S32_SCB_SCR_SLEEPDEEP_WIDTH              1u
+#define S32_SCB_SCR_SLEEPDEEP(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_SCR_SLEEPDEEP_SHIFT))&S32_SCB_SCR_SLEEPDEEP_MASK)
+#define S32_SCB_SCR_SEVONPEND_MASK               0x10u
+#define S32_SCB_SCR_SEVONPEND_SHIFT              4u
+#define S32_SCB_SCR_SEVONPEND_WIDTH              1u
+#define S32_SCB_SCR_SEVONPEND(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_SCR_SEVONPEND_SHIFT))&S32_SCB_SCR_SEVONPEND_MASK)
+/* CCR Bit Fields */
+#define S32_SCB_CCR_NONBASETHRDENA_MASK          0x1u
+#define S32_SCB_CCR_NONBASETHRDENA_SHIFT         0u
+#define S32_SCB_CCR_NONBASETHRDENA_WIDTH         1u
+#define S32_SCB_CCR_NONBASETHRDENA(x)            (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_NONBASETHRDENA_SHIFT))&S32_SCB_CCR_NONBASETHRDENA_MASK)
+#define S32_SCB_CCR_USERSETMPEND_MASK            0x2u
+#define S32_SCB_CCR_USERSETMPEND_SHIFT           1u
+#define S32_SCB_CCR_USERSETMPEND_WIDTH           1u
+#define S32_SCB_CCR_USERSETMPEND(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_USERSETMPEND_SHIFT))&S32_SCB_CCR_USERSETMPEND_MASK)
+#define S32_SCB_CCR_UNALIGN_TRP_MASK             0x8u
+#define S32_SCB_CCR_UNALIGN_TRP_SHIFT            3u
+#define S32_SCB_CCR_UNALIGN_TRP_WIDTH            1u
+#define S32_SCB_CCR_UNALIGN_TRP(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_UNALIGN_TRP_SHIFT))&S32_SCB_CCR_UNALIGN_TRP_MASK)
+#define S32_SCB_CCR_DIV_0_TRP_MASK               0x10u
+#define S32_SCB_CCR_DIV_0_TRP_SHIFT              4u
+#define S32_SCB_CCR_DIV_0_TRP_WIDTH              1u
+#define S32_SCB_CCR_DIV_0_TRP(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_DIV_0_TRP_SHIFT))&S32_SCB_CCR_DIV_0_TRP_MASK)
+#define S32_SCB_CCR_BFHFNMIGN_MASK               0x100u
+#define S32_SCB_CCR_BFHFNMIGN_SHIFT              8u
+#define S32_SCB_CCR_BFHFNMIGN_WIDTH              1u
+#define S32_SCB_CCR_BFHFNMIGN(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_BFHFNMIGN_SHIFT))&S32_SCB_CCR_BFHFNMIGN_MASK)
+#define S32_SCB_CCR_STKALIGN_MASK                0x200u
+#define S32_SCB_CCR_STKALIGN_SHIFT               9u
+#define S32_SCB_CCR_STKALIGN_WIDTH               1u
+#define S32_SCB_CCR_STKALIGN(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_CCR_STKALIGN_SHIFT))&S32_SCB_CCR_STKALIGN_MASK)
+/* SHPR1 Bit Fields */
+#define S32_SCB_SHPR1_PRI_4_MASK                 0xFFu
+#define S32_SCB_SHPR1_PRI_4_SHIFT                0u
+#define S32_SCB_SHPR1_PRI_4_WIDTH                8u
+#define S32_SCB_SHPR1_PRI_4(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR1_PRI_4_SHIFT))&S32_SCB_SHPR1_PRI_4_MASK)
+#define S32_SCB_SHPR1_PRI_5_MASK                 0xFF00u
+#define S32_SCB_SHPR1_PRI_5_SHIFT                8u
+#define S32_SCB_SHPR1_PRI_5_WIDTH                8u
+#define S32_SCB_SHPR1_PRI_5(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR1_PRI_5_SHIFT))&S32_SCB_SHPR1_PRI_5_MASK)
+#define S32_SCB_SHPR1_PRI_6_MASK                 0xFF0000u
+#define S32_SCB_SHPR1_PRI_6_SHIFT                16u
+#define S32_SCB_SHPR1_PRI_6_WIDTH                8u
+#define S32_SCB_SHPR1_PRI_6(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR1_PRI_6_SHIFT))&S32_SCB_SHPR1_PRI_6_MASK)
+/* SHPR2 Bit Fields */
+#define S32_SCB_SHPR2_PRI_11_MASK                0xFF000000u
+#define S32_SCB_SHPR2_PRI_11_SHIFT               24u
+#define S32_SCB_SHPR2_PRI_11_WIDTH               8u
+#define S32_SCB_SHPR2_PRI_11(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR2_PRI_11_SHIFT))&S32_SCB_SHPR2_PRI_11_MASK)
+/* SHPR3 Bit Fields */
+#define S32_SCB_SHPR3_PRI_12_MASK                0xFFu
+#define S32_SCB_SHPR3_PRI_12_SHIFT               0u
+#define S32_SCB_SHPR3_PRI_12_WIDTH               8u
+#define S32_SCB_SHPR3_PRI_12(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR3_PRI_12_SHIFT))&S32_SCB_SHPR3_PRI_12_MASK)
+#define S32_SCB_SHPR3_PRI_14_MASK                0xFF0000u
+#define S32_SCB_SHPR3_PRI_14_SHIFT               16u
+#define S32_SCB_SHPR3_PRI_14_WIDTH               8u
+#define S32_SCB_SHPR3_PRI_14(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR3_PRI_14_SHIFT))&S32_SCB_SHPR3_PRI_14_MASK)
+#define S32_SCB_SHPR3_PRI_15_MASK                0xFF000000u
+#define S32_SCB_SHPR3_PRI_15_SHIFT               24u
+#define S32_SCB_SHPR3_PRI_15_WIDTH               8u
+#define S32_SCB_SHPR3_PRI_15(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHPR3_PRI_15_SHIFT))&S32_SCB_SHPR3_PRI_15_MASK)
+/* SHCSR Bit Fields */
+#define S32_SCB_SHCSR_MEMFAULTACT_MASK           0x1u
+#define S32_SCB_SHCSR_MEMFAULTACT_SHIFT          0u
+#define S32_SCB_SHCSR_MEMFAULTACT_WIDTH          1u
+#define S32_SCB_SHCSR_MEMFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_MEMFAULTACT_SHIFT))&S32_SCB_SHCSR_MEMFAULTACT_MASK)
+#define S32_SCB_SHCSR_BUSFAULTACT_MASK           0x2u
+#define S32_SCB_SHCSR_BUSFAULTACT_SHIFT          1u
+#define S32_SCB_SHCSR_BUSFAULTACT_WIDTH          1u
+#define S32_SCB_SHCSR_BUSFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_BUSFAULTACT_SHIFT))&S32_SCB_SHCSR_BUSFAULTACT_MASK)
+#define S32_SCB_SHCSR_USGFAULTACT_MASK           0x8u
+#define S32_SCB_SHCSR_USGFAULTACT_SHIFT          3u
+#define S32_SCB_SHCSR_USGFAULTACT_WIDTH          1u
+#define S32_SCB_SHCSR_USGFAULTACT(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_USGFAULTACT_SHIFT))&S32_SCB_SHCSR_USGFAULTACT_MASK)
+#define S32_SCB_SHCSR_SVCALLACT_MASK             0x80u
+#define S32_SCB_SHCSR_SVCALLACT_SHIFT            7u
+#define S32_SCB_SHCSR_SVCALLACT_WIDTH            1u
+#define S32_SCB_SHCSR_SVCALLACT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_SVCALLACT_SHIFT))&S32_SCB_SHCSR_SVCALLACT_MASK)
+#define S32_SCB_SHCSR_MONITORACT_MASK            0x100u
+#define S32_SCB_SHCSR_MONITORACT_SHIFT           8u
+#define S32_SCB_SHCSR_MONITORACT_WIDTH           1u
+#define S32_SCB_SHCSR_MONITORACT(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_MONITORACT_SHIFT))&S32_SCB_SHCSR_MONITORACT_MASK)
+#define S32_SCB_SHCSR_PENDSVACT_MASK             0x400u
+#define S32_SCB_SHCSR_PENDSVACT_SHIFT            10u
+#define S32_SCB_SHCSR_PENDSVACT_WIDTH            1u
+#define S32_SCB_SHCSR_PENDSVACT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_PENDSVACT_SHIFT))&S32_SCB_SHCSR_PENDSVACT_MASK)
+#define S32_SCB_SHCSR_SYSTICKACT_MASK            0x800u
+#define S32_SCB_SHCSR_SYSTICKACT_SHIFT           11u
+#define S32_SCB_SHCSR_SYSTICKACT_WIDTH           1u
+#define S32_SCB_SHCSR_SYSTICKACT(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_SYSTICKACT_SHIFT))&S32_SCB_SHCSR_SYSTICKACT_MASK)
+#define S32_SCB_SHCSR_USGFAULTPENDED_MASK        0x1000u
+#define S32_SCB_SHCSR_USGFAULTPENDED_SHIFT       12u
+#define S32_SCB_SHCSR_USGFAULTPENDED_WIDTH       1u
+#define S32_SCB_SHCSR_USGFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_USGFAULTPENDED_SHIFT))&S32_SCB_SHCSR_USGFAULTPENDED_MASK)
+#define S32_SCB_SHCSR_MEMFAULTPENDED_MASK        0x2000u
+#define S32_SCB_SHCSR_MEMFAULTPENDED_SHIFT       13u
+#define S32_SCB_SHCSR_MEMFAULTPENDED_WIDTH       1u
+#define S32_SCB_SHCSR_MEMFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_MEMFAULTPENDED_SHIFT))&S32_SCB_SHCSR_MEMFAULTPENDED_MASK)
+#define S32_SCB_SHCSR_BUSFAULTPENDED_MASK        0x4000u
+#define S32_SCB_SHCSR_BUSFAULTPENDED_SHIFT       14u
+#define S32_SCB_SHCSR_BUSFAULTPENDED_WIDTH       1u
+#define S32_SCB_SHCSR_BUSFAULTPENDED(x)          (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_BUSFAULTPENDED_SHIFT))&S32_SCB_SHCSR_BUSFAULTPENDED_MASK)
+#define S32_SCB_SHCSR_SVCALLPENDED_MASK          0x8000u
+#define S32_SCB_SHCSR_SVCALLPENDED_SHIFT         15u
+#define S32_SCB_SHCSR_SVCALLPENDED_WIDTH         1u
+#define S32_SCB_SHCSR_SVCALLPENDED(x)            (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_SVCALLPENDED_SHIFT))&S32_SCB_SHCSR_SVCALLPENDED_MASK)
+#define S32_SCB_SHCSR_MEMFAULTENA_MASK           0x10000u
+#define S32_SCB_SHCSR_MEMFAULTENA_SHIFT          16u
+#define S32_SCB_SHCSR_MEMFAULTENA_WIDTH          1u
+#define S32_SCB_SHCSR_MEMFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_MEMFAULTENA_SHIFT))&S32_SCB_SHCSR_MEMFAULTENA_MASK)
+#define S32_SCB_SHCSR_BUSFAULTENA_MASK           0x20000u
+#define S32_SCB_SHCSR_BUSFAULTENA_SHIFT          17u
+#define S32_SCB_SHCSR_BUSFAULTENA_WIDTH          1u
+#define S32_SCB_SHCSR_BUSFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_BUSFAULTENA_SHIFT))&S32_SCB_SHCSR_BUSFAULTENA_MASK)
+#define S32_SCB_SHCSR_USGFAULTENA_MASK           0x40000u
+#define S32_SCB_SHCSR_USGFAULTENA_SHIFT          18u
+#define S32_SCB_SHCSR_USGFAULTENA_WIDTH          1u
+#define S32_SCB_SHCSR_USGFAULTENA(x)             (((uint32_t)(((uint32_t)(x))<<S32_SCB_SHCSR_USGFAULTENA_SHIFT))&S32_SCB_SHCSR_USGFAULTENA_MASK)
+/* CFSR Bit Fields */
+#define S32_SCB_CFSR_IACCVIOL_MASK               0x1u
+#define S32_SCB_CFSR_IACCVIOL_SHIFT              0u
+#define S32_SCB_CFSR_IACCVIOL_WIDTH              1u
+#define S32_SCB_CFSR_IACCVIOL(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_IACCVIOL_SHIFT))&S32_SCB_CFSR_IACCVIOL_MASK)
+#define S32_SCB_CFSR_DACCVIOL_MASK               0x2u
+#define S32_SCB_CFSR_DACCVIOL_SHIFT              1u
+#define S32_SCB_CFSR_DACCVIOL_WIDTH              1u
+#define S32_SCB_CFSR_DACCVIOL(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_DACCVIOL_SHIFT))&S32_SCB_CFSR_DACCVIOL_MASK)
+#define S32_SCB_CFSR_MUNSTKERR_MASK              0x8u
+#define S32_SCB_CFSR_MUNSTKERR_SHIFT             3u
+#define S32_SCB_CFSR_MUNSTKERR_WIDTH             1u
+#define S32_SCB_CFSR_MUNSTKERR(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_MUNSTKERR_SHIFT))&S32_SCB_CFSR_MUNSTKERR_MASK)
+#define S32_SCB_CFSR_MSTKERR_MASK                0x10u
+#define S32_SCB_CFSR_MSTKERR_SHIFT               4u
+#define S32_SCB_CFSR_MSTKERR_WIDTH               1u
+#define S32_SCB_CFSR_MSTKERR(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_MSTKERR_SHIFT))&S32_SCB_CFSR_MSTKERR_MASK)
+#define S32_SCB_CFSR_MLSPERR_MASK                0x20u
+#define S32_SCB_CFSR_MLSPERR_SHIFT               5u
+#define S32_SCB_CFSR_MLSPERR_WIDTH               1u
+#define S32_SCB_CFSR_MLSPERR(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_MLSPERR_SHIFT))&S32_SCB_CFSR_MLSPERR_MASK)
+#define S32_SCB_CFSR_MMARVALID_MASK              0x80u
+#define S32_SCB_CFSR_MMARVALID_SHIFT             7u
+#define S32_SCB_CFSR_MMARVALID_WIDTH             1u
+#define S32_SCB_CFSR_MMARVALID(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_MMARVALID_SHIFT))&S32_SCB_CFSR_MMARVALID_MASK)
+#define S32_SCB_CFSR_IBUSERR_MASK                0x100u
+#define S32_SCB_CFSR_IBUSERR_SHIFT               8u
+#define S32_SCB_CFSR_IBUSERR_WIDTH               1u
+#define S32_SCB_CFSR_IBUSERR(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_IBUSERR_SHIFT))&S32_SCB_CFSR_IBUSERR_MASK)
+#define S32_SCB_CFSR_PRECISERR_MASK              0x200u
+#define S32_SCB_CFSR_PRECISERR_SHIFT             9u
+#define S32_SCB_CFSR_PRECISERR_WIDTH             1u
+#define S32_SCB_CFSR_PRECISERR(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_PRECISERR_SHIFT))&S32_SCB_CFSR_PRECISERR_MASK)
+#define S32_SCB_CFSR_IMPRECISERR_MASK            0x400u
+#define S32_SCB_CFSR_IMPRECISERR_SHIFT           10u
+#define S32_SCB_CFSR_IMPRECISERR_WIDTH           1u
+#define S32_SCB_CFSR_IMPRECISERR(x)              (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_IMPRECISERR_SHIFT))&S32_SCB_CFSR_IMPRECISERR_MASK)
+#define S32_SCB_CFSR_UNSTKERR_MASK               0x800u
+#define S32_SCB_CFSR_UNSTKERR_SHIFT              11u
+#define S32_SCB_CFSR_UNSTKERR_WIDTH              1u
+#define S32_SCB_CFSR_UNSTKERR(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_UNSTKERR_SHIFT))&S32_SCB_CFSR_UNSTKERR_MASK)
+#define S32_SCB_CFSR_STKERR_MASK                 0x1000u
+#define S32_SCB_CFSR_STKERR_SHIFT                12u
+#define S32_SCB_CFSR_STKERR_WIDTH                1u
+#define S32_SCB_CFSR_STKERR(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_STKERR_SHIFT))&S32_SCB_CFSR_STKERR_MASK)
+#define S32_SCB_CFSR_LSPERR_MASK                 0x2000u
+#define S32_SCB_CFSR_LSPERR_SHIFT                13u
+#define S32_SCB_CFSR_LSPERR_WIDTH                1u
+#define S32_SCB_CFSR_LSPERR(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_LSPERR_SHIFT))&S32_SCB_CFSR_LSPERR_MASK)
+#define S32_SCB_CFSR_BFARVALID_MASK              0x8000u
+#define S32_SCB_CFSR_BFARVALID_SHIFT             15u
+#define S32_SCB_CFSR_BFARVALID_WIDTH             1u
+#define S32_SCB_CFSR_BFARVALID(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_BFARVALID_SHIFT))&S32_SCB_CFSR_BFARVALID_MASK)
+#define S32_SCB_CFSR_UNDEFINSTR_MASK             0x10000u
+#define S32_SCB_CFSR_UNDEFINSTR_SHIFT            16u
+#define S32_SCB_CFSR_UNDEFINSTR_WIDTH            1u
+#define S32_SCB_CFSR_UNDEFINSTR(x)               (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_UNDEFINSTR_SHIFT))&S32_SCB_CFSR_UNDEFINSTR_MASK)
+#define S32_SCB_CFSR_INVSTATE_MASK               0x20000u
+#define S32_SCB_CFSR_INVSTATE_SHIFT              17u
+#define S32_SCB_CFSR_INVSTATE_WIDTH              1u
+#define S32_SCB_CFSR_INVSTATE(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_INVSTATE_SHIFT))&S32_SCB_CFSR_INVSTATE_MASK)
+#define S32_SCB_CFSR_INVPC_MASK                  0x40000u
+#define S32_SCB_CFSR_INVPC_SHIFT                 18u
+#define S32_SCB_CFSR_INVPC_WIDTH                 1u
+#define S32_SCB_CFSR_INVPC(x)                    (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_INVPC_SHIFT))&S32_SCB_CFSR_INVPC_MASK)
+#define S32_SCB_CFSR_NOCP_MASK                   0x80000u
+#define S32_SCB_CFSR_NOCP_SHIFT                  19u
+#define S32_SCB_CFSR_NOCP_WIDTH                  1u
+#define S32_SCB_CFSR_NOCP(x)                     (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_NOCP_SHIFT))&S32_SCB_CFSR_NOCP_MASK)
+#define S32_SCB_CFSR_UNALIGNED_MASK              0x1000000u
+#define S32_SCB_CFSR_UNALIGNED_SHIFT             24u
+#define S32_SCB_CFSR_UNALIGNED_WIDTH             1u
+#define S32_SCB_CFSR_UNALIGNED(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_UNALIGNED_SHIFT))&S32_SCB_CFSR_UNALIGNED_MASK)
+#define S32_SCB_CFSR_DIVBYZERO_MASK              0x2000000u
+#define S32_SCB_CFSR_DIVBYZERO_SHIFT             25u
+#define S32_SCB_CFSR_DIVBYZERO_WIDTH             1u
+#define S32_SCB_CFSR_DIVBYZERO(x)                (((uint32_t)(((uint32_t)(x))<<S32_SCB_CFSR_DIVBYZERO_SHIFT))&S32_SCB_CFSR_DIVBYZERO_MASK)
+/* HFSR Bit Fields */
+#define S32_SCB_HFSR_VECTTBL_MASK                0x2u
+#define S32_SCB_HFSR_VECTTBL_SHIFT               1u
+#define S32_SCB_HFSR_VECTTBL_WIDTH               1u
+#define S32_SCB_HFSR_VECTTBL(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_HFSR_VECTTBL_SHIFT))&S32_SCB_HFSR_VECTTBL_MASK)
+#define S32_SCB_HFSR_FORCED_MASK                 0x40000000u
+#define S32_SCB_HFSR_FORCED_SHIFT                30u
+#define S32_SCB_HFSR_FORCED_WIDTH                1u
+#define S32_SCB_HFSR_FORCED(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_HFSR_FORCED_SHIFT))&S32_SCB_HFSR_FORCED_MASK)
+#define S32_SCB_HFSR_DEBUGEVT_MASK               0x80000000u
+#define S32_SCB_HFSR_DEBUGEVT_SHIFT              31u
+#define S32_SCB_HFSR_DEBUGEVT_WIDTH              1u
+#define S32_SCB_HFSR_DEBUGEVT(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_HFSR_DEBUGEVT_SHIFT))&S32_SCB_HFSR_DEBUGEVT_MASK)
+/* DFSR Bit Fields */
+#define S32_SCB_DFSR_HALTED_MASK                 0x1u
+#define S32_SCB_DFSR_HALTED_SHIFT                0u
+#define S32_SCB_DFSR_HALTED_WIDTH                1u
+#define S32_SCB_DFSR_HALTED(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_DFSR_HALTED_SHIFT))&S32_SCB_DFSR_HALTED_MASK)
+#define S32_SCB_DFSR_BKPT_MASK                   0x2u
+#define S32_SCB_DFSR_BKPT_SHIFT                  1u
+#define S32_SCB_DFSR_BKPT_WIDTH                  1u
+#define S32_SCB_DFSR_BKPT(x)                     (((uint32_t)(((uint32_t)(x))<<S32_SCB_DFSR_BKPT_SHIFT))&S32_SCB_DFSR_BKPT_MASK)
+#define S32_SCB_DFSR_DWTTRAP_MASK                0x4u
+#define S32_SCB_DFSR_DWTTRAP_SHIFT               2u
+#define S32_SCB_DFSR_DWTTRAP_WIDTH               1u
+#define S32_SCB_DFSR_DWTTRAP(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_DFSR_DWTTRAP_SHIFT))&S32_SCB_DFSR_DWTTRAP_MASK)
+#define S32_SCB_DFSR_VCATCH_MASK                 0x8u
+#define S32_SCB_DFSR_VCATCH_SHIFT                3u
+#define S32_SCB_DFSR_VCATCH_WIDTH                1u
+#define S32_SCB_DFSR_VCATCH(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_DFSR_VCATCH_SHIFT))&S32_SCB_DFSR_VCATCH_MASK)
+#define S32_SCB_DFSR_EXTERNAL_MASK               0x10u
+#define S32_SCB_DFSR_EXTERNAL_SHIFT              4u
+#define S32_SCB_DFSR_EXTERNAL_WIDTH              1u
+#define S32_SCB_DFSR_EXTERNAL(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_DFSR_EXTERNAL_SHIFT))&S32_SCB_DFSR_EXTERNAL_MASK)
+/* MMFAR Bit Fields */
+#define S32_SCB_MMFAR_ADDRESS_MASK               0xFFFFFFFFu
+#define S32_SCB_MMFAR_ADDRESS_SHIFT              0u
+#define S32_SCB_MMFAR_ADDRESS_WIDTH              32u
+#define S32_SCB_MMFAR_ADDRESS(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_MMFAR_ADDRESS_SHIFT))&S32_SCB_MMFAR_ADDRESS_MASK)
+/* BFAR Bit Fields */
+#define S32_SCB_BFAR_ADDRESS_MASK                0xFFFFFFFFu
+#define S32_SCB_BFAR_ADDRESS_SHIFT               0u
+#define S32_SCB_BFAR_ADDRESS_WIDTH               32u
+#define S32_SCB_BFAR_ADDRESS(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_BFAR_ADDRESS_SHIFT))&S32_SCB_BFAR_ADDRESS_MASK)
+/* AFSR Bit Fields */
+#define S32_SCB_AFSR_AUXFAULT_MASK               0xFFFFFFFFu
+#define S32_SCB_AFSR_AUXFAULT_SHIFT              0u
+#define S32_SCB_AFSR_AUXFAULT_WIDTH              32u
+#define S32_SCB_AFSR_AUXFAULT(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_AFSR_AUXFAULT_SHIFT))&S32_SCB_AFSR_AUXFAULT_MASK)
+/* CPACR Bit Fields */
+#define S32_SCB_CPACR_CP10_MASK                  0x300000u
+#define S32_SCB_CPACR_CP10_SHIFT                 20u
+#define S32_SCB_CPACR_CP10_WIDTH                 2u
+#define S32_SCB_CPACR_CP10(x)                    (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPACR_CP10_SHIFT))&S32_SCB_CPACR_CP10_MASK)
+#define S32_SCB_CPACR_CP11_MASK                  0xC00000u
+#define S32_SCB_CPACR_CP11_SHIFT                 22u
+#define S32_SCB_CPACR_CP11_WIDTH                 2u
+#define S32_SCB_CPACR_CP11(x)                    (((uint32_t)(((uint32_t)(x))<<S32_SCB_CPACR_CP11_SHIFT))&S32_SCB_CPACR_CP11_MASK)
+/* FPCCR Bit Fields */
+#define S32_SCB_FPCCR_LSPACT_MASK                0x1u
+#define S32_SCB_FPCCR_LSPACT_SHIFT               0u
+#define S32_SCB_FPCCR_LSPACT_WIDTH               1u
+#define S32_SCB_FPCCR_LSPACT(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_LSPACT_SHIFT))&S32_SCB_FPCCR_LSPACT_MASK)
+#define S32_SCB_FPCCR_USER_MASK                  0x2u
+#define S32_SCB_FPCCR_USER_SHIFT                 1u
+#define S32_SCB_FPCCR_USER_WIDTH                 1u
+#define S32_SCB_FPCCR_USER(x)                    (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_USER_SHIFT))&S32_SCB_FPCCR_USER_MASK)
+#define S32_SCB_FPCCR_THREAD_MASK                0x8u
+#define S32_SCB_FPCCR_THREAD_SHIFT               3u
+#define S32_SCB_FPCCR_THREAD_WIDTH               1u
+#define S32_SCB_FPCCR_THREAD(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_THREAD_SHIFT))&S32_SCB_FPCCR_THREAD_MASK)
+#define S32_SCB_FPCCR_HFRDY_MASK                 0x10u
+#define S32_SCB_FPCCR_HFRDY_SHIFT                4u
+#define S32_SCB_FPCCR_HFRDY_WIDTH                1u
+#define S32_SCB_FPCCR_HFRDY(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_HFRDY_SHIFT))&S32_SCB_FPCCR_HFRDY_MASK)
+#define S32_SCB_FPCCR_MMRDY_MASK                 0x20u
+#define S32_SCB_FPCCR_MMRDY_SHIFT                5u
+#define S32_SCB_FPCCR_MMRDY_WIDTH                1u
+#define S32_SCB_FPCCR_MMRDY(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_MMRDY_SHIFT))&S32_SCB_FPCCR_MMRDY_MASK)
+#define S32_SCB_FPCCR_BFRDY_MASK                 0x40u
+#define S32_SCB_FPCCR_BFRDY_SHIFT                6u
+#define S32_SCB_FPCCR_BFRDY_WIDTH                1u
+#define S32_SCB_FPCCR_BFRDY(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_BFRDY_SHIFT))&S32_SCB_FPCCR_BFRDY_MASK)
+#define S32_SCB_FPCCR_MONRDY_MASK                0x100u
+#define S32_SCB_FPCCR_MONRDY_SHIFT               8u
+#define S32_SCB_FPCCR_MONRDY_WIDTH               1u
+#define S32_SCB_FPCCR_MONRDY(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_MONRDY_SHIFT))&S32_SCB_FPCCR_MONRDY_MASK)
+#define S32_SCB_FPCCR_LSPEN_MASK                 0x40000000u
+#define S32_SCB_FPCCR_LSPEN_SHIFT                30u
+#define S32_SCB_FPCCR_LSPEN_WIDTH                1u
+#define S32_SCB_FPCCR_LSPEN(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_LSPEN_SHIFT))&S32_SCB_FPCCR_LSPEN_MASK)
+#define S32_SCB_FPCCR_ASPEN_MASK                 0x80000000u
+#define S32_SCB_FPCCR_ASPEN_SHIFT                31u
+#define S32_SCB_FPCCR_ASPEN_WIDTH                1u
+#define S32_SCB_FPCCR_ASPEN(x)                   (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCCR_ASPEN_SHIFT))&S32_SCB_FPCCR_ASPEN_MASK)
+/* FPCAR Bit Fields */
+#define S32_SCB_FPCAR_ADDRESS_MASK               0xFFFFFFF8u
+#define S32_SCB_FPCAR_ADDRESS_SHIFT              3u
+#define S32_SCB_FPCAR_ADDRESS_WIDTH              29u
+#define S32_SCB_FPCAR_ADDRESS(x)                 (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPCAR_ADDRESS_SHIFT))&S32_SCB_FPCAR_ADDRESS_MASK)
+/* FPDSCR Bit Fields */
+#define S32_SCB_FPDSCR_RMode_MASK                0xC00000u
+#define S32_SCB_FPDSCR_RMode_SHIFT               22u
+#define S32_SCB_FPDSCR_RMode_WIDTH               2u
+#define S32_SCB_FPDSCR_RMode(x)                  (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPDSCR_RMode_SHIFT))&S32_SCB_FPDSCR_RMode_MASK)
+#define S32_SCB_FPDSCR_FZ_MASK                   0x1000000u
+#define S32_SCB_FPDSCR_FZ_SHIFT                  24u
+#define S32_SCB_FPDSCR_FZ_WIDTH                  1u
+#define S32_SCB_FPDSCR_FZ(x)                     (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPDSCR_FZ_SHIFT))&S32_SCB_FPDSCR_FZ_MASK)
+#define S32_SCB_FPDSCR_DN_MASK                   0x2000000u
+#define S32_SCB_FPDSCR_DN_SHIFT                  25u
+#define S32_SCB_FPDSCR_DN_WIDTH                  1u
+#define S32_SCB_FPDSCR_DN(x)                     (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPDSCR_DN_SHIFT))&S32_SCB_FPDSCR_DN_MASK)
+#define S32_SCB_FPDSCR_AHP_MASK                  0x4000000u
+#define S32_SCB_FPDSCR_AHP_SHIFT                 26u
+#define S32_SCB_FPDSCR_AHP_WIDTH                 1u
+#define S32_SCB_FPDSCR_AHP(x)                    (((uint32_t)(((uint32_t)(x))<<S32_SCB_FPDSCR_AHP_SHIFT))&S32_SCB_FPDSCR_AHP_MASK)
+
+/*!
+ * @}
+ */ /* end of group S32_SCB_Register_Masks */
+
+
+/*!
+ * @}
+ */ /* end of group S32_SCB_Peripheral_Access_Layer */
+
+
+/* ----------------------------------------------------------------------------
+   -- S32_SysTick Peripheral Access Layer
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_SysTick_Peripheral_Access_Layer S32_SysTick Peripheral Access Layer
+ * @{
+ */
+
+
+/** S32_SysTick - Size of Registers Arrays */
+
+/** S32_SysTick - Register Layout Typedef */
+typedef struct {
+  __IO uint32_t CSR;                               /**< SysTick Control and Status Register, offset: 0x0 */
+  __IO uint32_t RVR;                               /**< SysTick Reload Value Register, offset: 0x4 */
+  __IO uint32_t CVR;                               /**< SysTick Current Value Register, offset: 0x8 */
+  __I  uint32_t CALIB;                             /**< SysTick Calibration Value Register, offset: 0xC */
+} S32_SysTick_Type, *S32_SysTick_MemMapPtr;
+
+ /** Number of instances of the S32_SysTick module. */
+#define S32_SysTick_INSTANCE_COUNT               (1u)
+
+
+/* S32_SysTick - Peripheral instance base addresses */
+/** Peripheral S32_SysTick base address */
+#define S32_SysTick_BASE                         (0xE000E010u)
+/** Peripheral S32_SysTick base pointer */
+#define S32_SysTick                              ((S32_SysTick_Type *)S32_SysTick_BASE)
+/** Array initializer of S32_SysTick peripheral base addresses */
+#define S32_SysTick_BASE_ADDRS                   { S32_SysTick_BASE }
+/** Array initializer of S32_SysTick peripheral base pointers */
+#define S32_SysTick_BASE_PTRS                    { S32_SysTick }
+ /** Number of interrupt vector arrays for the S32_SysTick module. */
+#define S32_SysTick_IRQS_ARR_COUNT               (1u)
+ /** Number of interrupt channels for the S32_SysTick module. */
+#define S32_SysTick_IRQS_CH_COUNT                (1u)
+/** Interrupt vectors for the S32_SysTick peripheral type */
+#define S32_SysTick_IRQS                         { SysTick_IRQn }
+
+/* ----------------------------------------------------------------------------
+   -- S32_SysTick Register Masks
+   ---------------------------------------------------------------------------- */
+
+/*!
+ * @addtogroup S32_SysTick_Register_Masks S32_SysTick Register Masks
+ * @{
+ */
+
+/* CSR Bit Fields */
+#define S32_SysTick_CSR_ENABLE_MASK              0x1u
+#define S32_SysTick_CSR_ENABLE_SHIFT             0u
+#define S32_SysTick_CSR_ENABLE_WIDTH             1u
+#define S32_SysTick_CSR_ENABLE(x)                (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CSR_ENABLE_SHIFT))&S32_SysTick_CSR_ENABLE_MASK)
+#define S32_SysTick_CSR_TICKINT_MASK             0x2u
+#define S32_SysTick_CSR_TICKINT_SHIFT            1u
+#define S32_SysTick_CSR_TICKINT_WIDTH            1u
+#define S32_SysTick_CSR_TICKINT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CSR_TICKINT_SHIFT))&S32_SysTick_CSR_TICKINT_MASK)
+#define S32_SysTick_CSR_CLKSOURCE_MASK           0x4u
+#define S32_SysTick_CSR_CLKSOURCE_SHIFT          2u
+#define S32_SysTick_CSR_CLKSOURCE_WIDTH          1u
+#define S32_SysTick_CSR_CLKSOURCE(x)             (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CSR_CLKSOURCE_SHIFT))&S32_SysTick_CSR_CLKSOURCE_MASK)
+#define S32_SysTick_CSR_COUNTFLAG_MASK           0x10000u
+#define S32_SysTick_CSR_COUNTFLAG_SHIFT          16u
+#define S32_SysTick_CSR_COUNTFLAG_WIDTH          1u
+#define S32_SysTick_CSR_COUNTFLAG(x)             (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CSR_COUNTFLAG_SHIFT))&S32_SysTick_CSR_COUNTFLAG_MASK)
+/* RVR Bit Fields */
+#define S32_SysTick_RVR_RELOAD_MASK              0xFFFFFFu
+#define S32_SysTick_RVR_RELOAD_SHIFT             0u
+#define S32_SysTick_RVR_RELOAD_WIDTH             24u
+#define S32_SysTick_RVR_RELOAD(x)                (((uint32_t)(((uint32_t)(x))<<S32_SysTick_RVR_RELOAD_SHIFT))&S32_SysTick_RVR_RELOAD_MASK)
+/* CVR Bit Fields */
+#define S32_SysTick_CVR_CURRENT_MASK             0xFFFFFFu
+#define S32_SysTick_CVR_CURRENT_SHIFT            0u
+#define S32_SysTick_CVR_CURRENT_WIDTH            24u
+#define S32_SysTick_CVR_CURRENT(x)               (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CVR_CURRENT_SHIFT))&S32_SysTick_CVR_CURRENT_MASK)
+/* CALIB Bit Fields */
+#define S32_SysTick_CALIB_TENMS_MASK             0xFFFFFFu
+#define S32_SysTick_CALIB_TENMS_SHIFT            0u
+#define S32_SysTick_CALIB_TENMS_WIDTH            24u
+#define S32_SysTick_CALIB_TENMS(x)               (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CALIB_TENMS_SHIFT))&S32_SysTick_CALIB_TENMS_MASK)
+#define S32_SysTick_CALIB_SKEW_MASK              0x40000000u
+#define S32_SysTick_CALIB_SKEW_SHIFT             30u
+#define S32_SysTick_CALIB_SKEW_WIDTH             1u
+#define S32_SysTick_CALIB_SKEW(x)                (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CALIB_SKEW_SHIFT))&S32_SysTick_CALIB_SKEW_MASK)
+#define S32_SysTick_CALIB_NOREF_MASK             0x80000000u
+#define S32_SysTick_CALIB_NOREF_SHIFT            31u
+#define S32_SysTick_CALIB_NOREF_WIDTH            1u
+#define S32_SysTick_CALIB_NOREF(x)               (((uint32_t)(((uint32_t)(x))<<S32_SysTick_CALIB_NOREF_SHIFT))&S32_SysTick_CALIB_NOREF_MASK)
+
+/*!
+ * @}
+ */ /* end of group S32_SysTick_Register_Masks */
+
+
+/*!
+ * @}
+ */ /* end of group S32_SysTick_Peripheral_Access_Layer */
 
 
 /* ----------------------------------------------------------------------------

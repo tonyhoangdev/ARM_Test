@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013 - 2014, Freescale Semiconductor, Inc.
+ * Copyright 2016 NXP
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,8 +29,44 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * @page misra_violations MISRA-C:2012 violations
+ *
+ * @section [global]
+ * Violates MISRA 2012 Advisory Rule 8.9, An object should be defined at block
+ * scope if its identifier only appears in a single function.
+ * All variables with this problem are defined in the linker files.
+ *
+ * @section [global]
+ * Violates MISRA 2012 Advisory Rule 8.11, When an array with external linkage
+ * is declared, its size should be explicitly specified.
+ * The size of the arrays can not be explicitly determined.
+ *
+ * @section [global]
+ * Violates MISRA 2012 Advisory Rule 11.4, A conversion should not be performed
+ * between a pointer to object and an integer type.
+ * The cast is required to initialize a pointer with an unsigned int define,
+ * representing an address.
+ *
+ * @section [global]
+ * Violates MISRA 2012 Required Rule 11.6, A cast shall not be performed
+ * between pointer to void and an arithmetic type.
+ * The cast is required to initialize a pointer with an unsigned int define,
+ * representing an address.
+ *
+ * @section [global]
+ * Violates MISRA 2012 Required Rule 2.1, A project shall not contain unreachable
+ * code.
+ * The condition compares two address defined in linker files that can be different.
+ *
+ * @section [global]
+ * Violates MISRA 2012 Advisory Rule 8.7, External could be made static.
+ * Function is defined for usage by application code.
+ *
+ */
+
 #include "startup.h"
-#include "fsl_device_registers.h"
+#include "device_registers.h"
 #include <stdint.h>
 
 #if (defined(__ICCARM__))
@@ -46,116 +83,118 @@
  *
  * Function Name : init_data_bss
  * Description   : Make necessary initializations for RAM.
+ * - Copy the vector table from ROM to RAM.
  * - Copy initialized data from ROM to RAM.
+ * - Copy code that should reside in RAM from ROM
  * - Clear the zero-initialized data section.
- * - Copy the vector table from ROM to RAM. This could be an option.  
  *
- * Tool Chians:
+ * Tool Chains:
  *   __GNUC__   : GNU Compiler Collection
- *   __ghs__    : GreenHillsARM
- *   __CC_ARM   : KEIL
- *   __ICCARM__ : IAR
+ *   __ghs__    : Green Hills ARM Compiler
+ *   __ICCARM__ : IAR ARM Compiler
  *   __CSMC__   : Cosmic C Cross Compiler
  *   __DCC__    : Wind River Diab Compiler
  *
+ * Implements    : init_data_bss_Activity
  *END**************************************************************************/
 void init_data_bss(void)
 {
     uint32_t n;
-    
-#if defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__)  || defined(__DCC__) || defined(__ICCARM__)
     /* Declare pointers for various data sections. These pointers
      * are initialized using values pulled in from the linker file */
-    uint8_t * data_ram, * data_rom, * data_rom_end;
-    uint8_t * bss_start, * bss_end;
-#endif
-    
-#if defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__)
-    extern uint32_t __DATA_ROM[];
-    extern uint32_t __DATA_RAM[];
-    extern char __DATA_END[];
-    extern char __START_BSS[];
-    extern char __END_BSS[];
-#endif
-    
-    /* Addresses for VECTOR_TABLE and VECTOR_RAM come from the linker file */
-#if defined(__CC_ARM)
-    extern uint32_t Image$$VECTOR_ROM$$Base[];
-    extern uint32_t Image$$VECTOR_RAM$$Base[];
-    extern uint32_t Image$$RW_m_data$$Base[];
+    uint8_t * data_ram;
+    uint8_t * code_ram;
+    uint8_t * bss_start;
+    const uint8_t * data_rom, * data_rom_end;
+    const uint8_t * code_rom, * code_rom_end;
+    const uint8_t * bss_end;
 
-    #define __VECTOR_TABLE Image$$VECTOR_ROM$$Base  
-    #define __VECTOR_RAM Image$$VECTOR_RAM$$Base  
-    #define __RAM_VECTOR_TABLE_SIZE (((uint32_t)Image$$RW_m_data$$Base - (uint32_t)Image$$VECTOR_RAM$$Base))
-#elif defined(__ICCARM__)
+    /* Addresses for VECTOR_TABLE and VECTOR_RAM come from the linker file */
     extern uint32_t __RAM_VECTOR_TABLE_SIZE[];
     extern uint32_t __VECTOR_TABLE[];
     extern uint32_t __VECTOR_RAM[];
-#elif defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__)
-    extern uint32_t __VECTOR_TABLE[];
-    extern uint32_t __VECTOR_RAM[];
-    extern uint32_t __RAM_VECTOR_TABLE_SIZE_BYTES[];
-    uint32_t __RAM_VECTOR_TABLE_SIZE = (uint32_t)(__RAM_VECTOR_TABLE_SIZE_BYTES);
+
+    /* Get section information from linker files */
+#if defined(__ICCARM__)
+    /* Data */
+    data_ram        = __section_begin(".data");
+    data_rom        = __section_begin(".data_init");
+    data_rom_end    = __section_end(".data_init");
+
+    /* CODE RAM */
+    #pragma section = "__CODE_ROM"
+    #pragma section = "__CODE_RAM"
+    code_ram        = __section_begin("__CODE_RAM");
+    code_rom        = __section_begin("__CODE_ROM");
+    code_rom_end    = __section_end("__CODE_ROM");
+
+    /* BSS */
+    bss_start       = __section_begin(".bss");
+    bss_end         = __section_end(".bss");
+#else
+    extern uint32_t __DATA_ROM[];
+    extern uint32_t __DATA_RAM[];
+    extern uint32_t __DATA_END[];
+
+    extern uint32_t __CODE_RAM[];
+    extern uint32_t __CODE_ROM[];
+    extern uint32_t __CODE_END[];
+
+    extern uint32_t __BSS_START[];
+    extern uint32_t __BSS_END[];
+
+    /* Data */
+    data_ram        = (uint8_t *)__DATA_RAM;
+    data_rom        = (uint8_t *)__DATA_ROM;
+    data_rom_end    = (uint8_t *)__DATA_END;
+    /* CODE RAM */
+    code_ram        = (uint8_t *)__CODE_RAM;
+    code_rom        = (uint8_t *)__CODE_ROM;
+    code_rom_end    = (uint8_t *)__CODE_END;
+    /* BSS */
+    bss_start       = (uint8_t *)__BSS_START;
+    bss_end         = (uint8_t *)__BSS_END;
 #endif
 
+    /* Check if VECTOR_TABLE copy is needed */
     if (__VECTOR_RAM != __VECTOR_TABLE)
-    {   
+    {
         /* Copy the vector table from ROM to RAM */
-        for (n = 0; n < ((uint32_t)__RAM_VECTOR_TABLE_SIZE)/sizeof(uint32_t); n++)
+        for (n = 0; n < (((uint32_t)__RAM_VECTOR_TABLE_SIZE)/sizeof(uint32_t)); n++)
         {
             __VECTOR_RAM[n] = __VECTOR_TABLE[n];
         }
         /* Point the VTOR to the position of vector table */
-        FSL_SCB->VTOR = (uint32_t)__VECTOR_RAM;
+        S32_SCB->VTOR = (uint32_t)__VECTOR_RAM;
     }
     else
     {
         /* Point the VTOR to the position of vector table */
-        FSL_SCB->VTOR = (uint32_t)__VECTOR_TABLE;
+        S32_SCB->VTOR = (uint32_t)__VECTOR_TABLE;
     }
-
-    /* Copy initialized data from ROM to RAM and clear the zero-initialized data
-     * section (GCC and IAR) */
-#if defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__) || defined(__ICCARM__)
-    
-    /* Get the addresses for the .data section (initialized data section) */
-#if defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__)
-    data_ram = (uint8_t *)__DATA_RAM;
-    data_rom = (uint8_t *)__DATA_ROM;
-    data_rom_end  = (uint8_t *)__DATA_END;
-#endif
-#if defined(__ICCARM__)
-    data_ram = __section_begin(".data");
-    data_rom = __section_begin(".data_init");
-    data_rom_end = __section_end(".data_init");
-#endif
-
-    n = data_rom_end - data_rom;
 
     /* Copy initialized data from ROM to RAM */
-    while (n--)
+    while (data_rom_end != data_rom)
     {
-        *data_ram++ = *data_rom++;
+        *data_ram = *data_rom;
+        data_ram++;
+        data_rom++;
     }
 
-    /* Get the addresses for the .bss section (zero-initialized data) */
-#if defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__)
-    bss_start = (uint8_t *)__START_BSS;
-    bss_end = (uint8_t *)__END_BSS;
-#endif
-#if defined(__ICCARM__)
-    bss_start = __section_begin(".bss");
-    bss_end = __section_end(".bss");
-#endif
+    /* Copy functions from ROM to RAM */
+    while (code_rom_end != code_rom)
+    {
+        *code_ram = *code_rom;
+        code_ram++;
+        code_rom++;
+    }
 
     /* Clear the zero-initialized data section */
-    n = bss_end - bss_start;
-    while(n--)
+    while(bss_end != bss_start)
     {
-        *bss_start++ = 0;
+        *bss_start = 0;
+        bss_start++;
     }
-
-#endif /* defined(__GNUC__) || defined(__ghs__) || defined(__CSMC__) || defined(__DCC__) || defined(__ICCARM__) */
 }
 
 /*******************************************************************************
