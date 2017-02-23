@@ -9,12 +9,6 @@ VPATH=$(SOURCEDIR)
 CSOURCES:=main.c
 CSOURCES+=startup.c
 CSOURCES+=system_S32K144.c
-# CSOURCES+=erm_driver.c
-# CSOURCES+=erm_hal.c
-
-#CSOURCES+=FSL_ERM_DRV_UT_TS001.c
-#CSOURCES+=FSL_ERM_HAL_UT_TS001.c
-#CSOURCES+=erm_test.c
 
 ASMSOURCES:=startup_S32K144.S
 
@@ -22,11 +16,6 @@ ASMSOURCES:=startup_S32K144.S
 BASEDIR:=./
 SOURCEDIR_LIB:=include/
 SOURCEDIR_LIB+=Project_Settings/Startup_Code/
-
-SOURCEDIR_LIB+=platform/drivers/inc/
-SOURCEDIR_LIB+=platform/drivers/src/erm/
-SOURCEDIR_LIB+=platform/hal/inc/
-SOURCEDIR_LIB+=platform/hal/src/erm/
 
 ## Location of objects
 OBJECTDIR_NAME:=obj
