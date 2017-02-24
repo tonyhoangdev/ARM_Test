@@ -124,12 +124,20 @@ size:
 # Target used to print compile informations
 print:
 	@echo $(SEPARATOR)
-	@echo 'Compile C options:'
-	@echo '    $(CFLAGS)'
-	@echo 'Compile ASM options:'
-	@echo '    $(ASFLAGS)'
 	@echo 'Includes:'
 	@echo '    $(INCLUDES)'
+	@echo ''
+	@echo 'Compile C options:'
+	@echo '    $(CFLAGS)'
+	@echo ''
+	@echo 'Compile ASM options:'
+	@echo '    $(ASFLAGS)'
+	@echo ''
+	@echo 'LDFLAGS_FLASH options:'
+	@echo '    $(LDFLAGS_FLASH)'
+	@echo ''
+	@echo 'LDFLAGS_RAM options:'
+	@echo '    $(LDFLAGS_RAM)'
 build_complete:
 	@echo $(SEPARATOR)
 	@echo 'Build completed!'

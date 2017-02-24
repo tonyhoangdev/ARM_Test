@@ -57,9 +57,8 @@ ASFLAGS+=-nostartfiles -nodefaultlibs
 
 ## Linker flags
 LDFLAGS_FLASH:=-mcpu=cortex-m4 -mthumb
-
 LDFLAGS_FLASH+=-Wl,-Map=$(MAP_FLASH) -Xlinker --gc-sections
-LDFLAGS_FLASH+=-T "Project_Settings/Linker_Files/S32K1xx_flash.ld" --entry=Reset_Handler
+LDFLAGS_FLASH+=-T"Project_Settings/Linker_Files/S32K1xx_flash.ld" --entry=Reset_Handler
 LDFLAGS_FLASH+=-nostartfiles -nodefaultlibs
 #LDFLAGS_FLASH+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
 #LDFLAGS_FLASH+=-mfloat-abi=hard -mfpu=fpv4-sp-d16
@@ -117,12 +116,20 @@ size:
 # Target used to print compile informations
 print:
 	@echo $(SEPARATOR)
-	@echo 'Compile C options:'
-	@echo '    $(CFLAGS)'
-	@echo 'Compile ASM options:'
-	@echo '    $(ASFLAGS)'
 	@echo 'Includes:'
 	@echo '    $(INCLUDES)'
+	@echo ''
+	@echo 'Compile C options:'
+	@echo '    $(CFLAGS)'
+	@echo ''
+	@echo 'Compile ASM options:'
+	@echo '    $(ASFLAGS)'
+	@echo ''
+	@echo 'LDFLAGS_FLASH options:'
+	@echo '    $(LDFLAGS_FLASH)'
+	@echo ''
+	@echo 'LDFLAGS_RAM options:'
+	@echo '    $(LDFLAGS_RAM)'
 build_complete:
 	@echo $(SEPARATOR)
 	@echo 'Build completed!'

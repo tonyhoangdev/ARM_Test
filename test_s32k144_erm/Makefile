@@ -53,7 +53,8 @@ CCSIZE:=arm-none-eabi-size
 ## Toolchain C flags ##
 CFLAGS:=-mcpu=cortex-m4 -mthumb
 CFLAGS+=-DCPU_S32K144HFT0VLLT
-CFLAGS+=-O1 -g3 -Wall
+CFLAGS+=-O1 -g3
+CFLAGS+=-Wall
 CFLAGS+=-c -fmessage-length=0 -ffunction-sections -fdata-sections 
 CFLAGS+=-nostartfiles -nodefaultlibs
 #CFLAGS+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
@@ -128,12 +129,20 @@ size:
 # Target used to print compile informations
 print:
 	@echo $(SEPARATOR)
-	@echo 'Compile C options:'
-	@echo '    $(CFLAGS)'
-	@echo 'Compile ASM options:'
-	@echo '    $(ASFLAGS)'
 	@echo 'Includes:'
 	@echo '    $(INCLUDES)'
+	@echo ''
+	@echo 'Compile C options:'
+	@echo '    $(CFLAGS)'
+	@echo ''
+	@echo 'Compile ASM options:'
+	@echo '    $(ASFLAGS)'
+	@echo ''
+	@echo 'LDFLAGS_FLASH options:'
+	@echo '    $(LDFLAGS_FLASH)'
+	@echo ''
+	@echo 'LDFLAGS_RAM options:'
+	@echo '    $(LDFLAGS_RAM)'
 build_complete:
 	@echo $(SEPARATOR)
 	@echo 'Build completed!'
