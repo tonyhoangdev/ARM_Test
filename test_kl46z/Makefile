@@ -69,49 +69,42 @@ SEPARATOR=========================================
 
 ## Targets
 all: print dir $(EXECUTABLE_FLASH) size build_complete
+
 # Target used to compile C source files
 # $<: dependency (%.c)
 # $@: target (%.o)
 $(OBJECTDIR)%.o: %.c
-	@echo $(SEPARATOR)
-	@echo 'Compiling $@'
+	@echo -e '$(SEPARATOR)\nCompiling $@'
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 # Target used to compile assembler files
 $(OBJECTDIR)%.o: %.S
-	@echo $(SEPARATOR)
-	@echo 'Compiling $@'
+	@echo -e '$(SEPARATOR)\nCompiling $@'
 	@$(AS) $(ASFLAGS) $(INCLUDES) -c $< -o $@
 # Target used to link compiled sources
 $(EXECUTABLE_FLASH): $(COBJECTS)
-	@echo $(SEPARATOR)
-	@echo 'Linking to $(EXECUTABLE_FLASH)'
+	@echo -e '$(SEPARATOR)\nLinking to $(EXECUTABLE_RAM)'
+	@$(LD) -o $(EXECUTABLE_RAM) $(COBJECTS) $(LDFLAGS_RAM)
+	@echo -e '$(SEPARATOR)\nLinking to $(EXECUTABLE_FLASH)'
 	@$(LD) -o $(EXECUTABLE_FLASH) $(COBJECTS) $(LDFLAGS_FLASH)
 # Target used to print executables sizes
-size:
-	@echo $(SEPARATOR)
+size: print $(EXECUTABLE_FLASH)
+	@echo '$(SEPARATOR)'
 	@echo 'Size of $(EXECUTABLE_FLASH)'
 	@$(CCSIZE) $(EXECUTABLE_FLASH)
+	@echo 'Size of $(EXECUTABLE_RAM)'
+	@$(CCSIZE) $(EXECUTABLE_RAM)
 # Target used to print compile informations
 print:
 	@echo $(SEPARATOR)
-	@echo 'Includes:'
-	@echo '    $(INCLUDES)'
-	@echo ''
-	@echo 'Compile C options:'
-	@echo '    $(CFLAGS)'
-	@echo ''
-	@echo 'Compile ASM options:'
-	@echo '    $(ASFLAGS)'
-	@echo ''
-	@echo 'LDFLAGS_FLASH options:'
-	@echo '    $(LDFLAGS_FLASH)'
-	@echo ''
-	@echo 'LDFLAGS_RAM options:'
-	@echo '    $(LDFLAGS_RAM)'
-build_complete:
+	@echo -e '_____Compile C options_____:\n    $(CFLAGS)\n'
+	@echo -e '_____Compile ASM options_____:\n    $(ASFLAGS)\n'
+	@echo -e '_____LDFLAGS_FLASH options_____:\n    $(LDFLAGS_FLASH)\n'
+	@echo -e '_____LDFLAGS_RAM options_____:\n    $(LDFLAGS_RAM)\n'
+	@echo -e '_____Includes_____:\n    $(INCLUDES)\n'
+build_complete: size
 	@echo $(SEPARATOR)
 	@echo 'Build completed!'
-#Target used to create folder used to store temprary objects
+#Target used to create folder used to store temporary objects
 dir:
 	@mkdir -p $(OBJECTDIR)
 #Target used to remove files and folders
