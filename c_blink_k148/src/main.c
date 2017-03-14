@@ -108,19 +108,122 @@ void end_of_test_hook()
 
 #endif
 
+static inline void WritePin(GPIO_Type * base, uint32_t pin, uint8_t value)
+{
+    if (value != 0)
+    {
+        base->PDOR |= (1UL << pin);
+    }
+    else
+    {
+        base->PDOR &= ~(1UL << pin);
+    }
+}
+
+static inline void TogglePin(GPIO_Type * base, uint32_t pinMask)
+{
+    base->PTOR = pinMask;
+}
+
 void delay(volatile uint32_t time)
 {
     while (time--)
         ;
 }
 
-uint32_t arr[] = {2,4,3,4};
-uint32_t b = 3;
+void led_shift(uint8_t data)
+{
+    WritePin(LED0_TOUCH_GPIO, LED0_TOUCH_GPIO_PIN, data & 0x01U);
+    WritePin(LED1_TOUCH_GPIO, LED1_TOUCH_GPIO_PIN, data & 0x02U);
+    WritePin(LED2_TOUCH_GPIO, LED2_TOUCH_GPIO_PIN, data & 0x04U);
+    WritePin(LED3_TOUCH_GPIO, LED3_TOUCH_GPIO_PIN, data & 0x08U);
+    WritePin(LED4_TOUCH_GPIO, LED4_TOUCH_GPIO_PIN, data & 0x10U);
+}
+
+void BlinkALL2(uint32_t time)
+{
+    LED0_TOUCH_TOOGLE;
+    LED1_TOUCH_TOOGLE;
+    LED2_TOUCH_TOOGLE;
+    LED3_TOUCH_TOOGLE;
+    LED4_TOUCH_TOOGLE;
+    delay(time);
+    LED0_TOUCH_TOOGLE;
+    LED1_TOUCH_TOOGLE;
+    LED2_TOUCH_TOOGLE;
+    LED3_TOUCH_TOOGLE;
+    LED4_TOUCH_TOOGLE;
+    delay(time);
+    LED0_TOUCH_TOOGLE;
+    LED1_TOUCH_TOOGLE;
+    LED2_TOUCH_TOOGLE;
+    LED3_TOUCH_TOOGLE;
+    LED4_TOUCH_TOOGLE;
+    delay(time);
+    LED0_TOUCH_TOOGLE;
+    LED1_TOUCH_TOOGLE;
+    LED2_TOUCH_TOOGLE;
+    LED3_TOUCH_TOOGLE;
+    LED4_TOUCH_TOOGLE;
+    delay(time);
+}
+
+void BlinkLeft(uint32_t time)
+{
+    uint8_t i;
+
+    for (i = 0U; i < 5U; i++)
+    {
+        led_shift(1U << i);
+        delay(time);
+    }
+}
+
+void BlinkRight(uint32_t time)
+{
+    uint8_t i;
+
+    for (i = 0U; i < 5U; i++)
+    {
+        led_shift(0x10U >> i);
+        delay(time);
+    }
+}
+
+void BlinkRaiseOut(uint32_t time)
+{
+    uint8_t i;
+    uint8_t data;
+
+    for (i = 3U; i > 0U; i--)
+    {
+        data = (0x04U >> (3-i)) | (0x04U << (3-i));
+        led_shift(data);
+        delay(time);
+    }
+}
+
+void BlinkRaiseIn(uint32_t time)
+{
+    uint8_t i;
+    uint8_t data;
+
+    for (i = 0U; i < 3U; i++)
+    {
+        data = (0x10U >> i) | (0x01U << i);
+        led_shift(data);
+        delay(time);
+    }
+}
+
+// uint32_t arr[] = {2,4,3,4};
+const uint32_t b = 3;
+uint32_t arr;
 
 int main()
 {
-    volatile int a = arr[0];
-    (void)a;
+    //volatile int a = arr[0];
+    (void)arr;
     int b2 = b;
     (void)b2;
 
@@ -178,20 +281,21 @@ int main()
         return 1;
     }
 
-
     /* Infinite loop */
     for (;;)
     {
-        delay(1000000);
-
-        LED0_TOOGLE;
-        LED1_TOOGLE;
-
-        LED0_TOUCH_TOOGLE;
-        LED1_TOUCH_TOOGLE;
-        LED2_TOUCH_TOOGLE;
-        LED3_TOUCH_TOOGLE;
-        LED4_TOUCH_TOOGLE;
+        BlinkLeft(1000000);
+        BlinkLeft(1000000);
+        BlinkLeft(1000000);
+        BlinkRight(1000000);
+        BlinkRight(1000000);
+        BlinkRight(1000000);
+        BlinkRaiseOut(1000000);
+        BlinkRaiseOut(1000000);
+        BlinkRaiseOut(1000000);
+        BlinkRaiseIn(1000000);
+        BlinkRaiseIn(1000000);
+        BlinkRaiseIn(1000000);
     }
 
     return 0;

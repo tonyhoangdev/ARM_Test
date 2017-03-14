@@ -12,7 +12,7 @@ target remote localhost:2331
 monitor reset
 
 # Segger: specify flash of device
-monitor device = S32K144
+monitor device = S32K148
 
 # load/flash application file
 load ./app_flash.elf
