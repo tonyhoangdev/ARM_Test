@@ -6,7 +6,7 @@
 VPATH=$(SOURCEDIR)
 
 ## Define CSOURCES and ASMSOURCES
-CSOURCES:=
+CSOURCES:=main.c
 CSOURCES+=startup.c
 CSOURCES+=system_MKL46Z4.c
 
@@ -82,8 +82,6 @@ $(OBJECTDIR)%.o: %.S
 	@$(AS) $(ASFLAGS) $(INCLUDES) -c $< -o $@
 # Target used to link compiled sources
 $(EXECUTABLE_FLASH): $(COBJECTS)
-	@echo -e '$(SEPARATOR)\nLinking to $(EXECUTABLE_RAM)'
-	@$(LD) -o $(EXECUTABLE_RAM) $(COBJECTS) $(LDFLAGS_RAM)
 	@echo -e '$(SEPARATOR)\nLinking to $(EXECUTABLE_FLASH)'
 	@$(LD) -o $(EXECUTABLE_FLASH) $(COBJECTS) $(LDFLAGS_FLASH)
 # Target used to print executables sizes
@@ -91,8 +89,6 @@ size: print $(EXECUTABLE_FLASH)
 	@echo '$(SEPARATOR)'
 	@echo 'Size of $(EXECUTABLE_FLASH)'
 	@$(CCSIZE) $(EXECUTABLE_FLASH)
-	@echo 'Size of $(EXECUTABLE_RAM)'
-	@$(CCSIZE) $(EXECUTABLE_RAM)
 # Target used to print compile informations
 print:
 	@echo $(SEPARATOR)
@@ -110,6 +106,6 @@ dir:
 #Target used to remove files and folders
 clean:
 	@echo $(SEPARATOR)
-	$(RM) -rf $(OBJECTDIR) $(EXECUTABLE_FLASH) $(EXECUTABLE_RAM) $(MAP_FLASH) $(MAP_RAM)
+	$(RM) -rf $(OBJECTDIR) $(EXECUTABLE_FLASH) $(MAP_FLASH) $(MAP_RAM)
 
 .PHONY: all print dir size clean
