@@ -1,0 +1,1 @@
+"C:\GNU\com.pemicro.debug.gdbjtag.ppc_1.4.4.201611211911\win32\pegdbserver_power_console.exe" -device=MPC5748G -startserver -singlesession -serverport=7224 -interface=OPENSDA -speed=5000 -port=USB1 -configfile
