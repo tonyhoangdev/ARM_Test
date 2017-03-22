@@ -179,6 +179,9 @@ extern "C" {
     #define ENABLE_CHECK_RAMSECTION_FUNCTION_CALL
 #endif
 
+/** \brief  Endianness.
+ */
+#define CORE_LITTLE_ENDIAN
 
 #ifdef __cplusplus
 }

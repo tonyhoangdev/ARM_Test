@@ -9,28 +9,27 @@ VPATH=$(SOURCEDIR)
 CSOURCES:=main.c
 CSOURCES+=startup.c
 CSOURCES+=system_S32K144.c
-# CSOURCES+=erm_driver.c
-# CSOURCES+=erm_hal.c
+CSOURCES+=erm_driver.c
+CSOURCES+=erm_hw_access.c
 
-#CSOURCES+=FSL_ERM_DRV_UT_TS001.c
-#CSOURCES+=FSL_ERM_HAL_UT_TS001.c
-#CSOURCES+=erm_test.c
+CSOURCES+=FSL_ERM_DRV_UT_TS001.c
+CSOURCES+=erm_test.c
 
 ASMSOURCES:=startup_S32K144.S
 
 ## Define SOURCEDIR_LIB
-BASEDIR:=./
-SOURCEDIR_LIB:=include/
-SOURCEDIR_LIB+=Project_Settings/Startup_Code/
+BASEDIR:=
+SOURCEDIR_LIB:=
 
-SOURCEDIR_LIB+=platform/drivers/inc/
-SOURCEDIR_LIB+=platform/drivers/src/erm/
-SOURCEDIR_LIB+=platform/hal/inc/
-SOURCEDIR_LIB+=platform/hal/src/erm/
+SOURCEDIR_LIB+=
 
 ## Location of objects
 OBJECTDIR_NAME:=obj
 SOURCEDIR_NAME:=src
+SOURCEDIR_NAME+=include 
+SOURCEDIR_NAME+=Project_Settings/Startup_Code
+SOURCEDIR_NAME+=D:/04_Projects/ZZZ_DEV/erm
+SOURCEDIR_NAME+=../../src
 
 # Assenbler file extension
 ASM_EXT:=S
@@ -53,8 +52,7 @@ CCSIZE:=arm-none-eabi-size
 ## Toolchain C flags ##
 CFLAGS:=-mcpu=cortex-m4 -mthumb
 CFLAGS+=-DCPU_S32K144HFT0VLLT
-CFLAGS+=-O1 -g3
-CFLAGS+=-Wall
+CFLAGS+=-O1 -g3 -Wall
 CFLAGS+=-c -fmessage-length=0 -ffunction-sections -fdata-sections 
 CFLAGS+=-nostartfiles -nodefaultlibs
 #CFLAGS+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
@@ -69,9 +67,8 @@ ASFLAGS+=-nostartfiles -nodefaultlibs
 
 ## Linker flags
 LDFLAGS_FLASH:=-mcpu=cortex-m4 -mthumb
-
 LDFLAGS_FLASH+=-Wl,-Map=$(MAP_FLASH) -Xlinker --gc-sections
-LDFLAGS_FLASH+=-T "Project_Settings/Linker_Files/S32K1xx_flash.ld" --entry=Reset_Handler
+LDFLAGS_FLASH+=-T"Project_Settings/Linker_Files/S32K1xx_flash.ld" --entry=Reset_Handler
 LDFLAGS_FLASH+=-nostartfiles -nodefaultlibs
 #LDFLAGS_FLASH+=--sysroot="C:\GNU\arm-none-eabi-4_9\arm-none-eabi" -specs=nano.specs
 #LDFLAGS_FLASH+=-mfloat-abi=hard -mfpu=fpv4-sp-d16

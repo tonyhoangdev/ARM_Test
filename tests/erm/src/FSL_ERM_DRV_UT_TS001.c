@@ -48,6 +48,7 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+static ERM_Type * const g_ermBase[] = ERM_BASE_PTRS;
 
 /*******************************************************************************
  * Defines
@@ -102,13 +103,13 @@ erm_drv_test_result_t ERM_DRV_TEST_Init()
     /* Check result */
     for (i = 0U; i < ERM_NUM_OF_CFG_CHANNEL; i++)
     {
-        if (ERM_HAL_IsEventInterruptEnabled(g_ermBase[FSL_ERM1], erm1_InitConfig[i].channel, ERM_EVENT_SINGLE_BIT) !=
+        if (ERM_IsEventInterruptEnabled(g_ermBase[FSL_ERM1], erm1_InitConfig[i].channel, ERM_EVENT_SINGLE_BIT) !=
             ((*erm1_InitConfig[i].interruptCfg).enableSingleCorrection))
         {
             return ERM_DRV_TEST_FAILED;
         }
 
-        if (ERM_HAL_IsEventInterruptEnabled(g_ermBase[FSL_ERM1], erm1_InitConfig[i].channel, ERM_EVENT_NON_CORRECTABLE) !=
+        if (ERM_IsEventInterruptEnabled(g_ermBase[FSL_ERM1], erm1_InitConfig[i].channel, ERM_EVENT_NON_CORRECTABLE) !=
             ((*erm1_InitConfig[i].interruptCfg).enableNonCorrectable))
         {
             return ERM_DRV_TEST_FAILED;
@@ -171,7 +172,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_SEC()
 {
     uint32_t address;
     uint32_t read;
-    uint32_t testAddress = 0x55U;
+    volatile uint32_t testAddress = 0x55U;
     erm_ecc_event_t eccEvent;
 
     /* Call function */
@@ -186,6 +187,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_SEC()
 
     /* Read memory RAM */
     read = testAddress;
+    (void)read;
 
     /* Disable */
     EIM->EIMCR = EIM_EIMCR_GEIEN(0U);
@@ -206,7 +208,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_SEC()
     /* Clears the event for channel 1 */
     ERM_DRV_ClearEvent(FSL_ERM1, 1U, ERM_EVENT_SINGLE_BIT);
 
-    if (ERM_HAL_IsEventDetected(g_ermBase[FSL_ERM1], 1U, ERM_EVENT_SINGLE_BIT) != false)
+    if (ERM_IsEventDetected(g_ermBase[FSL_ERM1], 1U, ERM_EVENT_SINGLE_BIT) != false)
     {
         return ERM_DRV_TEST_FAILED;
     }
@@ -219,7 +221,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_DEC()
 {
     uint32_t address;
     uint32_t read;
-    uint32_t testAddress = 0x55U;
+    volatile uint32_t testAddress = 0x55U;
     erm_ecc_event_t eccEvent;
 
     /* Call function */
@@ -234,6 +236,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_DEC()
 
     /* Read memory RAM */
     read = testAddress;
+    (void)read;
 
     /* Disable */
     EIM->EIMCR = EIM_EIMCR_GEIEN(0U);
@@ -254,7 +257,7 @@ erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_DEC()
     /* Clears the event for channel 1 */
     ERM_DRV_ClearEvent(FSL_ERM1, 1U, ERM_EVENT_NON_CORRECTABLE);
 
-    if (ERM_HAL_IsEventDetected(g_ermBase[FSL_ERM1], 1U, ERM_EVENT_NON_CORRECTABLE) != false)
+    if (ERM_IsEventDetected(g_ermBase[FSL_ERM1], 1U, ERM_EVENT_NON_CORRECTABLE) != false)
     {
         return ERM_DRV_TEST_FAILED;
     }

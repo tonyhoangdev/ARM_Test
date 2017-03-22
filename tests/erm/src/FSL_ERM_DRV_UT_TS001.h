@@ -29,9 +29,9 @@
 
 /**************************************************************************
  *                                                                        *
- *                           ERM HAL For S32SDK                           *
+ *                           ERM Driver For S32SDK                        *
  *                                                                        *
- * FILE NAME     :  FSL_ERM_HAL_UT_TS001.h                                *
+ * FILE NAME     :  FSL_ERM_DRV_UT_TS001.h                                *
  * DATE          :  Aug 31, 2016                                          *
  *                                                                        *
  * AUTHOR        :  Minh Hoang                                            *
@@ -40,31 +40,30 @@
  *************************************************************************/
 
 /************************** CHANGES ***************************************
- 0.1.0       31.08.2016      Minh Hoang        Initial Version
+ 0.1.0       31.08.2016      Minh Hoang        Initial Versions
  *************************************************************************/
 
-#ifndef FSL_ERM_HAL_UT_TS001_H
-#define FSL_ERM_HAL_UT_TS001_H
+#ifndef FSL_ERM_DRV_UT_TS001_H
+#define FSL_ERM_DRV_UT_TS001_H
 
-#include "erm_hal.h"
+#include "erm_hw_access.h"
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+extern const erm_interrupt_config_t erm1_Interrupt1;
+extern const erm_interrupt_config_t erm1_Interrupt3;
+extern const erm_user_config_t erm1_InitConfig[];
 
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
-#define ERM_SBC_MASK(channel)   (1UL << (ERM_SBC_START - (channel * ERM_CHANNELS_OFFSET_SIZE)))
-#define ERM_SBC_SHIFT(channel)  (ERM_SBC_START - (channel * ERM_CHANNELS_OFFSET_SIZE))
-#define ERM_SBC(channel, x)     (((uint32_t)(((uint32_t)(x))<<ERM_SBC_SHIFT(channel)))&ERM_SBC_MASK(channel))
-
-#define ERM_NCE_MASK(channel)   (1UL << (ERM_NCE_START - (channel * ERM_CHANNELS_OFFSET_SIZE)))
-#define ERM_NCE_SHIFT(channel)  (ERM_NCE_START - (channel * ERM_CHANNELS_OFFSET_SIZE))
-#define ERM_NCE(channel, x)     (((uint32_t)(((uint32_t)(x))<<ERM_NCE_SHIFT(channel)))&ERM_NCE_MASK(channel))
-
 /* Test result type definition */
 typedef enum
 {
-    ERM_HAL_TEST_PASSED = 0U,
-    ERM_HAL_TEST_FAILED = 1U
-} erm_hal_test_result_t;
+    ERM_DRV_TEST_PASSED = 0U,
+    ERM_DRV_TEST_FAILED = 1U
+} erm_drv_test_result_t;
 
 /*******************************************************************************
  * Function prototypes
@@ -75,23 +74,26 @@ extern "C"
 {
 #endif
 
-/* Test for initialize the ERM module */
-erm_hal_test_result_t ERM_HAL_TEST_Init(void);
+/* Test function for ERM_DRV_Init and ERM_DRV_SetInterruptConfig */
+erm_drv_test_result_t ERM_DRV_TEST_Init();
 
-/* Test for enable Memory n interrupt event and check it */
-erm_hal_test_result_t ERM_HAL_TEST_EventInterrupt(void);
+/* Test function for ERM_DRV_Deinit */
+erm_drv_test_result_t ERM_DRV_TEST_Deinit();
 
-/* Test for get the address of the last ECC event in Memory n and ECC event with Single-bit correction */
-erm_hal_test_result_t ERM_HAL_TEST_GetErrorDetail_SEC(void);
+/* Test function for ERM_DRV_GetInterruptConfig */
+erm_drv_test_result_t ERM_DRV_TEST_GetInterruptConfig();
 
-/* Test for get the address of the last ECC event in Memory n and ECC event with Non-correctable */
-erm_hal_test_result_t ERM_HAL_TEST_GetErrorDetail_DEC(void);
+/* Test function for ERM_DRV_GetErrorDetail and ERM_DRV_ClearEvent with Single-bit correction */
+erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_SEC();
+
+/* Test function for ERM_DRV_GetErrorDetail and ERM_DRV_ClearEvent with Non-correctable */
+erm_drv_test_result_t ERM_DRV_TEST_GetErrorDetail_DEC();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* FSL_ERM_HAL_UT_TS001_H */
+#endif /* FSL_ERM_DRV_UT_TS001_H */
 /*******************************************************************************
  * EOF
  ******************************************************************************/

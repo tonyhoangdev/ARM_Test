@@ -15,7 +15,7 @@ extern int erm_test_start(void);
 int main(void)
 {
     /* Call function */
-    //bool exit_code = erm_test_start() ? 0U : 1U; /* exit_code = 0U (FAIL): exit_code = 1U (PASS) */
+    bool exit_code = erm_test_start() ? 0U : 1U; /* exit_code = 0U (FAIL): exit_code = 1U (PASS) */
 
     /* Infinite loop */
     for (;;)

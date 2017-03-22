@@ -30,7 +30,6 @@
  */
 
 #include "FSL_ERM_DRV_UT_TS001.h"
-#include "FSL_ERM_HAL_UT_TS001.h"
 
 /*******************************************************************************
  * Variables
@@ -47,26 +46,26 @@
  ******************************************************************************/
 int erm_test_start(void)
 {
-    PCC->PCCn[PCC_PORTD_INDEX] |= PCC_PCCn_CGC_MASK;
-    PORTD->PCR[15] |= PORT_PCR_MUX(1);
-    PORTD->PCR[16] |= PORT_PCR_MUX(1);
-    PTD->PDDR |= 1 << 15 | 1 << 16;
-    PTD->PCOR |= 1 << 15;
-    PTD->PSOR |= 1 << 16;
+    PCC->PCCn[PCC_PORTC_INDEX] |= PCC_PCCn_CGC_MASK;
+    PORTC->PCR[28] |= PORT_PCR_MUX(1);
+    PORTC->PCR[29] |= PORT_PCR_MUX(1);
+    PTC->PDDR |= 1 << 28 | 1 << 29;
+    PTC->PSOR |= 1 << 28;
+    PTC->PCOR |= 1 << 29;
 
     /* Index 0 for final result */
     /* Index form 1 to end for each test case */
-    erm_hal_test_result_t result_hal[NUMBER_OF_TEST_CASE_HAL + 1U] = { ERM_HAL_TEST_PASSED };
+    // erm_hal_test_result_t result_hal[NUMBER_OF_TEST_CASE_HAL + 1U] = { ERM_HAL_TEST_PASSED };
     erm_drv_test_result_t result_drv[NUMBER_OF_TEST_CASE_DRV + 1U] = { ERM_DRV_TEST_PASSED };
     /* Variable count */
-    uint32_t i = 1U;
+    //uint32_t i = 1U;
     uint32_t j = 1U;
 
     /******************************** Test for HAL ****************************/
     /* Test for initialize the ERM module */
-    result_hal[1U] = ERM_HAL_TEST_Init();
+    // result_hal[1U] = ERM_HAL_TEST_Init();
     /* Test for enable Memory n interrupt event and check it */
-    result_hal[2U] = ERM_HAL_TEST_EventInterrupt();
+    // result_hal[2U] = ERM_HAL_TEST_EventInterrupt();
     // /* Test for get the address of the last ECC event in Memory n and ECC event with Single-bit correction */
     // result_hal[3U] = ERM_HAL_TEST_GetErrorDetail_SEC();
     // /* Test for get the address of the last ECC event in Memory n and ECC event with Non-correctable */
@@ -80,20 +79,20 @@ int erm_test_start(void)
     /* Test function for ERM_DRV_GetInterruptConfig */
     result_drv[3U] |= ERM_DRV_TEST_GetInterruptConfig();
     // /* Test function for ERM_DRV_GetErrorDetail and ERM_DRV_ClearEvent with Single-bit correction */
-    // result_drv[4U] |= ERM_DRV_TEST_GetErrorDetail_SEC();
+    result_drv[4U] |= ERM_DRV_TEST_GetErrorDetail_SEC();
     // /* Test function for ERM_DRV_GetErrorDetail and ERM_DRV_ClearEvent with Non-correctable */
-    // result_drv[5U] |= ERM_DRV_TEST_GetErrorDetail_DEC();
+    result_drv[5U] |= ERM_DRV_TEST_GetErrorDetail_DEC();
 
     /******************************** Check result ****************************/
     /* Check HAL result */
-    for (i = 1U; i <= NUMBER_OF_TEST_CASE_HAL; i++)
-    {
-        if (result_hal[i] == ERM_HAL_TEST_FAILED)
-        {
-            result_hal[0] = ERM_HAL_TEST_FAILED;
-            break;
-        }
-    }
+    // for (i = 1U; i <= NUMBER_OF_TEST_CASE_HAL; i++)
+    // {
+    //     if (result_hal[i] == ERM_HAL_TEST_FAILED)
+    //     {
+    //         result_hal[0] = ERM_HAL_TEST_FAILED;
+    //         break;
+    //     }
+    // }
 
     /* Check DRV result */
     for (j = 1U; j <= NUMBER_OF_TEST_CASE_DRV; j++)
@@ -106,13 +105,13 @@ int erm_test_start(void)
     }
 
     /* Exit condition */
-    if (result_hal[0] | result_drv[0])
+    if (result_drv[0])
     {
         return 1U; /* FAIL */
     }
     else
     {
-        PTD->PCOR |= 1 << 16;
+        PTC->PSOR |= 1 << 29;
         return 0U; /* PASS */
     }
 }
