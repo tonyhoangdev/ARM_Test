@@ -296,6 +296,9 @@ int main()
         BlinkRaiseIn(1000000);
         BlinkRaiseIn(1000000);
         BlinkRaiseIn(1000000);
+        BlinkALL2(1000000);
+        BlinkALL2(1000000);
+        BlinkALL2(1000000);
     }
 
     return 0;
