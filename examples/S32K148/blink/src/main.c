@@ -66,8 +66,8 @@ void end_of_test_hook()
 #define LED0_TOUCH_PORT         PORTA
 #define LED0_TOUCH_GPIO_PIN     16U
 #define LED0_TOUCH_MASK         1U << LED0_TOUCH_GPIO_PIN
-#define LED0_TOUCH_OFF          LED0_TOUCH_GPIO->PSOR |= LED0_TOUCH_MASK
-#define LED0_TOUCH_ON           LED0_TOUCH_GPIO->PCOR |= LED0_TOUCH_MASK
+#define LED0_TOUCH_ON           LED0_TOUCH_GPIO->PSOR |= LED0_TOUCH_MASK
+#define LED0_TOUCH_OFF          LED0_TOUCH_GPIO->PCOR |= LED0_TOUCH_MASK
 #define LED0_TOUCH_TOOGLE       LED0_TOUCH_GPIO->PTOR |= LED0_TOUCH_MASK
 
 #define LED1_TOUCH_PCC_CLOCK    PCC_PORTE_INDEX
@@ -75,8 +75,8 @@ void end_of_test_hook()
 #define LED1_TOUCH_PORT         PORTE
 #define LED1_TOUCH_GPIO_PIN     20U
 #define LED1_TOUCH_MASK         1U << LED1_TOUCH_GPIO_PIN
-#define LED1_TOUCH_OFF          LED1_TOUCH_GPIO->PSOR |= LED1_TOUCH_MASK
-#define LED1_TOUCH_ON           LED1_TOUCH_GPIO->PCOR |= LED1_TOUCH_MASK
+#define LED1_TOUCH_ON           LED1_TOUCH_GPIO->PSOR |= LED1_TOUCH_MASK
+#define LED1_TOUCH_OFF          LED1_TOUCH_GPIO->PCOR |= LED1_TOUCH_MASK
 #define LED1_TOUCH_TOOGLE       LED1_TOUCH_GPIO->PTOR |= LED1_TOUCH_MASK
 
 #define LED2_TOUCH_PCC_CLOCK    PCC_PORTB_INDEX
@@ -84,8 +84,8 @@ void end_of_test_hook()
 #define LED2_TOUCH_PORT         PORTB
 #define LED2_TOUCH_GPIO_PIN     17U
 #define LED2_TOUCH_MASK         1U << LED2_TOUCH_GPIO_PIN
-#define LED2_TOUCH_OFF          LED2_TOUCH_GPIO->PSOR |= LED2_TOUCH_MASK
-#define LED2_TOUCH_ON           LED2_TOUCH_GPIO->PCOR |= LED2_TOUCH_MASK
+#define LED2_TOUCH_ON           LED2_TOUCH_GPIO->PSOR |= LED2_TOUCH_MASK
+#define LED2_TOUCH_OFF          LED2_TOUCH_GPIO->PCOR |= LED2_TOUCH_MASK
 #define LED2_TOUCH_TOOGLE       LED2_TOUCH_GPIO->PTOR |= LED2_TOUCH_MASK
 
 #define LED3_TOUCH_PCC_CLOCK    PCC_PORTC_INDEX
@@ -93,8 +93,8 @@ void end_of_test_hook()
 #define LED3_TOUCH_PORT         PORTC
 #define LED3_TOUCH_GPIO_PIN     29U
 #define LED3_TOUCH_MASK         1U << LED3_TOUCH_GPIO_PIN
-#define LED3_TOUCH_OFF          LED3_TOUCH_GPIO->PSOR |= LED3_TOUCH_MASK
-#define LED3_TOUCH_ON           LED3_TOUCH_GPIO->PCOR |= LED3_TOUCH_MASK
+#define LED3_TOUCH_ON           LED3_TOUCH_GPIO->PSOR |= LED3_TOUCH_MASK
+#define LED3_TOUCH_OFF          LED3_TOUCH_GPIO->PCOR |= LED3_TOUCH_MASK
 #define LED3_TOUCH_TOOGLE       LED3_TOUCH_GPIO->PTOR |= LED3_TOUCH_MASK
 
 #define LED4_TOUCH_PCC_CLOCK    PCC_PORTC_INDEX
@@ -102,13 +102,15 @@ void end_of_test_hook()
 #define LED4_TOUCH_PORT         PORTC
 #define LED4_TOUCH_GPIO_PIN     28U
 #define LED4_TOUCH_MASK         1U << LED4_TOUCH_GPIO_PIN
-#define LED4_TOUCH_OFF          LED4_TOUCH_GPIO->PSOR |= LED4_TOUCH_MASK
-#define LED4_TOUCH_ON           LED4_TOUCH_GPIO->PCOR |= LED4_TOUCH_MASK
+#define LED4_TOUCH_ON           LED4_TOUCH_GPIO->PSOR |= LED4_TOUCH_MASK
+#define LED4_TOUCH_OFF          LED4_TOUCH_GPIO->PCOR |= LED4_TOUCH_MASK
 #define LED4_TOUCH_TOOGLE       LED4_TOUCH_GPIO->PTOR |= LED4_TOUCH_MASK
 
 #endif
 
-static inline void WritePin(GPIO_Type * base, uint32_t pin, uint8_t value)
+static inline void WritePin(GPIO_Type * base,
+                            uint32_t pin,
+                            uint8_t value)
 {
     if (value != 0)
     {
@@ -120,7 +122,8 @@ static inline void WritePin(GPIO_Type * base, uint32_t pin, uint8_t value)
     }
 }
 
-static inline void TogglePin(GPIO_Type * base, uint32_t pinMask)
+static inline void TogglePin(GPIO_Type * base,
+                             uint32_t pinMask)
 {
     base->PTOR = pinMask;
 }
@@ -197,7 +200,7 @@ void BlinkRaiseOut(uint32_t time)
 
     for (i = 3U; i > 0U; i--)
     {
-        data = (0x04U >> (3-i)) | (0x04U << (3-i));
+        data = (0x04U >> (3 - i)) | (0x04U << (3 - i));
         led_shift(data);
         delay(time);
     }
@@ -260,11 +263,11 @@ int main()
     LED0_ON;
     LED1_OFF;
 
-    LED0_TOUCH_ON;
-    LED1_TOUCH_ON;
-    LED2_TOUCH_ON;
-    LED3_TOUCH_ON;
-    LED4_TOUCH_ON;
+    LED0_TOUCH_OFF;
+    LED1_TOUCH_OFF;
+    LED2_TOUCH_OFF;
+    LED3_TOUCH_OFF;
+    LED4_TOUCH_OFF;
 
     int i = 3;
 
