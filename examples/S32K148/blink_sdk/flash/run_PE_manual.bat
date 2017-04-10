@@ -1,0 +1,1 @@
+cd .. && make && arm-none-eabi-gdb -x flash/runPE.txt
