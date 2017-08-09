@@ -1,46 +1,28 @@
 /*
 ** ###################################################################
 **     Processor:           S32K144_100
-**     Compilers:           GNU C Compiler
-**                          GreenHills ARM Compiler
-**                          IAR ANSI C/C++ Compiler for ARM
-**
-**     Reference manual:    S32K14XRM Rev. 2 Draft B, 11/2016
-**     Version:             rev. 2.5, 2016-11-25
-**     Build:               b161202
+**     Reference manual:    S32K14XRM Rev. 2, 02/2017
+**     Version:             rev. 2.8, 2017-03-27
+**     Build:               b170328
 **
 **     Abstract:
 **         Peripheral Access Layer for S32K144
 **
 **     Copyright (c) 1997 - 2016 Freescale Semiconductor, Inc.
-**     Copyright 2016 NXP
-**     Copyright (c) 2016 - 2016 NXP
+**     Copyright 2016-2017 NXP
 **     All rights reserved.
 **
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted provided that the following conditions are met:
-**
-**     o Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     o Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     o Neither the name of NXP nor the names of its contributors may be used to endorse
-**       or promote products derived from this software without specific prior software
-**       without specific prior written permission.
-**
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**     THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+**     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+**     OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+**     IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+**     INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+**     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+**     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+**     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+**     IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+**     THE POSSIBILITY OF SUCH DAMAGE.
 **
 **     http:                 www.nxp.com
 **     mail:                 support@nxp.com
@@ -127,14 +109,21 @@
 **         Added MISRA declarations
 **         Updated copyright
 **         Changed prefix of NVIC, SCB and SysTick to S32_
+**     - rev. 2.6 (2017-01-09) - Iulian Talpiga
+**         Fix interrupts for CAN, LPUART, FTFC
+**     - rev. 2.7 (2017-02-22) - Iulian Talpiga
+**         Update header as per rev S32K14XRM Rev. 2, 02/2017
+**         Updated modules AIPS, CAN, LPI2C, LPSPI, MCM, MPU, SCG and SIM
+**     - rev. 2.8 (2017-03-27) - Iulian Talpiga
+**         Synchronized PCC_FlexIO on S32K Family
 **
 ** ###################################################################
 */
 
 /*!
  * @file S32K144.h
- * @version 2.5
- * @date 2016-11-25
+ * @version 2.8
+ * @date 2017-03-27
  * @brief Peripheral Access Layer for S32K144
  *
  * This file contains register definitions and macros for easy access to their
@@ -200,7 +189,7 @@
  * compatible) */
 #define MCU_MEM_MAP_VERSION 0x0200u
 /** Memory map minor version */
-#define MCU_MEM_MAP_VERSION_MINOR 0x0005u
+#define MCU_MEM_MAP_VERSION_MINOR 0x0008u
 
 /* ----------------------------------------------------------------------------
    -- Generic macros
@@ -314,111 +303,77 @@ typedef enum
   DMA15_IRQn                   = 15u,              /**< DMA channel 15 transfer complete */
   DMA_Error_IRQn               = 16u,              /**< DMA error interrupt channels 0-15 */
   MCM_IRQn                     = 17u,              /**< FPU sources */
-  FTFC_IRQn                    = 18u,              /**< FTFC command complete */
-  Read_Collision_IRQn          = 19u,              /**< FTFC read collision */
-  LVD_LVW_IRQn                 = 20u,              /**< PMC controller low-voltage detect, low-voltage warning */
+  FTFC_IRQn                    = 18u,              /**< FTFC Command complete */
+  Read_Collision_IRQn          = 19u,              /**< FTFC Read collision */
+  LVD_LVW_IRQn                 = 20u,              /**< PMC Low voltage detect interrupt */
   FTFC_Fault_IRQn              = 21u,              /**< FTFC Double bit fault detect */
   WDOG_EWM_IRQn                = 22u,              /**< Single interrupt vector for WDOG and EWM */
   RCM_IRQn                     = 23u,              /**< RCM Asynchronous Interrupt */
-  LPI2C0_Master_IRQn           = 24u,              /**< Inter-integrated circuit 0 */
-  LPI2C0_Slave_IRQn            = 25u,              /**< Inter-integrated circuit 0 */
-  LPSPI0_IRQn                  = 26u,              /**< Serial peripheral Interface 0 */
-  LPSPI1_IRQn                  = 27u,              /**< Serial peripheral Interface 1 */
-  LPSPI2_IRQn                  = 28u,              /**< Serial peripheral Interface 2 */
-  Reserved45_IRQn              = 29u,              /**< Reserved interrupt */
-  Reserved46_IRQn              = 30u,              /**< Reserved interrupt */
-  LPUART0_RxTx_IRQn            = 31u,              /**< LPUART0 receive/transmit interrupt */
-  LPUART0_ERR_IRQn             = 32u,              /**< LPUART0 Receive overrun, parity error, framing error or noise error */
-  LPUART1_RxTx_IRQn            = 33u,              /**< LPUART1 receive/transmit interrupt */
-  LPUART1_ERR_IRQn             = 34u,              /**< LPUART1 Receive overrun, parity error, framing error or noise error */
-  LPUART2_RxTx_IRQn            = 35u,              /**< LPUART2 receive/transmit interrupt */
-  LPUART2_ERR_IRQn             = 36u,              /**< LPUART2 Receive overrun, parity error, framing error or noise error */
-  Reserved53_IRQn              = 37u,              /**< Reserved interrupt */
-  Reserved54_IRQn              = 38u,              /**< Reserved interrupt */
-  ADC0_IRQn                    = 39u,              /**< ADC0 conversion complete interrupt */
-  ADC1_IRQn                    = 40u,              /**< ADC1 conversion complete interrupt */
-  CMP0_IRQn                    = 41u,              /**< CMP0 interrupt */
-  Reserved58_IRQn              = 42u,              /**< Reserved interrupt */
-  Reserved59_IRQn              = 43u,              /**< Reserved interrupt */
-  ERM_single_fault_IRQn        = 44u,              /**< ERM single fault */
-  ERM_double_fault_IRQn        = 45u,              /**< ERM double fault */
+  LPI2C0_Master_IRQn           = 24u,              /**< LPI2C0 Master Interrupt */
+  LPI2C0_Slave_IRQn            = 25u,              /**< LPI2C0 Slave Interrupt */
+  LPSPI0_IRQn                  = 26u,              /**< LPSPI0 Interrupt */
+  LPSPI1_IRQn                  = 27u,              /**< LPSPI1 Interrupt */
+  LPSPI2_IRQn                  = 28u,              /**< LPSPI2 Interrupt */
+  LPUART0_RxTx_IRQn            = 31u,              /**< LPUART0 Transmit / Receive Interrupt */
+  LPUART1_RxTx_IRQn            = 33u,              /**< LPUART1 Transmit / Receive  Interrupt */
+  LPUART2_RxTx_IRQn            = 35u,              /**< LPUART2 Transmit / Receive  Interrupt */
+  ADC0_IRQn                    = 39u,              /**< ADC0 interrupt request. */
+  ADC1_IRQn                    = 40u,              /**< ADC1 interrupt request. */
+  CMP0_IRQn                    = 41u,              /**< CMP0 interrupt request */
+  ERM_single_fault_IRQn        = 44u,              /**< ERM single bit error correction */
+  ERM_double_fault_IRQn        = 45u,              /**< ERM double bit error non-correctable */
   RTC_IRQn                     = 46u,              /**< RTC alarm interrupt */
-  RTC_Seconds_IRQn             = 47u,              /**< RTC seconds interrupt overflow */
-  LPIT0_Ch0_IRQn               = 48u,              /**< LPIT0 channel 0 overflow */
-  LPIT0_Ch1_IRQn               = 49u,              /**< LPIT0 channel 1 overflow */
-  LPIT0_Ch2_IRQn               = 50u,              /**< LPIT0 channel 2 overflow */
-  LPIT0_Ch3_IRQn               = 51u,              /**< LPIT0 channel 3 overflow */
-  PDB0_IRQn                    = 52u,              /**< Programmable delay block */
-  Reserved69_IRQn              = 53u,              /**< Reserved interrupt */
-  Reserved70_IRQn              = 54u,              /**< Reserved interrupt */
-  Reserved71_IRQn              = 55u,              /**< Reserved interrupt */
-  Reserved72_IRQn              = 56u,              /**< Reserved interrupt */
-  SCG_IRQn                     = 57u,              /**< System clock generator */
-  LPTMR0_IRQn                  = 58u,              /**< Single interrupt vector for  Low Power Timer 0 */
+  RTC_Seconds_IRQn             = 47u,              /**< RTC seconds interrupt */
+  LPIT0_Ch0_IRQn               = 48u,              /**< LPIT0 channel 0 overflow interrupt */
+  LPIT0_Ch1_IRQn               = 49u,              /**< LPIT0 channel 1 overflow interrupt */
+  LPIT0_Ch2_IRQn               = 50u,              /**< LPIT0 channel 2 overflow interrupt */
+  LPIT0_Ch3_IRQn               = 51u,              /**< LPIT0 channel 3 overflow interrupt */
+  PDB0_IRQn                    = 52u,              /**< PDB0 interrupt */
+  SCG_IRQn                     = 57u,              /**< SCG bus interrupt request */
+  LPTMR0_IRQn                  = 58u,              /**< LPTIMER interrupt request */
   PORTA_IRQn                   = 59u,              /**< Port A pin detect interrupt */
   PORTB_IRQn                   = 60u,              /**< Port B pin detect interrupt */
   PORTC_IRQn                   = 61u,              /**< Port C pin detect interrupt */
   PORTD_IRQn                   = 62u,              /**< Port D pin detect interrupt */
   PORTE_IRQn                   = 63u,              /**< Port E pin detect interrupt */
   SWI_IRQn                     = 64u,              /**< Software interrupt */
-  Reserved81_IRQn              = 65u,              /**< Reserved interrupt */
-  Reserved82_IRQn              = 66u,              /**< Reserved interrupt */
-  Reserved83_IRQn              = 67u,              /**< Reserved interrupt */
-  PDB1_IRQn                    = 68u,              /**< Programmable delay block */
-  FLEXIO_IRQn                  = 69u,              /**< FLEXIO */
-  Reserved86_IRQn              = 70u,              /**< Reserved interrupt */
-  Reserved87_IRQn              = 71u,              /**< Reserved interrupt */
-  Reserved88_IRQn              = 72u,              /**< Reserved interrupt */
-  Reserved89_IRQn              = 73u,              /**< Reserved interrupt */
-  Reserved90_IRQn              = 74u,              /**< Reserved interrupt */
-  Reserved91_IRQn              = 75u,              /**< Reserved interrupt */
-  Reserved92_IRQn              = 76u,              /**< Reserved interrupt */
-  Reserved93_IRQn              = 77u,              /**< Reserved interrupt */
-  CAN0_ORed_IRQn               = 78u,              /**< can */
-  CAN0_Error_IRQn              = 79u,              /**< can */
-  CAN0_Wake_Up_IRQn            = 80u,              /**< can */
-  CAN0_ORed_0_15_MB_IRQn       = 81u,              /**< can */
-  CAN0_ORed_16_31_MB_IRQn      = 82u,              /**< can */
-  Reserved99_IRQn              = 83u,              /**< Reserved interrupt */
-  Reserved100_IRQn             = 84u,              /**< Reserved interrupt */
-  CAN1_ORed_IRQn               = 85u,              /**< can */
-  CAN1_Error_IRQn              = 86u,              /**< can */
-  CAN1_Wake_Up_IRQn            = 87u,              /**< can */
-  CAN1_ORed_0_15_MB_IRQn       = 88u,              /**< can */
-  CAN1_ORed_16_31_MB_IRQn      = 89u,              /**< can */
-  Reserved106_IRQn             = 90u,              /**< Reserved interrupt */
-  Reserved107_IRQn             = 91u,              /**< Reserved interrupt */
-  CAN2_ORed_IRQn               = 92u,              /**< can */
-  CAN2_Error_IRQn              = 93u,              /**< can */
-  CAN2_Wake_Up_IRQn            = 94u,              /**< can */
-  CAN2_ORed_0_15_MB_IRQn       = 95u,              /**< can */
-  CAN2_ORed_16_31_MB_IRQn      = 96u,              /**< can */
-  Reserved113_IRQn             = 97u,              /**< Reserved interrupt */
-  Reserved114_IRQn             = 98u,              /**< Reserved interrupt */
-  FTM0_Ch0_Ch1_IRQn            = 99u,              /**< FTM0 ch0 and ch1 */
-  FTM0_Ch2_Ch3_IRQn            = 100u,             /**< FTM0 ch2 and ch3 */
-  FTM0_Ch4_Ch5_IRQn            = 101u,             /**< FTM0 ch4 and ch5 */
-  FTM0_Ch6_Ch7_IRQn            = 102u,             /**< FTM0 ch6 and ch7 */
-  FTM0_Fault_IRQn              = 103u,             /**< FTM0 Fault */
-  FTM0_Ovf_Reload_IRQn         = 104u,             /**< FTM0 Counter overflow, Reload */
-  FTM1_Ch0_Ch1_IRQn            = 105u,             /**< FTM1 ch0 and ch1 */
-  FTM1_Ch2_Ch3_IRQn            = 106u,             /**< FTM1 ch2 and ch3 */
-  FTM1_Ch4_Ch5_IRQn            = 107u,             /**< FTM1 ch4 and ch5 */
-  FTM1_Ch6_Ch7_IRQn            = 108u,             /**< FTM1 ch6 and ch7 */
-  FTM1_Fault_IRQn              = 109u,             /**< FTM1 Fault */
-  FTM1_Ovf_Reload_IRQn         = 110u,             /**< FTM1 Counter overflow, Reload */
-  FTM2_Ch0_Ch1_IRQn            = 111u,             /**< FTM2 ch0 and ch1 */
-  FTM2_Ch2_Ch3_IRQn            = 112u,             /**< FTM2 ch2 and ch3 */
-  FTM2_Ch4_Ch5_IRQn            = 113u,             /**< FTM2 ch4 and ch5 */
-  FTM2_Ch6_Ch7_IRQn            = 114u,             /**< FTM2 ch6 and ch7 */
-  FTM2_Fault_IRQn              = 115u,             /**< FTM2 Fault */
-  FTM2_Ovf_Reload_IRQn         = 116u,             /**< FTM2 Counter overflow, Reload */
-  FTM3_Ch0_Ch1_IRQn            = 117u,             /**< FTM3 ch0 and ch1 */
-  FTM3_Ch2_Ch3_IRQn            = 118u,             /**< FTM3 ch2 and ch3 */
-  FTM3_Ch4_Ch5_IRQn            = 119u,             /**< FTM3 ch4 and ch5 */
-  FTM3_Ch6_Ch7_IRQn            = 120u,             /**< FTM3 ch6 and ch7 */
-  FTM3_Fault_IRQn              = 121u,             /**< FTM3 Fault */
-  FTM3_Ovf_Reload_IRQn         = 122u              /**< FTM3 Counter overflow, Reload */
+  PDB1_IRQn                    = 68u,              /**< PDB1 interrupt */
+  FLEXIO_IRQn                  = 69u,              /**< FlexIO Interrupt */
+  CAN0_ORed_IRQn               = 78u,              /**< CAN0 OR'ed [Bus Off OR Transmit Warning OR Receive Warning] */
+  CAN0_Error_IRQn              = 79u,              /**< CAN0 Interrupt indicating that errors were detected on the CAN bus */
+  CAN0_Wake_Up_IRQn            = 80u,              /**< CAN0 Interrupt asserted when Pretended Networking operation is enabled, and a valid message matches the selected filter criteria during Low Power mode */
+  CAN0_ORed_0_15_MB_IRQn       = 81u,              /**< CAN0 OR'ed Message buffer (0-15) */
+  CAN0_ORed_16_31_MB_IRQn      = 82u,              /**< CAN0 OR'ed Message buffer (16-31) */
+  CAN1_ORed_IRQn               = 85u,              /**< CAN1 OR'ed [Bus Off OR Transmit Warning OR Receive Warning] */
+  CAN1_Error_IRQn              = 86u,              /**< CAN1 Interrupt indicating that errors were detected on the CAN bus */
+  CAN1_ORed_0_15_MB_IRQn       = 88u,              /**< CAN1 OR'ed Interrupt for Message buffer (0-15) */
+  CAN2_ORed_IRQn               = 92u,              /**< CAN2 OR'ed [Bus Off OR Transmit Warning OR Receive Warning] */
+  CAN2_Error_IRQn              = 93u,              /**< CAN2 Interrupt indicating that errors were detected on the CAN bus */
+  CAN2_ORed_0_15_MB_IRQn       = 95u,              /**< CAN2 OR'ed Message buffer (0-15) */
+  FTM0_Ch0_Ch1_IRQn            = 99u,              /**< FTM0 Channel 0 and 1 interrupt */
+  FTM0_Ch2_Ch3_IRQn            = 100u,             /**< FTM0 Channel 2 and 3 interrupt */
+  FTM0_Ch4_Ch5_IRQn            = 101u,             /**< FTM0 Channel 4 and 5 interrupt */
+  FTM0_Ch6_Ch7_IRQn            = 102u,             /**< FTM0 Channel 6 and 7 interrupt */
+  FTM0_Fault_IRQn              = 103u,             /**< FTM0 Fault interrupt */
+  FTM0_Ovf_Reload_IRQn         = 104u,             /**< FTM0 Counter overflow and Reload interrupt */
+  FTM1_Ch0_Ch1_IRQn            = 105u,             /**< FTM1 Channel 0 and 1 interrupt */
+  FTM1_Ch2_Ch3_IRQn            = 106u,             /**< FTM1 Channel 2 and 3 interrupt */
+  FTM1_Ch4_Ch5_IRQn            = 107u,             /**< FTM1 Channel 4 and 5 interrupt */
+  FTM1_Ch6_Ch7_IRQn            = 108u,             /**< FTM1 Channel 6 and 7 interrupt */
+  FTM1_Fault_IRQn              = 109u,             /**< FTM1 Fault interrupt */
+  FTM1_Ovf_Reload_IRQn         = 110u,             /**< FTM1 Counter overflow and Reload interrupt */
+  FTM2_Ch0_Ch1_IRQn            = 111u,             /**< FTM2 Channel 0 and 1 interrupt */
+  FTM2_Ch2_Ch3_IRQn            = 112u,             /**< FTM2 Channel 2 and 3 interrupt */
+  FTM2_Ch4_Ch5_IRQn            = 113u,             /**< FTM2 Channel 4 and 5 interrupt */
+  FTM2_Ch6_Ch7_IRQn            = 114u,             /**< FTM2 Channel 6 and 7 interrupt */
+  FTM2_Fault_IRQn              = 115u,             /**< FTM2 Fault interrupt */
+  FTM2_Ovf_Reload_IRQn         = 116u,             /**< FTM2 Counter overflow and Reload interrupt */
+  FTM3_Ch0_Ch1_IRQn            = 117u,             /**< FTM3 Channel 0 and 1 interrupt */
+  FTM3_Ch2_Ch3_IRQn            = 118u,             /**< FTM3 Channel 2 and 3 interrupt */
+  FTM3_Ch4_Ch5_IRQn            = 119u,             /**< FTM3 Channel 4 and 5 interrupt */
+  FTM3_Ch6_Ch7_IRQn            = 120u,             /**< FTM3 Channel 6 and 7 interrupt */
+  FTM3_Fault_IRQn              = 121u,             /**< FTM3 Fault interrupt */
+  FTM3_Ovf_Reload_IRQn         = 122u              /**< FTM3 Counter overflow and Reload interrupt */
 } IRQn_Type;
 
 /*!
@@ -820,30 +775,6 @@ typedef struct {
 #define AIPS_MPRA_MTR0_WIDTH                     1u
 #define AIPS_MPRA_MTR0(x)                        (((uint32_t)(((uint32_t)(x))<<AIPS_MPRA_MTR0_SHIFT))&AIPS_MPRA_MTR0_MASK)
 /* PACR Bit Fields */
-#define AIPS_PACR_TP7_MASK                       0x1u
-#define AIPS_PACR_TP7_SHIFT                      0u
-#define AIPS_PACR_TP7_WIDTH                      1u
-#define AIPS_PACR_TP7(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_TP7_SHIFT))&AIPS_PACR_TP7_MASK)
-#define AIPS_PACR_WP7_MASK                       0x2u
-#define AIPS_PACR_WP7_SHIFT                      1u
-#define AIPS_PACR_WP7_WIDTH                      1u
-#define AIPS_PACR_WP7(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_WP7_SHIFT))&AIPS_PACR_WP7_MASK)
-#define AIPS_PACR_SP7_MASK                       0x4u
-#define AIPS_PACR_SP7_SHIFT                      2u
-#define AIPS_PACR_SP7_WIDTH                      1u
-#define AIPS_PACR_SP7(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP7_SHIFT))&AIPS_PACR_SP7_MASK)
-#define AIPS_PACR_TP6_MASK                       0x10u
-#define AIPS_PACR_TP6_SHIFT                      4u
-#define AIPS_PACR_TP6_WIDTH                      1u
-#define AIPS_PACR_TP6(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_TP6_SHIFT))&AIPS_PACR_TP6_MASK)
-#define AIPS_PACR_WP6_MASK                       0x20u
-#define AIPS_PACR_WP6_SHIFT                      5u
-#define AIPS_PACR_WP6_WIDTH                      1u
-#define AIPS_PACR_WP6(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_WP6_SHIFT))&AIPS_PACR_WP6_MASK)
-#define AIPS_PACR_SP6_MASK                       0x40u
-#define AIPS_PACR_SP6_SHIFT                      6u
-#define AIPS_PACR_SP6_WIDTH                      1u
-#define AIPS_PACR_SP6(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP6_SHIFT))&AIPS_PACR_SP6_MASK)
 #define AIPS_PACR_TP5_MASK                       0x100u
 #define AIPS_PACR_TP5_SHIFT                      8u
 #define AIPS_PACR_TP5_WIDTH                      1u
@@ -856,42 +787,6 @@ typedef struct {
 #define AIPS_PACR_SP5_SHIFT                      10u
 #define AIPS_PACR_SP5_WIDTH                      1u
 #define AIPS_PACR_SP5(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP5_SHIFT))&AIPS_PACR_SP5_MASK)
-#define AIPS_PACR_TP4_MASK                       0x1000u
-#define AIPS_PACR_TP4_SHIFT                      12u
-#define AIPS_PACR_TP4_WIDTH                      1u
-#define AIPS_PACR_TP4(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_TP4_SHIFT))&AIPS_PACR_TP4_MASK)
-#define AIPS_PACR_WP4_MASK                       0x2000u
-#define AIPS_PACR_WP4_SHIFT                      13u
-#define AIPS_PACR_WP4_WIDTH                      1u
-#define AIPS_PACR_WP4(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_WP4_SHIFT))&AIPS_PACR_WP4_MASK)
-#define AIPS_PACR_SP4_MASK                       0x4000u
-#define AIPS_PACR_SP4_SHIFT                      14u
-#define AIPS_PACR_SP4_WIDTH                      1u
-#define AIPS_PACR_SP4(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP4_SHIFT))&AIPS_PACR_SP4_MASK)
-#define AIPS_PACR_TP3_MASK                       0x10000u
-#define AIPS_PACR_TP3_SHIFT                      16u
-#define AIPS_PACR_TP3_WIDTH                      1u
-#define AIPS_PACR_TP3(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_TP3_SHIFT))&AIPS_PACR_TP3_MASK)
-#define AIPS_PACR_WP3_MASK                       0x20000u
-#define AIPS_PACR_WP3_SHIFT                      17u
-#define AIPS_PACR_WP3_WIDTH                      1u
-#define AIPS_PACR_WP3(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_WP3_SHIFT))&AIPS_PACR_WP3_MASK)
-#define AIPS_PACR_SP3_MASK                       0x40000u
-#define AIPS_PACR_SP3_SHIFT                      18u
-#define AIPS_PACR_SP3_WIDTH                      1u
-#define AIPS_PACR_SP3(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP3_SHIFT))&AIPS_PACR_SP3_MASK)
-#define AIPS_PACR_TP2_MASK                       0x100000u
-#define AIPS_PACR_TP2_SHIFT                      20u
-#define AIPS_PACR_TP2_WIDTH                      1u
-#define AIPS_PACR_TP2(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_TP2_SHIFT))&AIPS_PACR_TP2_MASK)
-#define AIPS_PACR_WP2_MASK                       0x200000u
-#define AIPS_PACR_WP2_SHIFT                      21u
-#define AIPS_PACR_WP2_WIDTH                      1u
-#define AIPS_PACR_WP2(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_WP2_SHIFT))&AIPS_PACR_WP2_MASK)
-#define AIPS_PACR_SP2_MASK                       0x400000u
-#define AIPS_PACR_SP2_SHIFT                      22u
-#define AIPS_PACR_SP2_WIDTH                      1u
-#define AIPS_PACR_SP2(x)                         (((uint32_t)(((uint32_t)(x))<<AIPS_PACR_SP2_SHIFT))&AIPS_PACR_SP2_MASK)
 #define AIPS_PACR_TP1_MASK                       0x1000000u
 #define AIPS_PACR_TP1_SHIFT                      24u
 #define AIPS_PACR_TP1_WIDTH                      1u
@@ -1111,7 +1006,7 @@ typedef struct {
 /** Array initializer of CAN peripheral base pointers */
 #define CAN_BASE_PTRS                            { CAN0, CAN1, CAN2 }
  /** Number of interrupt vector arrays for the CAN module. */
-#define CAN_IRQS_ARR_COUNT                       (6u)
+#define CAN_IRQS_ARR_COUNT                       (7u)
  /** Number of interrupt channels for the Rx_Warning type of CAN module. */
 #define CAN_Rx_Warning_IRQS_CH_COUNT             (1u)
  /** Number of interrupt channels for the Tx_Warning type of CAN module. */
@@ -1122,17 +1017,18 @@ typedef struct {
 #define CAN_Error_IRQS_CH_COUNT                  (1u)
  /** Number of interrupt channels for the Bus_Off type of CAN module. */
 #define CAN_Bus_Off_IRQS_CH_COUNT                (1u)
- /** Number of interrupt channels for the ORed_Message_buffer type of CAN module. */
-#define CAN_ORed_Message_buffer_IRQS_CH_COUNT    (2u)
+ /** Number of interrupt channels for the ORed_0_15_MB type of CAN module. */
+#define CAN_ORed_0_15_MB_IRQS_CH_COUNT           (1u)
+ /** Number of interrupt channels for the ORed_16_31_MB type of CAN module. */
+#define CAN_ORed_16_31_MB_IRQS_CH_COUNT          (1u)
 /** Interrupt vectors for the CAN peripheral type */
 #define CAN_Rx_Warning_IRQS                      { CAN0_ORed_IRQn, CAN1_ORed_IRQn, CAN2_ORed_IRQn }
 #define CAN_Tx_Warning_IRQS                      { CAN0_ORed_IRQn, CAN1_ORed_IRQn, CAN2_ORed_IRQn }
-#define CAN_Wake_Up_IRQS                         { CAN0_Wake_Up_IRQn, CAN1_Wake_Up_IRQn, CAN2_Wake_Up_IRQn }
+#define CAN_Wake_Up_IRQS                         { CAN0_Wake_Up_IRQn, NotAvail_IRQn, NotAvail_IRQn }
 #define CAN_Error_IRQS                           { CAN0_Error_IRQn, CAN1_Error_IRQn, CAN2_Error_IRQn }
 #define CAN_Bus_Off_IRQS                         { CAN0_ORed_IRQn, CAN1_ORed_IRQn, CAN2_ORed_IRQn }
-#define CAN_ORed_Message_buffer_IRQS             { { CAN0_ORed_0_15_MB_IRQn, CAN0_ORed_16_31_MB_IRQn }, \
-                                                   { CAN1_ORed_0_15_MB_IRQn, CAN1_ORed_16_31_MB_IRQn }, \
-                                                   { CAN2_ORed_0_15_MB_IRQn, CAN2_ORed_16_31_MB_IRQn } }
+#define CAN_ORed_0_15_MB_IRQS                    { CAN0_ORed_0_15_MB_IRQn, CAN1_ORed_0_15_MB_IRQn, CAN2_ORed_0_15_MB_IRQn }
+#define CAN_ORed_16_31_MB_IRQS                   { CAN0_ORed_16_31_MB_IRQn, NotAvail_IRQn, NotAvail_IRQn }
 
 /* ----------------------------------------------------------------------------
    -- CAN Register Masks
@@ -1458,10 +1354,10 @@ typedef struct {
 #define CAN_CTRL2_EDFLTDIS_SHIFT                 11u
 #define CAN_CTRL2_EDFLTDIS_WIDTH                 1u
 #define CAN_CTRL2_EDFLTDIS(x)                    (((uint32_t)(((uint32_t)(x))<<CAN_CTRL2_EDFLTDIS_SHIFT))&CAN_CTRL2_EDFLTDIS_MASK)
-#define CAN_CTRL2_STFCNTEN_MASK                  0x1000u
-#define CAN_CTRL2_STFCNTEN_SHIFT                 12u
-#define CAN_CTRL2_STFCNTEN_WIDTH                 1u
-#define CAN_CTRL2_STFCNTEN(x)                    (((uint32_t)(((uint32_t)(x))<<CAN_CTRL2_STFCNTEN_SHIFT))&CAN_CTRL2_STFCNTEN_MASK)
+#define CAN_CTRL2_ISOCANFDEN_MASK                0x1000u
+#define CAN_CTRL2_ISOCANFDEN_SHIFT               12u
+#define CAN_CTRL2_ISOCANFDEN_WIDTH               1u
+#define CAN_CTRL2_ISOCANFDEN(x)                  (((uint32_t)(((uint32_t)(x))<<CAN_CTRL2_ISOCANFDEN_SHIFT))&CAN_CTRL2_ISOCANFDEN_MASK)
 #define CAN_CTRL2_PREXCEN_MASK                   0x4000u
 #define CAN_CTRL2_PREXCEN_SHIFT                  14u
 #define CAN_CTRL2_PREXCEN_WIDTH                  1u
@@ -1800,10 +1696,6 @@ typedef struct {
 #define CAN_FDCTRL_MBDSR0_SHIFT                  16u
 #define CAN_FDCTRL_MBDSR0_WIDTH                  2u
 #define CAN_FDCTRL_MBDSR0(x)                     (((uint32_t)(((uint32_t)(x))<<CAN_FDCTRL_MBDSR0_SHIFT))&CAN_FDCTRL_MBDSR0_MASK)
-#define CAN_FDCTRL_MBDSR1_MASK                   0x180000u
-#define CAN_FDCTRL_MBDSR1_SHIFT                  19u
-#define CAN_FDCTRL_MBDSR1_WIDTH                  2u
-#define CAN_FDCTRL_MBDSR1(x)                     (((uint32_t)(((uint32_t)(x))<<CAN_FDCTRL_MBDSR1_SHIFT))&CAN_FDCTRL_MBDSR1_MASK)
 #define CAN_FDCTRL_FDRATE_MASK                   0x80000000u
 #define CAN_FDCTRL_FDRATE_SHIFT                  31u
 #define CAN_FDCTRL_FDRATE_WIDTH                  1u
@@ -3911,17 +3803,14 @@ typedef struct {
 /** Array initializer of FTFC peripheral base pointers */
 #define FTFC_BASE_PTRS                           { FTFC }
  /** Number of interrupt vector arrays for the FTFC module. */
-#define FTFC_IRQS_ARR_COUNT                      (3u)
+#define FTFC_IRQS_ARR_COUNT                      (2u)
  /** Number of interrupt channels for the COMMAND_COMPLETE type of FTFC module. */
 #define FTFC_COMMAND_COMPLETE_IRQS_CH_COUNT      (1u)
  /** Number of interrupt channels for the READ_COLLISION type of FTFC module. */
 #define FTFC_READ_COLLISION_IRQS_CH_COUNT        (1u)
- /** Number of interrupt channels for the FAULT_DOUBLEBIT type of FTFC module. */
-#define FTFC_FAULT_DOUBLEBIT_IRQS_CH_COUNT       (1u)
 /** Interrupt vectors for the FTFC peripheral type */
 #define FTFC_COMMAND_COMPLETE_IRQS               { FTFC_IRQn }
 #define FTFC_READ_COLLISION_IRQS                 { Read_Collision_IRQn }
-#define FTFC_FAULT_DOUBLEBIT_IRQS                { FTFC_Fault_IRQn }
 
 /* ----------------------------------------------------------------------------
    -- FTFC Register Masks
@@ -4121,13 +4010,13 @@ typedef struct {
   __IO uint32_t SWOCTRL;                           /**< FTM Software Output Control, offset: 0x94 */
   __IO uint32_t PWMLOAD;                           /**< FTM PWM Load, offset: 0x98 */
   __IO uint32_t HCR;                               /**< Half Cycle Register, offset: 0x9C */
-  __IO uint32_t PAIR0DEADTIME;                     /**< FTM Pair 0 Deadtime Configuration, offset: 0xA0 */
+  __IO uint32_t PAIR0DEADTIME;                     /**< Pair 0 Deadtime Configuration, offset: 0xA0 */
        uint8_t RESERVED_0[4];
-  __IO uint32_t PAIR1DEADTIME;                     /**< FTM Pair 1 Deadtime Configuration, offset: 0xA8 */
+  __IO uint32_t PAIR1DEADTIME;                     /**< Pair 1 Deadtime Configuration, offset: 0xA8 */
        uint8_t RESERVED_1[4];
-  __IO uint32_t PAIR2DEADTIME;                     /**< FTM Pair 2 Deadtime Configuration, offset: 0xB0 */
+  __IO uint32_t PAIR2DEADTIME;                     /**< Pair 2 Deadtime Configuration, offset: 0xB0 */
        uint8_t RESERVED_2[4];
-  __IO uint32_t PAIR3DEADTIME;                     /**< FTM Pair 3 Deadtime Configuration, offset: 0xB8 */
+  __IO uint32_t PAIR3DEADTIME;                     /**< Pair 3 Deadtime Configuration, offset: 0xB8 */
 } FTM_Type, *FTM_MemMapPtr;
 
  /** Number of instances of the FTM module. */
@@ -5759,22 +5648,22 @@ typedef struct {
 #define LPI2C_MCCR1_DATAVD_WIDTH                 6u
 #define LPI2C_MCCR1_DATAVD(x)                    (((uint32_t)(((uint32_t)(x))<<LPI2C_MCCR1_DATAVD_SHIFT))&LPI2C_MCCR1_DATAVD_MASK)
 /* MFCR Bit Fields */
-#define LPI2C_MFCR_TXWATER_MASK                  0xFFu
+#define LPI2C_MFCR_TXWATER_MASK                  0x3u
 #define LPI2C_MFCR_TXWATER_SHIFT                 0u
-#define LPI2C_MFCR_TXWATER_WIDTH                 8u
+#define LPI2C_MFCR_TXWATER_WIDTH                 2u
 #define LPI2C_MFCR_TXWATER(x)                    (((uint32_t)(((uint32_t)(x))<<LPI2C_MFCR_TXWATER_SHIFT))&LPI2C_MFCR_TXWATER_MASK)
-#define LPI2C_MFCR_RXWATER_MASK                  0xFF0000u
+#define LPI2C_MFCR_RXWATER_MASK                  0x30000u
 #define LPI2C_MFCR_RXWATER_SHIFT                 16u
-#define LPI2C_MFCR_RXWATER_WIDTH                 8u
+#define LPI2C_MFCR_RXWATER_WIDTH                 2u
 #define LPI2C_MFCR_RXWATER(x)                    (((uint32_t)(((uint32_t)(x))<<LPI2C_MFCR_RXWATER_SHIFT))&LPI2C_MFCR_RXWATER_MASK)
 /* MFSR Bit Fields */
-#define LPI2C_MFSR_TXCOUNT_MASK                  0xFFu
+#define LPI2C_MFSR_TXCOUNT_MASK                  0x7u
 #define LPI2C_MFSR_TXCOUNT_SHIFT                 0u
-#define LPI2C_MFSR_TXCOUNT_WIDTH                 8u
+#define LPI2C_MFSR_TXCOUNT_WIDTH                 3u
 #define LPI2C_MFSR_TXCOUNT(x)                    (((uint32_t)(((uint32_t)(x))<<LPI2C_MFSR_TXCOUNT_SHIFT))&LPI2C_MFSR_TXCOUNT_MASK)
-#define LPI2C_MFSR_RXCOUNT_MASK                  0xFF0000u
+#define LPI2C_MFSR_RXCOUNT_MASK                  0x70000u
 #define LPI2C_MFSR_RXCOUNT_SHIFT                 16u
-#define LPI2C_MFSR_RXCOUNT_WIDTH                 8u
+#define LPI2C_MFSR_RXCOUNT_WIDTH                 3u
 #define LPI2C_MFSR_RXCOUNT(x)                    (((uint32_t)(((uint32_t)(x))<<LPI2C_MFSR_RXCOUNT_SHIFT))&LPI2C_MFSR_RXCOUNT_MASK)
 /* MTDR Bit Fields */
 #define LPI2C_MTDR_DATA_MASK                     0xFFu
@@ -5811,14 +5700,6 @@ typedef struct {
 #define LPI2C_SCR_FILTDZ_SHIFT                   5u
 #define LPI2C_SCR_FILTDZ_WIDTH                   1u
 #define LPI2C_SCR_FILTDZ(x)                      (((uint32_t)(((uint32_t)(x))<<LPI2C_SCR_FILTDZ_SHIFT))&LPI2C_SCR_FILTDZ_MASK)
-#define LPI2C_SCR_RTF_MASK                       0x100u
-#define LPI2C_SCR_RTF_SHIFT                      8u
-#define LPI2C_SCR_RTF_WIDTH                      1u
-#define LPI2C_SCR_RTF(x)                         (((uint32_t)(((uint32_t)(x))<<LPI2C_SCR_RTF_SHIFT))&LPI2C_SCR_RTF_MASK)
-#define LPI2C_SCR_RRF_MASK                       0x200u
-#define LPI2C_SCR_RRF_SHIFT                      9u
-#define LPI2C_SCR_RRF_WIDTH                      1u
-#define LPI2C_SCR_RRF(x)                         (((uint32_t)(((uint32_t)(x))<<LPI2C_SCR_RRF_SHIFT))&LPI2C_SCR_RRF_MASK)
 /* SSR Bit Fields */
 #define LPI2C_SSR_TDF_MASK                       0x1u
 #define LPI2C_SSR_TDF_SHIFT                      0u
@@ -6560,22 +6441,22 @@ typedef struct {
 #define LPSPI_CCR_SCKPCS_WIDTH                   8u
 #define LPSPI_CCR_SCKPCS(x)                      (((uint32_t)(((uint32_t)(x))<<LPSPI_CCR_SCKPCS_SHIFT))&LPSPI_CCR_SCKPCS_MASK)
 /* FCR Bit Fields */
-#define LPSPI_FCR_TXWATER_MASK                   0xFFu
+#define LPSPI_FCR_TXWATER_MASK                   0x3u
 #define LPSPI_FCR_TXWATER_SHIFT                  0u
-#define LPSPI_FCR_TXWATER_WIDTH                  8u
+#define LPSPI_FCR_TXWATER_WIDTH                  2u
 #define LPSPI_FCR_TXWATER(x)                     (((uint32_t)(((uint32_t)(x))<<LPSPI_FCR_TXWATER_SHIFT))&LPSPI_FCR_TXWATER_MASK)
-#define LPSPI_FCR_RXWATER_MASK                   0xFF0000u
+#define LPSPI_FCR_RXWATER_MASK                   0x30000u
 #define LPSPI_FCR_RXWATER_SHIFT                  16u
-#define LPSPI_FCR_RXWATER_WIDTH                  8u
+#define LPSPI_FCR_RXWATER_WIDTH                  2u
 #define LPSPI_FCR_RXWATER(x)                     (((uint32_t)(((uint32_t)(x))<<LPSPI_FCR_RXWATER_SHIFT))&LPSPI_FCR_RXWATER_MASK)
 /* FSR Bit Fields */
-#define LPSPI_FSR_TXCOUNT_MASK                   0xFFu
+#define LPSPI_FSR_TXCOUNT_MASK                   0x7u
 #define LPSPI_FSR_TXCOUNT_SHIFT                  0u
-#define LPSPI_FSR_TXCOUNT_WIDTH                  8u
+#define LPSPI_FSR_TXCOUNT_WIDTH                  3u
 #define LPSPI_FSR_TXCOUNT(x)                     (((uint32_t)(((uint32_t)(x))<<LPSPI_FSR_TXCOUNT_SHIFT))&LPSPI_FSR_TXCOUNT_MASK)
-#define LPSPI_FSR_RXCOUNT_MASK                   0xFF0000u
+#define LPSPI_FSR_RXCOUNT_MASK                   0x70000u
 #define LPSPI_FSR_RXCOUNT_SHIFT                  16u
-#define LPSPI_FSR_RXCOUNT_WIDTH                  8u
+#define LPSPI_FSR_RXCOUNT_WIDTH                  3u
 #define LPSPI_FSR_RXCOUNT(x)                     (((uint32_t)(((uint32_t)(x))<<LPSPI_FSR_RXCOUNT_SHIFT))&LPSPI_FSR_RXCOUNT_MASK)
 /* TCR Bit Fields */
 #define LPSPI_TCR_FRAMESZ_MASK                   0xFFFu
@@ -6822,14 +6703,11 @@ typedef struct {
 /** Array initializer of LPUART peripheral base pointers */
 #define LPUART_BASE_PTRS                         { LPUART0, LPUART1, LPUART2 }
  /** Number of interrupt vector arrays for the LPUART module. */
-#define LPUART_IRQS_ARR_COUNT                    (2u)
+#define LPUART_IRQS_ARR_COUNT                    (1u)
  /** Number of interrupt channels for the RX_TX type of LPUART module. */
 #define LPUART_RX_TX_IRQS_CH_COUNT               (1u)
- /** Number of interrupt channels for the ERR type of LPUART module. */
-#define LPUART_ERR_IRQS_CH_COUNT                 (1u)
 /** Interrupt vectors for the LPUART peripheral type */
 #define LPUART_RX_TX_IRQS                        { LPUART0_RxTx_IRQn, LPUART1_RxTx_IRQn, LPUART2_RxTx_IRQn }
-#define LPUART_ERR_IRQS                          { LPUART0_ERR_IRQn, LPUART1_ERR_IRQn, LPUART2_ERR_IRQn }
 
 /* ----------------------------------------------------------------------------
    -- LPUART Register Masks
@@ -7210,9 +7088,9 @@ typedef struct {
 #define LPUART_MODIR_TXCTSSRC_SHIFT              5u
 #define LPUART_MODIR_TXCTSSRC_WIDTH              1u
 #define LPUART_MODIR_TXCTSSRC(x)                 (((uint32_t)(((uint32_t)(x))<<LPUART_MODIR_TXCTSSRC_SHIFT))&LPUART_MODIR_TXCTSSRC_MASK)
-#define LPUART_MODIR_RTSWATER_MASK               0xFF00u
+#define LPUART_MODIR_RTSWATER_MASK               0x300u
 #define LPUART_MODIR_RTSWATER_SHIFT              8u
-#define LPUART_MODIR_RTSWATER_WIDTH              8u
+#define LPUART_MODIR_RTSWATER_WIDTH              2u
 #define LPUART_MODIR_RTSWATER(x)                 (((uint32_t)(((uint32_t)(x))<<LPUART_MODIR_RTSWATER_SHIFT))&LPUART_MODIR_RTSWATER_MASK)
 #define LPUART_MODIR_TNP_MASK                    0x30000u
 #define LPUART_MODIR_TNP_SHIFT                   16u
@@ -7276,21 +7154,21 @@ typedef struct {
 #define LPUART_FIFO_TXEMPT_WIDTH                 1u
 #define LPUART_FIFO_TXEMPT(x)                    (((uint32_t)(((uint32_t)(x))<<LPUART_FIFO_TXEMPT_SHIFT))&LPUART_FIFO_TXEMPT_MASK)
 /* WATER Bit Fields */
-#define LPUART_WATER_TXWATER_MASK                0xFFu
+#define LPUART_WATER_TXWATER_MASK                0x3u
 #define LPUART_WATER_TXWATER_SHIFT               0u
-#define LPUART_WATER_TXWATER_WIDTH               8u
+#define LPUART_WATER_TXWATER_WIDTH               2u
 #define LPUART_WATER_TXWATER(x)                  (((uint32_t)(((uint32_t)(x))<<LPUART_WATER_TXWATER_SHIFT))&LPUART_WATER_TXWATER_MASK)
-#define LPUART_WATER_TXCOUNT_MASK                0xFF00u
+#define LPUART_WATER_TXCOUNT_MASK                0x700u
 #define LPUART_WATER_TXCOUNT_SHIFT               8u
-#define LPUART_WATER_TXCOUNT_WIDTH               8u
+#define LPUART_WATER_TXCOUNT_WIDTH               3u
 #define LPUART_WATER_TXCOUNT(x)                  (((uint32_t)(((uint32_t)(x))<<LPUART_WATER_TXCOUNT_SHIFT))&LPUART_WATER_TXCOUNT_MASK)
-#define LPUART_WATER_RXWATER_MASK                0xFF0000u
+#define LPUART_WATER_RXWATER_MASK                0x30000u
 #define LPUART_WATER_RXWATER_SHIFT               16u
-#define LPUART_WATER_RXWATER_WIDTH               8u
+#define LPUART_WATER_RXWATER_WIDTH               2u
 #define LPUART_WATER_RXWATER(x)                  (((uint32_t)(((uint32_t)(x))<<LPUART_WATER_RXWATER_SHIFT))&LPUART_WATER_RXWATER_MASK)
-#define LPUART_WATER_RXCOUNT_MASK                0xFF000000u
+#define LPUART_WATER_RXCOUNT_MASK                0x7000000u
 #define LPUART_WATER_RXCOUNT_SHIFT               24u
-#define LPUART_WATER_RXCOUNT_WIDTH               8u
+#define LPUART_WATER_RXCOUNT_WIDTH               3u
 #define LPUART_WATER_RXCOUNT(x)                  (((uint32_t)(((uint32_t)(x))<<LPUART_WATER_RXCOUNT_SHIFT))&LPUART_WATER_RXCOUNT_MASK)
 
 /*!
@@ -7314,7 +7192,7 @@ typedef struct {
 
 
 /** MCM - Size of Registers Arrays */
-#define MCM_LMDR_COUNT                           3u
+#define MCM_LMDR_COUNT                           2u
 
 /** MCM - Register Layout Typedef */
 typedef struct {
@@ -7329,6 +7207,7 @@ typedef struct {
   __IO uint32_t CPO;                               /**< Compute Operation Control Register, offset: 0x40 */
        uint8_t RESERVED_3[956];
   __IO uint32_t LMDR[MCM_LMDR_COUNT];              /**< Local Memory Descriptor Register, array offset: 0x400, array step: 0x4 */
+  __IO uint32_t LMDR2;                             /**< Local Memory Descriptor Register2, offset: 0x408 */
        uint8_t RESERVED_4[116];
   __IO uint32_t LMPECR;                            /**< LMEM Parity and ECC Control Register, offset: 0x480 */
        uint8_t RESERVED_5[4];
@@ -7501,10 +7380,10 @@ typedef struct {
 #define MCM_LMDR_MT_SHIFT                        13u
 #define MCM_LMDR_MT_WIDTH                        3u
 #define MCM_LMDR_MT(x)                           (((uint32_t)(((uint32_t)(x))<<MCM_LMDR_MT_SHIFT))&MCM_LMDR_MT_MASK)
-#define MCM_LMDR_RO_MASK                         0x10000u
-#define MCM_LMDR_RO_SHIFT                        16u
-#define MCM_LMDR_RO_WIDTH                        1u
-#define MCM_LMDR_RO(x)                           (((uint32_t)(((uint32_t)(x))<<MCM_LMDR_RO_SHIFT))&MCM_LMDR_RO_MASK)
+#define MCM_LMDR_LOCK_MASK                       0x10000u
+#define MCM_LMDR_LOCK_SHIFT                      16u
+#define MCM_LMDR_LOCK_WIDTH                      1u
+#define MCM_LMDR_LOCK(x)                         (((uint32_t)(((uint32_t)(x))<<MCM_LMDR_LOCK_SHIFT))&MCM_LMDR_LOCK_MASK)
 #define MCM_LMDR_DPW_MASK                        0xE0000u
 #define MCM_LMDR_DPW_SHIFT                       17u
 #define MCM_LMDR_DPW_WIDTH                       3u
@@ -7525,6 +7404,39 @@ typedef struct {
 #define MCM_LMDR_V_SHIFT                         31u
 #define MCM_LMDR_V_WIDTH                         1u
 #define MCM_LMDR_V(x)                            (((uint32_t)(((uint32_t)(x))<<MCM_LMDR_V_SHIFT))&MCM_LMDR_V_MASK)
+/* LMDR2 Bit Fields */
+#define MCM_LMDR2_CF1_MASK                       0xF0u
+#define MCM_LMDR2_CF1_SHIFT                      4u
+#define MCM_LMDR2_CF1_WIDTH                      4u
+#define MCM_LMDR2_CF1(x)                         (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_CF1_SHIFT))&MCM_LMDR2_CF1_MASK)
+#define MCM_LMDR2_MT_MASK                        0xE000u
+#define MCM_LMDR2_MT_SHIFT                       13u
+#define MCM_LMDR2_MT_WIDTH                       3u
+#define MCM_LMDR2_MT(x)                          (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_MT_SHIFT))&MCM_LMDR2_MT_MASK)
+#define MCM_LMDR2_LOCK_MASK                      0x10000u
+#define MCM_LMDR2_LOCK_SHIFT                     16u
+#define MCM_LMDR2_LOCK_WIDTH                     1u
+#define MCM_LMDR2_LOCK(x)                        (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_LOCK_SHIFT))&MCM_LMDR2_LOCK_MASK)
+#define MCM_LMDR2_DPW_MASK                       0xE0000u
+#define MCM_LMDR2_DPW_SHIFT                      17u
+#define MCM_LMDR2_DPW_WIDTH                      3u
+#define MCM_LMDR2_DPW(x)                         (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_DPW_SHIFT))&MCM_LMDR2_DPW_MASK)
+#define MCM_LMDR2_WY_MASK                        0xF00000u
+#define MCM_LMDR2_WY_SHIFT                       20u
+#define MCM_LMDR2_WY_WIDTH                       4u
+#define MCM_LMDR2_WY(x)                          (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_WY_SHIFT))&MCM_LMDR2_WY_MASK)
+#define MCM_LMDR2_LMSZ_MASK                      0xF000000u
+#define MCM_LMDR2_LMSZ_SHIFT                     24u
+#define MCM_LMDR2_LMSZ_WIDTH                     4u
+#define MCM_LMDR2_LMSZ(x)                        (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_LMSZ_SHIFT))&MCM_LMDR2_LMSZ_MASK)
+#define MCM_LMDR2_LMSZH_MASK                     0x10000000u
+#define MCM_LMDR2_LMSZH_SHIFT                    28u
+#define MCM_LMDR2_LMSZH_WIDTH                    1u
+#define MCM_LMDR2_LMSZH(x)                       (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_LMSZH_SHIFT))&MCM_LMDR2_LMSZH_MASK)
+#define MCM_LMDR2_V_MASK                         0x80000000u
+#define MCM_LMDR2_V_SHIFT                        31u
+#define MCM_LMDR2_V_WIDTH                        1u
+#define MCM_LMDR2_V(x)                           (((uint32_t)(((uint32_t)(x))<<MCM_LMDR2_V_SHIFT))&MCM_LMDR2_V_MASK)
 /* LMPECR Bit Fields */
 #define MCM_LMPECR_ERNCR_MASK                    0x1u
 #define MCM_LMPECR_ERNCR_SHIFT                   0u
@@ -7626,8 +7538,12 @@ typedef struct {
   __IO uint32_t CESR;                              /**< Control/Error Status Register, offset: 0x0 */
        uint8_t RESERVED_0[12];
   struct {                                         /* offset: 0x10, array step: 0x8 */
-    __I  uint32_t EAR;                               /**< Error Address Register, slave port 0, array offset: 0x10, array step: 0x8 */
-    __I  uint32_t EDR;                               /**< Error Detail Register, slave port 0, array offset: 0x14, array step: 0x8 */
+    __I  uint32_t EAR;                               /**< Error Address Register, slave port
+    							0..Error Address Register, slave port
+    							3, array offset: 0x10, array step: 0x8 */
+    __I  uint32_t EDR;                               /**< Error Detail Register, slave port
+    							0..Error Detail Register, slave port
+    							3, array offset: 0x14, array step: 0x8 */
   } EAR_EDR[MPU_EAR_EDR_COUNT];
        uint8_t RESERVED_1[976];
   struct {                                         /* offset: 0x400, array step: 0x10 */
@@ -7682,10 +7598,22 @@ typedef struct {
 #define MPU_CESR_HRL_SHIFT                       16u
 #define MPU_CESR_HRL_WIDTH                       4u
 #define MPU_CESR_HRL(x)                          (((uint32_t)(((uint32_t)(x))<<MPU_CESR_HRL_SHIFT))&MPU_CESR_HRL_MASK)
-#define MPU_CESR_SPERR_MASK                      0xF0000000u
-#define MPU_CESR_SPERR_SHIFT                     28u
-#define MPU_CESR_SPERR_WIDTH                     4u
-#define MPU_CESR_SPERR(x)                        (((uint32_t)(((uint32_t)(x))<<MPU_CESR_SPERR_SHIFT))&MPU_CESR_SPERR_MASK)
+#define MPU_CESR_SPERR3_MASK                     0x10000000u
+#define MPU_CESR_SPERR3_SHIFT                    28u
+#define MPU_CESR_SPERR3_WIDTH                    1u
+#define MPU_CESR_SPERR3(x)                       (((uint32_t)(((uint32_t)(x))<<MPU_CESR_SPERR3_SHIFT))&MPU_CESR_SPERR3_MASK)
+#define MPU_CESR_SPERR2_MASK                     0x20000000u
+#define MPU_CESR_SPERR2_SHIFT                    29u
+#define MPU_CESR_SPERR2_WIDTH                    1u
+#define MPU_CESR_SPERR2(x)                       (((uint32_t)(((uint32_t)(x))<<MPU_CESR_SPERR2_SHIFT))&MPU_CESR_SPERR2_MASK)
+#define MPU_CESR_SPERR1_MASK                     0x40000000u
+#define MPU_CESR_SPERR1_SHIFT                    30u
+#define MPU_CESR_SPERR1_WIDTH                    1u
+#define MPU_CESR_SPERR1(x)                       (((uint32_t)(((uint32_t)(x))<<MPU_CESR_SPERR1_SHIFT))&MPU_CESR_SPERR1_MASK)
+#define MPU_CESR_SPERR0_MASK                     0x80000000u
+#define MPU_CESR_SPERR0_SHIFT                    31u
+#define MPU_CESR_SPERR0_WIDTH                    1u
+#define MPU_CESR_SPERR0(x)                       (((uint32_t)(((uint32_t)(x))<<MPU_CESR_SPERR0_SHIFT))&MPU_CESR_SPERR0_MASK)
 /* EAR Bit Fields */
 #define MPU_EAR_EADDR_MASK                       0xFFFFFFFFu
 #define MPU_EAR_EADDR_SHIFT                      0u
@@ -7919,10 +7847,10 @@ typedef struct {
   __I  uint32_t CP0NUM;                            /**< Processor 0 Number Register, offset: 0x24 */
   __I  uint32_t CP0MASTER;                         /**< Processor 0 Master Register, offset: 0x28 */
   __I  uint32_t CP0COUNT;                          /**< Processor 0 Count Register, offset: 0x2C */
-  __I  uint32_t CP0CFG0;                           /**< Processor 0 Configuration 0 Register, offset: 0x30 */
-  __I  uint32_t CP0CFG1;                           /**< Processor 0 Configuration 1 Register, offset: 0x34 */
-  __I  uint32_t CP0CFG2;                           /**< Processor 0 Configuration 2 Register, offset: 0x38 */
-  __I  uint32_t CP0CFG3;                           /**< Processor 0 Configuration 3 Register, offset: 0x3C */
+  __I  uint32_t CP0CFG0;                           /**< Processor 0 Configuration Register 0, offset: 0x30 */
+  __I  uint32_t CP0CFG1;                           /**< Processor 0 Configuration Register 1, offset: 0x34 */
+  __I  uint32_t CP0CFG2;                           /**< Processor 0 Configuration Register 2, offset: 0x38 */
+  __I  uint32_t CP0CFG3;                           /**< Processor 0 Configuration Register 3, offset: 0x3C */
        uint8_t RESERVED_0[960];
   __IO uint32_t OCMDR[MSCM_OCMDR_COUNT];           /**< On-Chip Memory Descriptor Register, array offset: 0x400, array step: 0x4 */
 } MSCM_Type, *MSCM_MemMapPtr;
@@ -8244,7 +8172,7 @@ typedef struct {
 #define PCC_PORTC_INDEX                          75
 #define PCC_PORTD_INDEX                          76
 #define PCC_PORTE_INDEX                          77
-#define PCC_FLEXIO_INDEX                         90
+#define PCC_FlexIO_INDEX                         90
 #define PCC_EWM_INDEX                            97
 #define PCC_LPI2C0_INDEX                         102
 #define PCC_LPUART0_INDEX                        106
@@ -10455,10 +10383,7 @@ typedef struct {
   __IO uint32_t FIRCCSR;                           /**< Fast IRC Control Status Register, offset: 0x300 */
   __IO uint32_t FIRCDIV;                           /**< Fast IRC Divide Register, offset: 0x304 */
   __IO uint32_t FIRCCFG;                           /**< Fast IRC Configuration Register, offset: 0x308 */
-  __IO uint32_t FIRCTCFG;                          /**< Fast IRC Trim Configuration Register, offset: 0x30C */
-       uint8_t RESERVED_4[8];
-  __IO uint32_t FIRCSTAT;                          /**< Fast IRC Status Register, offset: 0x318 */
-       uint8_t RESERVED_5[740];
+       uint8_t RESERVED_4[756];
   __IO uint32_t SPLLCSR;                           /**< System PLL Control Status Register, offset: 0x600 */
   __IO uint32_t SPLLDIV;                           /**< System PLL Divide Register, offset: 0x604 */
   __IO uint32_t SPLLCFG;                           /**< System PLL Configuration Register, offset: 0x608 */
@@ -10585,10 +10510,6 @@ typedef struct {
 #define SCG_SOSCCSR_SOSCEN_SHIFT                 0u
 #define SCG_SOSCCSR_SOSCEN_WIDTH                 1u
 #define SCG_SOSCCSR_SOSCEN(x)                    (((uint32_t)(((uint32_t)(x))<<SCG_SOSCCSR_SOSCEN_SHIFT))&SCG_SOSCCSR_SOSCEN_MASK)
-#define SCG_SOSCCSR_SOSCERCLKEN_MASK             0x8u
-#define SCG_SOSCCSR_SOSCERCLKEN_SHIFT            3u
-#define SCG_SOSCCSR_SOSCERCLKEN_WIDTH            1u
-#define SCG_SOSCCSR_SOSCERCLKEN(x)               (((uint32_t)(((uint32_t)(x))<<SCG_SOSCCSR_SOSCERCLKEN_SHIFT))&SCG_SOSCCSR_SOSCERCLKEN_MASK)
 #define SCG_SOSCCSR_SOSCCM_MASK                  0x10000u
 #define SCG_SOSCCSR_SOSCCM_SHIFT                 16u
 #define SCG_SOSCCSR_SOSCCM_WIDTH                 1u
@@ -10683,14 +10604,6 @@ typedef struct {
 #define SCG_FIRCCSR_FIRCREGOFF_SHIFT             3u
 #define SCG_FIRCCSR_FIRCREGOFF_WIDTH             1u
 #define SCG_FIRCCSR_FIRCREGOFF(x)                (((uint32_t)(((uint32_t)(x))<<SCG_FIRCCSR_FIRCREGOFF_SHIFT))&SCG_FIRCCSR_FIRCREGOFF_MASK)
-#define SCG_FIRCCSR_FIRCTREN_MASK                0x100u
-#define SCG_FIRCCSR_FIRCTREN_SHIFT               8u
-#define SCG_FIRCCSR_FIRCTREN_WIDTH               1u
-#define SCG_FIRCCSR_FIRCTREN(x)                  (((uint32_t)(((uint32_t)(x))<<SCG_FIRCCSR_FIRCTREN_SHIFT))&SCG_FIRCCSR_FIRCTREN_MASK)
-#define SCG_FIRCCSR_FIRCTRUP_MASK                0x200u
-#define SCG_FIRCCSR_FIRCTRUP_SHIFT               9u
-#define SCG_FIRCCSR_FIRCTRUP_WIDTH               1u
-#define SCG_FIRCCSR_FIRCTRUP(x)                  (((uint32_t)(((uint32_t)(x))<<SCG_FIRCCSR_FIRCTRUP_SHIFT))&SCG_FIRCCSR_FIRCTRUP_MASK)
 #define SCG_FIRCCSR_LK_MASK                      0x800000u
 #define SCG_FIRCCSR_LK_SHIFT                     23u
 #define SCG_FIRCCSR_LK_WIDTH                     1u
@@ -10721,24 +10634,6 @@ typedef struct {
 #define SCG_FIRCCFG_RANGE_SHIFT                  0u
 #define SCG_FIRCCFG_RANGE_WIDTH                  2u
 #define SCG_FIRCCFG_RANGE(x)                     (((uint32_t)(((uint32_t)(x))<<SCG_FIRCCFG_RANGE_SHIFT))&SCG_FIRCCFG_RANGE_MASK)
-/* FIRCTCFG Bit Fields */
-#define SCG_FIRCTCFG_TRIMSRC_MASK                0x3u
-#define SCG_FIRCTCFG_TRIMSRC_SHIFT               0u
-#define SCG_FIRCTCFG_TRIMSRC_WIDTH               2u
-#define SCG_FIRCTCFG_TRIMSRC(x)                  (((uint32_t)(((uint32_t)(x))<<SCG_FIRCTCFG_TRIMSRC_SHIFT))&SCG_FIRCTCFG_TRIMSRC_MASK)
-#define SCG_FIRCTCFG_TRIMDIV_MASK                0x700u
-#define SCG_FIRCTCFG_TRIMDIV_SHIFT               8u
-#define SCG_FIRCTCFG_TRIMDIV_WIDTH               3u
-#define SCG_FIRCTCFG_TRIMDIV(x)                  (((uint32_t)(((uint32_t)(x))<<SCG_FIRCTCFG_TRIMDIV_SHIFT))&SCG_FIRCTCFG_TRIMDIV_MASK)
-/* FIRCSTAT Bit Fields */
-#define SCG_FIRCSTAT_TRIMFINE_MASK               0x7Fu
-#define SCG_FIRCSTAT_TRIMFINE_SHIFT              0u
-#define SCG_FIRCSTAT_TRIMFINE_WIDTH              7u
-#define SCG_FIRCSTAT_TRIMFINE(x)                 (((uint32_t)(((uint32_t)(x))<<SCG_FIRCSTAT_TRIMFINE_SHIFT))&SCG_FIRCSTAT_TRIMFINE_MASK)
-#define SCG_FIRCSTAT_TRIMCOAR_MASK               0x3F00u
-#define SCG_FIRCSTAT_TRIMCOAR_SHIFT              8u
-#define SCG_FIRCSTAT_TRIMCOAR_WIDTH              6u
-#define SCG_FIRCSTAT_TRIMCOAR(x)                 (((uint32_t)(((uint32_t)(x))<<SCG_FIRCSTAT_TRIMCOAR_SHIFT))&SCG_FIRCSTAT_TRIMCOAR_MASK)
 /* SPLLCSR Bit Fields */
 #define SCG_SPLLCSR_SPLLEN_MASK                  0x1u
 #define SCG_SPLLCSR_SPLLEN_SHIFT                 0u
@@ -10778,10 +10673,6 @@ typedef struct {
 #define SCG_SPLLDIV_SPLLDIV2_WIDTH               3u
 #define SCG_SPLLDIV_SPLLDIV2(x)                  (((uint32_t)(((uint32_t)(x))<<SCG_SPLLDIV_SPLLDIV2_SHIFT))&SCG_SPLLDIV_SPLLDIV2_MASK)
 /* SPLLCFG Bit Fields */
-#define SCG_SPLLCFG_SOURCE_MASK                  0x1u
-#define SCG_SPLLCFG_SOURCE_SHIFT                 0u
-#define SCG_SPLLCFG_SOURCE_WIDTH                 1u
-#define SCG_SPLLCFG_SOURCE(x)                    (((uint32_t)(((uint32_t)(x))<<SCG_SPLLCFG_SOURCE_SHIFT))&SCG_SPLLCFG_SOURCE_MASK)
 #define SCG_SPLLCFG_PREDIV_MASK                  0x700u
 #define SCG_SPLLCFG_PREDIV_SHIFT                 8u
 #define SCG_SPLLCFG_PREDIV_WIDTH                 3u
@@ -10867,9 +10758,9 @@ typedef struct {
 #define SIM_CHIPCTL_ADC_INTERLEAVE_EN_SHIFT      0u
 #define SIM_CHIPCTL_ADC_INTERLEAVE_EN_WIDTH      4u
 #define SIM_CHIPCTL_ADC_INTERLEAVE_EN(x)         (((uint32_t)(((uint32_t)(x))<<SIM_CHIPCTL_ADC_INTERLEAVE_EN_SHIFT))&SIM_CHIPCTL_ADC_INTERLEAVE_EN_MASK)
-#define SIM_CHIPCTL_CLKOUTSEL_MASK               0xE0u
-#define SIM_CHIPCTL_CLKOUTSEL_SHIFT              5u
-#define SIM_CHIPCTL_CLKOUTSEL_WIDTH              3u
+#define SIM_CHIPCTL_CLKOUTSEL_MASK               0xF0u
+#define SIM_CHIPCTL_CLKOUTSEL_SHIFT              4u
+#define SIM_CHIPCTL_CLKOUTSEL_WIDTH              4u
 #define SIM_CHIPCTL_CLKOUTSEL(x)                 (((uint32_t)(((uint32_t)(x))<<SIM_CHIPCTL_CLKOUTSEL_SHIFT))&SIM_CHIPCTL_CLKOUTSEL_MASK)
 #define SIM_CHIPCTL_CLKOUTDIV_MASK               0x700u
 #define SIM_CHIPCTL_CLKOUTDIV_SHIFT              8u
@@ -10920,22 +10811,6 @@ typedef struct {
 #define SIM_FTMOPT0_FTM3FLTxSEL_SHIFT            12u
 #define SIM_FTMOPT0_FTM3FLTxSEL_WIDTH            3u
 #define SIM_FTMOPT0_FTM3FLTxSEL(x)               (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT0_FTM3FLTxSEL_SHIFT))&SIM_FTMOPT0_FTM3FLTxSEL_MASK)
-#define SIM_FTMOPT0_FTM4CLKSEL_MASK              0x30000u
-#define SIM_FTMOPT0_FTM4CLKSEL_SHIFT             16u
-#define SIM_FTMOPT0_FTM4CLKSEL_WIDTH             2u
-#define SIM_FTMOPT0_FTM4CLKSEL(x)                (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT0_FTM4CLKSEL_SHIFT))&SIM_FTMOPT0_FTM4CLKSEL_MASK)
-#define SIM_FTMOPT0_FTM5CLKSEL_MASK              0xC0000u
-#define SIM_FTMOPT0_FTM5CLKSEL_SHIFT             18u
-#define SIM_FTMOPT0_FTM5CLKSEL_WIDTH             2u
-#define SIM_FTMOPT0_FTM5CLKSEL(x)                (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT0_FTM5CLKSEL_SHIFT))&SIM_FTMOPT0_FTM5CLKSEL_MASK)
-#define SIM_FTMOPT0_FTM6CLKSEL_MASK              0x300000u
-#define SIM_FTMOPT0_FTM6CLKSEL_SHIFT             20u
-#define SIM_FTMOPT0_FTM6CLKSEL_WIDTH             2u
-#define SIM_FTMOPT0_FTM6CLKSEL(x)                (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT0_FTM6CLKSEL_SHIFT))&SIM_FTMOPT0_FTM6CLKSEL_MASK)
-#define SIM_FTMOPT0_FTM7CLKSEL_MASK              0xC00000u
-#define SIM_FTMOPT0_FTM7CLKSEL_SHIFT             22u
-#define SIM_FTMOPT0_FTM7CLKSEL_WIDTH             2u
-#define SIM_FTMOPT0_FTM7CLKSEL(x)                (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT0_FTM7CLKSEL_SHIFT))&SIM_FTMOPT0_FTM7CLKSEL_MASK)
 #define SIM_FTMOPT0_FTM0CLKSEL_MASK              0x3000000u
 #define SIM_FTMOPT0_FTM0CLKSEL_SHIFT             24u
 #define SIM_FTMOPT0_FTM0CLKSEL_WIDTH             2u
@@ -11023,22 +10898,6 @@ typedef struct {
 #define SIM_FTMOPT1_FTM2CH1SEL_SHIFT             8u
 #define SIM_FTMOPT1_FTM2CH1SEL_WIDTH             1u
 #define SIM_FTMOPT1_FTM2CH1SEL(x)                (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT1_FTM2CH1SEL_SHIFT))&SIM_FTMOPT1_FTM2CH1SEL_MASK)
-#define SIM_FTMOPT1_FTM4SYNCBIT_MASK             0x800u
-#define SIM_FTMOPT1_FTM4SYNCBIT_SHIFT            11u
-#define SIM_FTMOPT1_FTM4SYNCBIT_WIDTH            1u
-#define SIM_FTMOPT1_FTM4SYNCBIT(x)               (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT1_FTM4SYNCBIT_SHIFT))&SIM_FTMOPT1_FTM4SYNCBIT_MASK)
-#define SIM_FTMOPT1_FTM5SYNCBIT_MASK             0x1000u
-#define SIM_FTMOPT1_FTM5SYNCBIT_SHIFT            12u
-#define SIM_FTMOPT1_FTM5SYNCBIT_WIDTH            1u
-#define SIM_FTMOPT1_FTM5SYNCBIT(x)               (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT1_FTM5SYNCBIT_SHIFT))&SIM_FTMOPT1_FTM5SYNCBIT_MASK)
-#define SIM_FTMOPT1_FTM6SYNCBIT_MASK             0x2000u
-#define SIM_FTMOPT1_FTM6SYNCBIT_SHIFT            13u
-#define SIM_FTMOPT1_FTM6SYNCBIT_WIDTH            1u
-#define SIM_FTMOPT1_FTM6SYNCBIT(x)               (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT1_FTM6SYNCBIT_SHIFT))&SIM_FTMOPT1_FTM6SYNCBIT_MASK)
-#define SIM_FTMOPT1_FTM7SYNCBIT_MASK             0x4000u
-#define SIM_FTMOPT1_FTM7SYNCBIT_SHIFT            14u
-#define SIM_FTMOPT1_FTM7SYNCBIT_WIDTH            1u
-#define SIM_FTMOPT1_FTM7SYNCBIT(x)               (((uint32_t)(((uint32_t)(x))<<SIM_FTMOPT1_FTM7SYNCBIT_SHIFT))&SIM_FTMOPT1_FTM7SYNCBIT_MASK)
 #define SIM_FTMOPT1_FTMGLDOK_MASK                0x8000u
 #define SIM_FTMOPT1_FTMGLDOK_SHIFT               15u
 #define SIM_FTMOPT1_FTMGLDOK_WIDTH               1u
@@ -11068,22 +10927,6 @@ typedef struct {
 #define SIM_MISCTRL0_FTM3_OBE_CTRL_SHIFT         19u
 #define SIM_MISCTRL0_FTM3_OBE_CTRL_WIDTH         1u
 #define SIM_MISCTRL0_FTM3_OBE_CTRL(x)            (((uint32_t)(((uint32_t)(x))<<SIM_MISCTRL0_FTM3_OBE_CTRL_SHIFT))&SIM_MISCTRL0_FTM3_OBE_CTRL_MASK)
-#define SIM_MISCTRL0_FTM4_OBE_CTRL_MASK          0x100000u
-#define SIM_MISCTRL0_FTM4_OBE_CTRL_SHIFT         20u
-#define SIM_MISCTRL0_FTM4_OBE_CTRL_WIDTH         1u
-#define SIM_MISCTRL0_FTM4_OBE_CTRL(x)            (((uint32_t)(((uint32_t)(x))<<SIM_MISCTRL0_FTM4_OBE_CTRL_SHIFT))&SIM_MISCTRL0_FTM4_OBE_CTRL_MASK)
-#define SIM_MISCTRL0_FTM5_OBE_CTRL_MASK          0x200000u
-#define SIM_MISCTRL0_FTM5_OBE_CTRL_SHIFT         21u
-#define SIM_MISCTRL0_FTM5_OBE_CTRL_WIDTH         1u
-#define SIM_MISCTRL0_FTM5_OBE_CTRL(x)            (((uint32_t)(((uint32_t)(x))<<SIM_MISCTRL0_FTM5_OBE_CTRL_SHIFT))&SIM_MISCTRL0_FTM5_OBE_CTRL_MASK)
-#define SIM_MISCTRL0_FTM6_OBE_CTRL_MASK          0x400000u
-#define SIM_MISCTRL0_FTM6_OBE_CTRL_SHIFT         22u
-#define SIM_MISCTRL0_FTM6_OBE_CTRL_WIDTH         1u
-#define SIM_MISCTRL0_FTM6_OBE_CTRL(x)            (((uint32_t)(((uint32_t)(x))<<SIM_MISCTRL0_FTM6_OBE_CTRL_SHIFT))&SIM_MISCTRL0_FTM6_OBE_CTRL_MASK)
-#define SIM_MISCTRL0_FTM7_OBE_CTRL_MASK          0x800000u
-#define SIM_MISCTRL0_FTM7_OBE_CTRL_SHIFT         23u
-#define SIM_MISCTRL0_FTM7_OBE_CTRL_WIDTH         1u
-#define SIM_MISCTRL0_FTM7_OBE_CTRL(x)            (((uint32_t)(((uint32_t)(x))<<SIM_MISCTRL0_FTM7_OBE_CTRL_SHIFT))&SIM_MISCTRL0_FTM7_OBE_CTRL_MASK)
 /* SDID Bit Fields */
 #define SIM_SDID_FEATURES_MASK                   0xFFu
 #define SIM_SDID_FEATURES_SHIFT                  0u

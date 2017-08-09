@@ -3,17 +3,17 @@
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED  WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
- * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
- * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -70,7 +70,7 @@
  *
  * Function Name : init_data_bss
  * Description   : Make necessary initializations for RAM.
- * - Copy the vector table from ROM to RAM. 
+ * - Copy the vector table from ROM to RAM.
  * - Copy initialized data from ROM to RAM.
  * - Copy code that should reside in RAM from ROM
  * - Clear the zero-initialized data section.
@@ -95,7 +95,7 @@ void init_data_bss(void)
     const uint8_t * data_rom, * data_rom_end;
     const uint8_t * code_rom, * code_rom_end;
     const uint8_t * bss_end;
-    
+
     /* Addresses for VECTOR_TABLE and VECTOR_RAM come from the linker file */
     extern uint32_t __RAM_VECTOR_TABLE_SIZE[];
     extern uint32_t __VECTOR_TABLE[];
@@ -107,17 +107,17 @@ void init_data_bss(void)
     data_ram        = __section_begin(".data");
     data_rom        = __section_begin(".data_init");
     data_rom_end    = __section_end(".data_init");
-    
+
     /* CODE RAM */
     #pragma section = "__CODE_ROM"
     #pragma section = "__CODE_RAM"
     code_ram        = __section_begin("__CODE_RAM");
     code_rom        = __section_begin("__CODE_ROM");
     code_rom_end    = __section_end("__CODE_ROM");
-    
+
     /* BSS */
     bss_start       = __section_begin(".bss");
-    bss_end         = __section_end(".bss");    
+    bss_end         = __section_end(".bss");
 #else
     extern uint32_t __DATA_ROM[];
     extern uint32_t __DATA_RAM[];
@@ -129,7 +129,7 @@ void init_data_bss(void)
 
     extern uint32_t __BSS_START[];
     extern uint32_t __BSS_END[];
-    
+
     /* Data */
     data_ram        = (uint8_t *)__DATA_RAM;
     data_rom        = (uint8_t *)__DATA_ROM;
@@ -142,7 +142,7 @@ void init_data_bss(void)
     bss_start       = (uint8_t *)__BSS_START;
     bss_end         = (uint8_t *)__BSS_END;
 #endif
-        
+
     /* Check if VECTOR_TABLE copy is needed */
     if (__VECTOR_RAM != __VECTOR_TABLE)
     {

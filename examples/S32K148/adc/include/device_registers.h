@@ -7,17 +7,17 @@
 **     Copyright 2016-2017 NXP
 **     All rights reserved.
 **
-**     Permission to use, copy, modify, and/or distribute this software for any
-**     purpose with or without fee is hereby granted, provided that the above
-**     copyright notice and this permission notice appear in all copies.
-**
-**     THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-**     WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED  WARRANTIES OF
-**     MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
-**     SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
-**     RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
-**     CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
-**     CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+**     THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+**     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+**     OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+**     IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+**     INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+**     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+**     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+**     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+**     IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+**     THE POSSIBILITY OF SUCH DAMAGE.
 **
 **     http:                 www.nxp.com
 **     mail:                 support@nxp.com
@@ -43,23 +43,14 @@
  * The CPU macro should be declared in the project or makefile.
  */
 
-#if (defined(CPU_S32K144HFT0VLLT) || defined(CPU_S32K144LFT0MLLT) || defined(CPU_S32K148) || defined(CPU_S32K142))
+#if (defined(CPU_S32K148) )
 
     #define S32K14x_SERIES
 
     /* Specific core definitions */
     #include "s32_core_cm4.h"
-
-    #if (defined(CPU_S32K144HFT0VLLT) || defined(CPU_S32K144LFT0MLLT))
-
-        #define S32K144_SERIES
-
-        /* Register definitions */
-        #include "S32K144/include/S32K144.h"
-        /* CPU specific feature definitions */
-        #include "S32K144/include/S32K144_features.h"
-
-    #elif defined(CPU_S32K148)
+	
+    #if defined(CPU_S32K148)
 
         #define S32K148_SERIES
 
@@ -67,55 +58,8 @@
         #include "S32K148.h"
         /* CPU specific feature definitions */
         #include "S32K148_features.h"
-
-    #elif defined(CPU_S32K142)
-
-        #define S32K142_SERIES
-
-        /* Register definitions */
-        #include "S32K142/include/S32K142.h"
-        /* CPU specific feature definitions */
-        #include "S32K142/include/S32K142_features.h"
-
     #endif
-
-#elif defined(CPU_S32V234)
-
-    #define S32V234_SERIES
-
-    /* Specific core definitions */
-    #include "common/s32_core_cm4.h"
-    /* Register definitions */
-    #include "S32V234/include/S32V234.h"
-    /* CPU specific feature definitions */
-    #include "S32V234/include/S32V234_features.h"
-
-#elif (defined(CPU_MPC5748G) || defined(CPU_MPC5746C))
-
-    #define MPC574x_SERIES
-
-    /* Specific core definitions */
-    #include "common/s32_core_e200.h"
-
-    #if (defined(CPU_MPC5748G))
-
-        #define MPC5748G_SERIES
-
-        /* Register definitions */
-        #include "MPC5748G/include/MPC5748G.h"
-        /* CPU specific feature definitions */
-        #include "MPC5748G/include/MPC5748G_features.h"
-
-    #elif defined(CPU_MPC5746C)
-
-        #define MPC5746C_SERIES
-
-        /* Register definitions */
-        #include "MPC5746C/include/MPC5746C.h"
-        /* CPU specific feature definitions */
-        #include "MPC5746C/include/MPC5746C_features.h"
-
-    #endif
+    
 #else
     #error "No valid CPU defined!"
 #endif

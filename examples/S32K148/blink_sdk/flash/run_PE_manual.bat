@@ -1,1 +1,1 @@
-cd .. && make && arm-none-eabi-gdb -x flash/runPE.txt
+arm-none-eabi-gdb -x runPE.txt

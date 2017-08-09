@@ -10,30 +10,17 @@
 **     Copyright 2017 NXP
 **     All rights reserved.
 **
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted provided that the following conditions are met:
-**
-**     o Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     o Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     o Neither the name of Freescale Semiconductor, Inc. nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
-**
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**     THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+**     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+**     OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+**     IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+**     INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+**     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+**     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+**     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+**     IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+**     THE POSSIBILITY OF SUCH DAMAGE.
 **
 **     http:                 www.freescale.com
 **     mail:                 support@freescale.com
@@ -43,6 +30,11 @@
 
 /* Entry Point */
 ENTRY(Reset_Handler)
+
+/*
+To use "new" operator with EWL in C++ project the following symbol shall be defined
+*/
+/*EXTERN(_ZN10__cxxabiv119__terminate_handlerE)*/
 
 HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x00000400;
 STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x00000400;
@@ -88,7 +80,7 @@ SECTIONS
     KEEP (*(.fini))
     . = ALIGN(4);
   } > m_text
-  
+
   /* Section for storing functions that needs to execute from RAM */
   .code_ram :
   {
@@ -99,7 +91,7 @@ SECTIONS
     __CODE_END = .;            /* No copy */
     . = ALIGN(4);
   } > m_text
-  
+
   .ARM.extab :
   {
     *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -173,14 +165,14 @@ SECTIONS
   __etext = .;    /* Define a global symbol at end of code. */
   __DATA_ROM = .; /* Symbol is used by startup for data initialization. */
   __DATA_END = __DATA_ROM; /* No copy */
-  
+
   /* Custom Section Block that can be used to place data at absolute address. */
   /* Use __attribute__((section (".customSection"))) to place data here. */
   .customSectionBlock  ORIGIN(m_data) :
   {
     KEEP(*(.customSection))  /* Keep section even if not referenced. */
   } > m_data
-  
+
   .data :
   {
     . = ALIGN(4);

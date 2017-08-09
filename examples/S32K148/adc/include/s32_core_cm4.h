@@ -3,17 +3,17 @@
  * Copyright 2016-2017 NXP
  * All rights reserved.
  *
- * Permission to use, copy, modify, and/or distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED  WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
- * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
- * CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
 /*!
@@ -61,7 +61,7 @@ extern "C" {
  *   Macro to be used to trigger an debug interrupt
  */
 #define BKPT_ASM __asm("BKPT #0\n\t")
-        
+
 
 /** \brief  Enable FPU
  *
@@ -150,17 +150,18 @@ extern "C" {
 #elif defined ( __DCC__ )
     #define START_FUNCTION_DECLARATION_RAMSECTION      _Pragma("section CODE \".code_ram\"") \
                                                        _Pragma("use_section CODE")
-    #define END_FUNCTION_DECLARATION_RAMSECTION        ;
-#elif defined ( __CSMC__ )                                                           
+    #define END_FUNCTION_DECLARATION_RAMSECTION        ; \
+                                                       _Pragma("section CODE \".text\"")
+#elif defined ( __CSMC__ )
     #define START_FUNCTION_DECLARATION_RAMSECTION      @ext
     #define END_FUNCTION_DECLARATION_RAMSECTION        ;
 #else
     /* Keep compatibility with software analysis tools */
-    #define START_FUNCTION_DECLARATION_RAMSECTION      
+    #define START_FUNCTION_DECLARATION_RAMSECTION
     #define END_FUNCTION_DECLARATION_RAMSECTION        ;
 #endif
-                                                   
-#if defined ( __CSMC__ )                                                           
+
+#if defined ( __CSMC__ )
     #define START_FUNCTION_DEFINITION_RAMSECTION       _Pragma("section (code_ram)")
     #define END_FUNCTION_DEFINITION_RAMSECTION         _Pragma("section ()")
 #else
@@ -177,6 +178,20 @@ extern "C" {
 #else
     #define DISABLE_CHECK_RAMSECTION_FUNCTION_CALL
     #define ENABLE_CHECK_RAMSECTION_FUNCTION_CALL
+#endif
+
+
+/** \brief  Data alignment.
+ */
+#if defined ( __GNUC__ ) || defined ( __ghs__ ) || defined ( __DCC__ )
+    #define ALIGNED(x)      __attribute__((aligned(x)))
+#elif defined ( __ICCARM__ )
+    #define stringify(s) tostring(s)
+    #define tostring(s) #s
+    #define ALIGNED(x)      _Pragma(stringify(data_alignment=x))
+#else
+    /* Keep compatibility with software analysis tools */
+    #define ALIGNED(x)
 #endif
 
 /** \brief  Endianness.

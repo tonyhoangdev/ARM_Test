@@ -1,1 +1,1 @@
-cd .. && make && arm-none-eabi-gdb -x flash/runJlink.txt
+arm-none-eabi-gdb -x runJlink.txt

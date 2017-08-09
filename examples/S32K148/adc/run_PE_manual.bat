@@ -1,1 +1,0 @@
-make && arm-none-eabi-gdb -x runPE.txt

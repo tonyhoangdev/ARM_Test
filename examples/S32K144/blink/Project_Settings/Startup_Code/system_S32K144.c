@@ -1,74 +1,19 @@
 /*
-** ###################################################################
-**     Processor:           S32K144_100
-**     Compilers:           GNU C Compiler
-**                          GreenHills ARM Compiler
-**                          IAR ANSI C/C++ Compiler for ARM
-**
-**     Reference manual:    S32K144RM Rev. 1, Draft D, 10/2015
-**     Version:             rev. 1.7, 2015-10-21
-**     Build:               b151027
-**
-**     Abstract:
-**         Provides a system configuration function and a global variable that
-**         contains the system frequency. It configures the device and initializes
-**         the oscillator (PLL) that is part of the microcontroller device.
-**
-**     Copyright (c) 2015 Freescale Semiconductor, Inc.
-**     Copyright 2016 NXP
-**     All rights reserved.
-**
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted provided that the following conditions are met:
-**
-**     o Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     o Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     o Neither the name of Freescale Semiconductor, Inc. nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
-**
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-**
-**     http:                 www.freescale.com
-**     mail:                 support@freescale.com
-**
-**     Revisions:
-**     - rev. 1.0 (2015-04-09) - Iulian Talpiga
-**         Initial version.
-**     - rev. 1.1 (2015-05-19) - Bogdan Nitu
-**         Updated interrupts table
-**         Removed SIM_CHIPCTL_DAC2CMP
-**         Compacted PORT_PCR registers
-**     - rev. 1.2 (2015-09-16) - Iulian Talpiga
-**         Implemented SystemCoreClockUpdate
-**     - rev. 1.3 (2015-11-26) - Iulian Talpiga
-**         Improved FPU enable logic and comments
-**
-** ###################################################################
-*/
-
-/*!
- * @file S32K144
- * @version 1.3
- * @date 2015-11-26
- * @brief Device specific configuration file for S32K144 (implementation file)
+ * Copyright (c) 2015 Freescale Semiconductor, Inc.
+ * Copyright 2016-2017 NXP
+ * All rights reserved.
  *
- * Provides a system configuration function and a global variable that contains
- * the system frequency.
+ * THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 /**
@@ -111,9 +56,9 @@ uint32_t SystemCoreClock = DEFAULT_SYSTEM_CLOCK;
 /*FUNCTION**********************************************************************
  *
  * Function Name : SystemInit
- * Description   : Typically this function configures the oscillator that is part
- * of the microcontroller device. For systems with variable clock speed it also
- * updates the variable SystemCoreClock. SystemInit is called from startup_device file.
+ * Description   : This function disables the watchdog, enables FPU
+ * and the power mode protection if the corresponding feature macro
+ * is enabled. SystemInit is called from startup_device file.
  *
  * Implements    : SystemInit_Activity
  *END**************************************************************************/
@@ -139,6 +84,9 @@ void SystemInit(void)
 #if (DISABLE_WDOG)
   /* Write of the WDOG unlock key to CNT register, must be done in order to allow any modifications*/
   WDOG->CNT = (uint32_t ) FEATURE_WDOG_UNLOCK_VALUE;
+  /* The dummy read is used in order to make sure that the WDOG registers will be configured only
+   * after the write of the unlock value was completed. */
+  (void)WDOG->CNT;
 
   /* Initial write of WDOG configuration register:
    * enables support for 32-bit refresh/unlock command write words,
@@ -221,7 +169,7 @@ void SystemCoreClockUpdate(void)
 /*FUNCTION**********************************************************************
  *
  * Function Name : SystemSoftwareReset
- * Description   : This function is used to software reset the microcontroller.
+ * Description   : This function is used to initiate a system reset
  *
  * Implements    : SystemSoftwareReset_Activity
  *END**************************************************************************/

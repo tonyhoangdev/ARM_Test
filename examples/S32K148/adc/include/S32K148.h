@@ -2,8 +2,8 @@
 ** ###################################################################
 **     Processor:           S32K148_176
 **     Reference manual:    S32K14XRM Rev. 2, 02/2017
-**     Version:             rev. 2.0, 2017-02-23
-**     Build:               b170228
+**     Version:             rev. 3.0, 2017-04-03
+**     Build:               b170403
 **
 **     Abstract:
 **         Peripheral Access Layer for S32K148
@@ -12,30 +12,17 @@
 **     Copyright 2016-2017 NXP
 **     All rights reserved.
 **
-**     Redistribution and use in source and binary forms, with or without modification,
-**     are permitted provided that the following conditions are met:
-**
-**     o Redistributions of source code must retain the above copyright notice, this list
-**       of conditions and the following disclaimer.
-**
-**     o Redistributions in binary form must reproduce the above copyright notice, this
-**       list of conditions and the following disclaimer in the documentation and/or
-**       other materials provided with the distribution.
-**
-**     o Neither the name of Freescale Semiconductor, Inc. nor the names of its
-**       contributors may be used to endorse or promote products derived from this
-**       software without specific prior written permission.
-**
-**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
-**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**     THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR
+**     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+**     OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+**     IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+**     INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+**     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+**     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+**     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+**     IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+**     THE POSSIBILITY OF SUCH DAMAGE.
 **
 **     http:                 www.nxp.com
 **     mail:                 support@nxp.com
@@ -48,14 +35,16 @@
 **     - rev. 2.0 (2017-02-23) - Iulian Talpiga
 **         Update header as per rev S32K14XRM Rev. 2, 02/2017
 **         Updated modules AIPS, CAN, LPI2C, LPSPI, MCM, MPU, SCG and SIM
+**     - rev. 2.1 (2017-04-03) - Iulian Talpiga
+**         Correct SAI registers: split TCR and RCR arrays.
 **
 ** ###################################################################
 */
 
 /*!
  * @file S32K148.h
- * @version 2.0
- * @date 2017-02-23
+ * @version 2.1
+ * @date 2017-04-03
  * @brief Peripheral Access Layer for S32K148
  *
  * This file contains register definitions and macros for easy access to their
@@ -121,7 +110,7 @@
  * compatible) */
 #define MCU_MEM_MAP_VERSION 0x0200u
 /** Memory map minor version */
-#define MCU_MEM_MAP_VERSION_MINOR 0x0000u
+#define MCU_MEM_MAP_VERSION_MINOR 0x0001u
 
 /* ----------------------------------------------------------------------------
    -- Generic macros
@@ -12021,10 +12010,8 @@ typedef struct {
 
 
 /** SAI - Size of Registers Arrays */
-#define SAI_TCR_COUNT                            5u
 #define SAI_TDR_COUNT                            4u
 #define SAI_TFR_COUNT                            4u
-#define SAI_RCR_COUNT                            5u
 #define SAI_RDR_COUNT                            4u
 #define SAI_RFR_COUNT                            4u
 
@@ -12033,7 +12020,11 @@ typedef struct {
   __I  uint32_t VERID;                             /**< Version ID Register, offset: 0x0 */
   __I  uint32_t PARAM;                             /**< Parameter Register, offset: 0x4 */
   __IO uint32_t TCSR;                              /**< SAI Transmit Control Register, offset: 0x8 */
-  __IO uint32_t TCR[SAI_TCR_COUNT];                /**< SAI Transmit Configuration 1 Register..SAI Transmit Configuration 5 Register, array offset: 0xC, array step: 0x4 */
+  __IO uint32_t TCR1;                              /**< SAI Transmit Configuration 1 Register, offset: 0xC */
+  __IO uint32_t TCR2;                              /**< SAI Transmit Configuration 2 Register, offset: 0x10 */
+  __IO uint32_t TCR3;                              /**< SAI Transmit Configuration 3 Register, offset: 0x14 */
+  __IO uint32_t TCR4;                              /**< SAI Transmit Configuration 4 Register, offset: 0x18 */
+  __IO uint32_t TCR5;                              /**< SAI Transmit Configuration 5 Register, offset: 0x1C */
   __O  uint32_t TDR[SAI_TDR_COUNT];                /**< SAI Transmit Data Register, array offset: 0x20, array step: 0x4 */
        uint8_t RESERVED_0[16];
   __I  uint32_t TFR[SAI_TFR_COUNT];                /**< SAI Transmit FIFO Register, array offset: 0x40, array step: 0x4 */
@@ -12041,7 +12032,11 @@ typedef struct {
   __IO uint32_t TMR;                               /**< SAI Transmit Mask Register, offset: 0x60 */
        uint8_t RESERVED_2[36];
   __IO uint32_t RCSR;                              /**< SAI Receive Control Register, offset: 0x88 */
-  __IO uint32_t RCR[SAI_RCR_COUNT];                /**< SAI Receive Configuration 1 Register..SAI Receive Configuration 5 Register, array offset: 0x8C, array step: 0x4 */
+  __IO uint32_t RCR1;                              /**< SAI Receive Configuration 1 Register, offset: 0x8C */
+  __IO uint32_t RCR2;                              /**< SAI Receive Configuration 2 Register, offset: 0x90 */
+  __IO uint32_t RCR3;                              /**< SAI Receive Configuration 3 Register, offset: 0x94 */
+  __IO uint32_t RCR4;                              /**< SAI Receive Configuration 4 Register, offset: 0x98 */
+  __IO uint32_t RCR5;                              /**< SAI Receive Configuration 5 Register, offset: 0x9C */
   __I  uint32_t RDR[SAI_RDR_COUNT];                /**< SAI Receive Data Register, array offset: 0xA0, array step: 0x4 */
        uint8_t RESERVED_3[16];
   __I  uint32_t RFR[SAI_RFR_COUNT];                /**< SAI Receive FIFO Register, array offset: 0xC0, array step: 0x4 */
@@ -12180,107 +12175,111 @@ typedef struct {
 #define SAI_TCSR_TE_SHIFT                        31u
 #define SAI_TCSR_TE_WIDTH                        1u
 #define SAI_TCSR_TE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCSR_TE_SHIFT))&SAI_TCSR_TE_MASK)
-/* TCR Bit Fields */
-#define SAI_TCR_WDFL_MASK                        0xFu
-#define SAI_TCR_WDFL_SHIFT                       0u
-#define SAI_TCR_WDFL_WIDTH                       4u
-#define SAI_TCR_WDFL(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR_WDFL_SHIFT))&SAI_TCR_WDFL_MASK)
-#define SAI_TCR_DIV_MASK                         0xFFu
-#define SAI_TCR_DIV_SHIFT                        0u
-#define SAI_TCR_DIV_WIDTH                        8u
-#define SAI_TCR_DIV(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_DIV_SHIFT))&SAI_TCR_DIV_MASK)
-#define SAI_TCR_TFW_MASK                         0x7u
-#define SAI_TCR_TFW_SHIFT                        0u
-#define SAI_TCR_TFW_WIDTH                        3u
-#define SAI_TCR_TFW(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_TFW_SHIFT))&SAI_TCR_TFW_MASK)
-#define SAI_TCR_FSD_MASK                         0x1u
-#define SAI_TCR_FSD_SHIFT                        0u
-#define SAI_TCR_FSD_WIDTH                        1u
-#define SAI_TCR_FSD(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FSD_SHIFT))&SAI_TCR_FSD_MASK)
-#define SAI_TCR_FSP_MASK                         0x2u
-#define SAI_TCR_FSP_SHIFT                        1u
-#define SAI_TCR_FSP_WIDTH                        1u
-#define SAI_TCR_FSP(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FSP_SHIFT))&SAI_TCR_FSP_MASK)
-#define SAI_TCR_ONDEM_MASK                       0x4u
-#define SAI_TCR_ONDEM_SHIFT                      2u
-#define SAI_TCR_ONDEM_WIDTH                      1u
-#define SAI_TCR_ONDEM(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR_ONDEM_SHIFT))&SAI_TCR_ONDEM_MASK)
-#define SAI_TCR_FSE_MASK                         0x8u
-#define SAI_TCR_FSE_SHIFT                        3u
-#define SAI_TCR_FSE_WIDTH                        1u
-#define SAI_TCR_FSE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FSE_SHIFT))&SAI_TCR_FSE_MASK)
-#define SAI_TCR_MF_MASK                          0x10u
-#define SAI_TCR_MF_SHIFT                         4u
-#define SAI_TCR_MF_WIDTH                         1u
-#define SAI_TCR_MF(x)                            (((uint32_t)(((uint32_t)(x))<<SAI_TCR_MF_SHIFT))&SAI_TCR_MF_MASK)
-#define SAI_TCR_CHMOD_MASK                       0x20u
-#define SAI_TCR_CHMOD_SHIFT                      5u
-#define SAI_TCR_CHMOD_WIDTH                      1u
-#define SAI_TCR_CHMOD(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR_CHMOD_SHIFT))&SAI_TCR_CHMOD_MASK)
-#define SAI_TCR_FBT_MASK                         0x1F00u
-#define SAI_TCR_FBT_SHIFT                        8u
-#define SAI_TCR_FBT_WIDTH                        5u
-#define SAI_TCR_FBT(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FBT_SHIFT))&SAI_TCR_FBT_MASK)
-#define SAI_TCR_SYWD_MASK                        0x1F00u
-#define SAI_TCR_SYWD_SHIFT                       8u
-#define SAI_TCR_SYWD_WIDTH                       5u
-#define SAI_TCR_SYWD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR_SYWD_SHIFT))&SAI_TCR_SYWD_MASK)
-#define SAI_TCR_W0W_MASK                         0x1F0000u
-#define SAI_TCR_W0W_SHIFT                        16u
-#define SAI_TCR_W0W_WIDTH                        5u
-#define SAI_TCR_W0W(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_W0W_SHIFT))&SAI_TCR_W0W_MASK)
-#define SAI_TCR_FRSZ_MASK                        0xF0000u
-#define SAI_TCR_FRSZ_SHIFT                       16u
-#define SAI_TCR_FRSZ_WIDTH                       4u
-#define SAI_TCR_FRSZ(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FRSZ_SHIFT))&SAI_TCR_FRSZ_MASK)
-#define SAI_TCR_TCE_MASK                         0xF0000u
-#define SAI_TCR_TCE_SHIFT                        16u
-#define SAI_TCR_TCE_WIDTH                        4u
-#define SAI_TCR_TCE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_TCE_SHIFT))&SAI_TCR_TCE_MASK)
-#define SAI_TCR_BCD_MASK                         0x1000000u
-#define SAI_TCR_BCD_SHIFT                        24u
-#define SAI_TCR_BCD_WIDTH                        1u
-#define SAI_TCR_BCD(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_BCD_SHIFT))&SAI_TCR_BCD_MASK)
-#define SAI_TCR_CFR_MASK                         0xF000000u
-#define SAI_TCR_CFR_SHIFT                        24u
-#define SAI_TCR_CFR_WIDTH                        4u
-#define SAI_TCR_CFR(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_CFR_SHIFT))&SAI_TCR_CFR_MASK)
-#define SAI_TCR_FPACK_MASK                       0x3000000u
-#define SAI_TCR_FPACK_SHIFT                      24u
-#define SAI_TCR_FPACK_WIDTH                      2u
-#define SAI_TCR_FPACK(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FPACK_SHIFT))&SAI_TCR_FPACK_MASK)
-#define SAI_TCR_WNW_MASK                         0x1F000000u
-#define SAI_TCR_WNW_SHIFT                        24u
-#define SAI_TCR_WNW_WIDTH                        5u
-#define SAI_TCR_WNW(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_WNW_SHIFT))&SAI_TCR_WNW_MASK)
-#define SAI_TCR_BCP_MASK                         0x2000000u
-#define SAI_TCR_BCP_SHIFT                        25u
-#define SAI_TCR_BCP_WIDTH                        1u
-#define SAI_TCR_BCP(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_BCP_SHIFT))&SAI_TCR_BCP_MASK)
-#define SAI_TCR_MSEL_MASK                        0xC000000u
-#define SAI_TCR_MSEL_SHIFT                       26u
-#define SAI_TCR_MSEL_WIDTH                       2u
-#define SAI_TCR_MSEL(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR_MSEL_SHIFT))&SAI_TCR_MSEL_MASK)
-#define SAI_TCR_FCOMB_MASK                       0xC000000u
-#define SAI_TCR_FCOMB_SHIFT                      26u
-#define SAI_TCR_FCOMB_WIDTH                      2u
-#define SAI_TCR_FCOMB(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FCOMB_SHIFT))&SAI_TCR_FCOMB_MASK)
-#define SAI_TCR_BCI_MASK                         0x10000000u
-#define SAI_TCR_BCI_SHIFT                        28u
-#define SAI_TCR_BCI_WIDTH                        1u
-#define SAI_TCR_BCI(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_BCI_SHIFT))&SAI_TCR_BCI_MASK)
-#define SAI_TCR_FCONT_MASK                       0x10000000u
-#define SAI_TCR_FCONT_SHIFT                      28u
-#define SAI_TCR_FCONT_WIDTH                      1u
-#define SAI_TCR_FCONT(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR_FCONT_SHIFT))&SAI_TCR_FCONT_MASK)
-#define SAI_TCR_BCS_MASK                         0x20000000u
-#define SAI_TCR_BCS_SHIFT                        29u
-#define SAI_TCR_BCS_WIDTH                        1u
-#define SAI_TCR_BCS(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR_BCS_SHIFT))&SAI_TCR_BCS_MASK)
-#define SAI_TCR_SYNC_MASK                        0xC0000000u
-#define SAI_TCR_SYNC_SHIFT                       30u
-#define SAI_TCR_SYNC_WIDTH                       2u
-#define SAI_TCR_SYNC(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR_SYNC_SHIFT))&SAI_TCR_SYNC_MASK)
+/* TCR1 Bit Fields */
+#define SAI_TCR1_TFW_MASK                        0x7u
+#define SAI_TCR1_TFW_SHIFT                       0u
+#define SAI_TCR1_TFW_WIDTH                       3u
+#define SAI_TCR1_TFW(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR1_TFW_SHIFT))&SAI_TCR1_TFW_MASK)
+/* TCR2 Bit Fields */
+#define SAI_TCR2_DIV_MASK                        0xFFu
+#define SAI_TCR2_DIV_SHIFT                       0u
+#define SAI_TCR2_DIV_WIDTH                       8u
+#define SAI_TCR2_DIV(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_DIV_SHIFT))&SAI_TCR2_DIV_MASK)
+#define SAI_TCR2_BCD_MASK                        0x1000000u
+#define SAI_TCR2_BCD_SHIFT                       24u
+#define SAI_TCR2_BCD_WIDTH                       1u
+#define SAI_TCR2_BCD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_BCD_SHIFT))&SAI_TCR2_BCD_MASK)
+#define SAI_TCR2_BCP_MASK                        0x2000000u
+#define SAI_TCR2_BCP_SHIFT                       25u
+#define SAI_TCR2_BCP_WIDTH                       1u
+#define SAI_TCR2_BCP(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_BCP_SHIFT))&SAI_TCR2_BCP_MASK)
+#define SAI_TCR2_MSEL_MASK                       0xC000000u
+#define SAI_TCR2_MSEL_SHIFT                      26u
+#define SAI_TCR2_MSEL_WIDTH                      2u
+#define SAI_TCR2_MSEL(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_MSEL_SHIFT))&SAI_TCR2_MSEL_MASK)
+#define SAI_TCR2_BCI_MASK                        0x10000000u
+#define SAI_TCR2_BCI_SHIFT                       28u
+#define SAI_TCR2_BCI_WIDTH                       1u
+#define SAI_TCR2_BCI(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_BCI_SHIFT))&SAI_TCR2_BCI_MASK)
+#define SAI_TCR2_BCS_MASK                        0x20000000u
+#define SAI_TCR2_BCS_SHIFT                       29u
+#define SAI_TCR2_BCS_WIDTH                       1u
+#define SAI_TCR2_BCS(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_BCS_SHIFT))&SAI_TCR2_BCS_MASK)
+#define SAI_TCR2_SYNC_MASK                       0xC0000000u
+#define SAI_TCR2_SYNC_SHIFT                      30u
+#define SAI_TCR2_SYNC_WIDTH                      2u
+#define SAI_TCR2_SYNC(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR2_SYNC_SHIFT))&SAI_TCR2_SYNC_MASK)
+/* TCR3 Bit Fields */
+#define SAI_TCR3_WDFL_MASK                       0xFu
+#define SAI_TCR3_WDFL_SHIFT                      0u
+#define SAI_TCR3_WDFL_WIDTH                      4u
+#define SAI_TCR3_WDFL(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR3_WDFL_SHIFT))&SAI_TCR3_WDFL_MASK)
+#define SAI_TCR3_TCE_MASK                        0xF0000u
+#define SAI_TCR3_TCE_SHIFT                       16u
+#define SAI_TCR3_TCE_WIDTH                       4u
+#define SAI_TCR3_TCE(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR3_TCE_SHIFT))&SAI_TCR3_TCE_MASK)
+#define SAI_TCR3_CFR_MASK                        0xF000000u
+#define SAI_TCR3_CFR_SHIFT                       24u
+#define SAI_TCR3_CFR_WIDTH                       4u
+#define SAI_TCR3_CFR(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR3_CFR_SHIFT))&SAI_TCR3_CFR_MASK)
+/* TCR4 Bit Fields */
+#define SAI_TCR4_FSD_MASK                        0x1u
+#define SAI_TCR4_FSD_SHIFT                       0u
+#define SAI_TCR4_FSD_WIDTH                       1u
+#define SAI_TCR4_FSD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FSD_SHIFT))&SAI_TCR4_FSD_MASK)
+#define SAI_TCR4_FSP_MASK                        0x2u
+#define SAI_TCR4_FSP_SHIFT                       1u
+#define SAI_TCR4_FSP_WIDTH                       1u
+#define SAI_TCR4_FSP(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FSP_SHIFT))&SAI_TCR4_FSP_MASK)
+#define SAI_TCR4_ONDEM_MASK                      0x4u
+#define SAI_TCR4_ONDEM_SHIFT                     2u
+#define SAI_TCR4_ONDEM_WIDTH                     1u
+#define SAI_TCR4_ONDEM(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_ONDEM_SHIFT))&SAI_TCR4_ONDEM_MASK)
+#define SAI_TCR4_FSE_MASK                        0x8u
+#define SAI_TCR4_FSE_SHIFT                       3u
+#define SAI_TCR4_FSE_WIDTH                       1u
+#define SAI_TCR4_FSE(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FSE_SHIFT))&SAI_TCR4_FSE_MASK)
+#define SAI_TCR4_MF_MASK                         0x10u
+#define SAI_TCR4_MF_SHIFT                        4u
+#define SAI_TCR4_MF_WIDTH                        1u
+#define SAI_TCR4_MF(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_MF_SHIFT))&SAI_TCR4_MF_MASK)
+#define SAI_TCR4_CHMOD_MASK                      0x20u
+#define SAI_TCR4_CHMOD_SHIFT                     5u
+#define SAI_TCR4_CHMOD_WIDTH                     1u
+#define SAI_TCR4_CHMOD(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_CHMOD_SHIFT))&SAI_TCR4_CHMOD_MASK)
+#define SAI_TCR4_SYWD_MASK                       0x1F00u
+#define SAI_TCR4_SYWD_SHIFT                      8u
+#define SAI_TCR4_SYWD_WIDTH                      5u
+#define SAI_TCR4_SYWD(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_SYWD_SHIFT))&SAI_TCR4_SYWD_MASK)
+#define SAI_TCR4_FRSZ_MASK                       0xF0000u
+#define SAI_TCR4_FRSZ_SHIFT                      16u
+#define SAI_TCR4_FRSZ_WIDTH                      4u
+#define SAI_TCR4_FRSZ(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FRSZ_SHIFT))&SAI_TCR4_FRSZ_MASK)
+#define SAI_TCR4_FPACK_MASK                      0x3000000u
+#define SAI_TCR4_FPACK_SHIFT                     24u
+#define SAI_TCR4_FPACK_WIDTH                     2u
+#define SAI_TCR4_FPACK(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FPACK_SHIFT))&SAI_TCR4_FPACK_MASK)
+#define SAI_TCR4_FCOMB_MASK                      0xC000000u
+#define SAI_TCR4_FCOMB_SHIFT                     26u
+#define SAI_TCR4_FCOMB_WIDTH                     2u
+#define SAI_TCR4_FCOMB(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FCOMB_SHIFT))&SAI_TCR4_FCOMB_MASK)
+#define SAI_TCR4_FCONT_MASK                      0x10000000u
+#define SAI_TCR4_FCONT_SHIFT                     28u
+#define SAI_TCR4_FCONT_WIDTH                     1u
+#define SAI_TCR4_FCONT(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_TCR4_FCONT_SHIFT))&SAI_TCR4_FCONT_MASK)
+/* TCR5 Bit Fields */
+#define SAI_TCR5_FBT_MASK                        0x1F00u
+#define SAI_TCR5_FBT_SHIFT                       8u
+#define SAI_TCR5_FBT_WIDTH                       5u
+#define SAI_TCR5_FBT(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR5_FBT_SHIFT))&SAI_TCR5_FBT_MASK)
+#define SAI_TCR5_W0W_MASK                        0x1F0000u
+#define SAI_TCR5_W0W_SHIFT                       16u
+#define SAI_TCR5_W0W_WIDTH                       5u
+#define SAI_TCR5_W0W(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR5_W0W_SHIFT))&SAI_TCR5_W0W_MASK)
+#define SAI_TCR5_WNW_MASK                        0x1F000000u
+#define SAI_TCR5_WNW_SHIFT                       24u
+#define SAI_TCR5_WNW_WIDTH                       5u
+#define SAI_TCR5_WNW(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_TCR5_WNW_SHIFT))&SAI_TCR5_WNW_MASK)
 /* TDR Bit Fields */
 #define SAI_TDR_TDR_MASK                         0xFFFFFFFFu
 #define SAI_TDR_TDR_SHIFT                        0u
@@ -12373,103 +12372,107 @@ typedef struct {
 #define SAI_RCSR_RE_SHIFT                        31u
 #define SAI_RCSR_RE_WIDTH                        1u
 #define SAI_RCSR_RE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCSR_RE_SHIFT))&SAI_RCSR_RE_MASK)
-/* RCR Bit Fields */
-#define SAI_RCR_WDFL_MASK                        0xFu
-#define SAI_RCR_WDFL_SHIFT                       0u
-#define SAI_RCR_WDFL_WIDTH                       4u
-#define SAI_RCR_WDFL(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR_WDFL_SHIFT))&SAI_RCR_WDFL_MASK)
-#define SAI_RCR_DIV_MASK                         0xFFu
-#define SAI_RCR_DIV_SHIFT                        0u
-#define SAI_RCR_DIV_WIDTH                        8u
-#define SAI_RCR_DIV(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_DIV_SHIFT))&SAI_RCR_DIV_MASK)
-#define SAI_RCR_RFW_MASK                         0x7u
-#define SAI_RCR_RFW_SHIFT                        0u
-#define SAI_RCR_RFW_WIDTH                        3u
-#define SAI_RCR_RFW(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_RFW_SHIFT))&SAI_RCR_RFW_MASK)
-#define SAI_RCR_FSD_MASK                         0x1u
-#define SAI_RCR_FSD_SHIFT                        0u
-#define SAI_RCR_FSD_WIDTH                        1u
-#define SAI_RCR_FSD(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FSD_SHIFT))&SAI_RCR_FSD_MASK)
-#define SAI_RCR_FSP_MASK                         0x2u
-#define SAI_RCR_FSP_SHIFT                        1u
-#define SAI_RCR_FSP_WIDTH                        1u
-#define SAI_RCR_FSP(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FSP_SHIFT))&SAI_RCR_FSP_MASK)
-#define SAI_RCR_ONDEM_MASK                       0x4u
-#define SAI_RCR_ONDEM_SHIFT                      2u
-#define SAI_RCR_ONDEM_WIDTH                      1u
-#define SAI_RCR_ONDEM(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR_ONDEM_SHIFT))&SAI_RCR_ONDEM_MASK)
-#define SAI_RCR_FSE_MASK                         0x8u
-#define SAI_RCR_FSE_SHIFT                        3u
-#define SAI_RCR_FSE_WIDTH                        1u
-#define SAI_RCR_FSE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FSE_SHIFT))&SAI_RCR_FSE_MASK)
-#define SAI_RCR_MF_MASK                          0x10u
-#define SAI_RCR_MF_SHIFT                         4u
-#define SAI_RCR_MF_WIDTH                         1u
-#define SAI_RCR_MF(x)                            (((uint32_t)(((uint32_t)(x))<<SAI_RCR_MF_SHIFT))&SAI_RCR_MF_MASK)
-#define SAI_RCR_SYWD_MASK                        0x1F00u
-#define SAI_RCR_SYWD_SHIFT                       8u
-#define SAI_RCR_SYWD_WIDTH                       5u
-#define SAI_RCR_SYWD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR_SYWD_SHIFT))&SAI_RCR_SYWD_MASK)
-#define SAI_RCR_FBT_MASK                         0x1F00u
-#define SAI_RCR_FBT_SHIFT                        8u
-#define SAI_RCR_FBT_WIDTH                        5u
-#define SAI_RCR_FBT(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FBT_SHIFT))&SAI_RCR_FBT_MASK)
-#define SAI_RCR_W0W_MASK                         0x1F0000u
-#define SAI_RCR_W0W_SHIFT                        16u
-#define SAI_RCR_W0W_WIDTH                        5u
-#define SAI_RCR_W0W(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_W0W_SHIFT))&SAI_RCR_W0W_MASK)
-#define SAI_RCR_FRSZ_MASK                        0xF0000u
-#define SAI_RCR_FRSZ_SHIFT                       16u
-#define SAI_RCR_FRSZ_WIDTH                       4u
-#define SAI_RCR_FRSZ(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FRSZ_SHIFT))&SAI_RCR_FRSZ_MASK)
-#define SAI_RCR_RCE_MASK                         0xF0000u
-#define SAI_RCR_RCE_SHIFT                        16u
-#define SAI_RCR_RCE_WIDTH                        4u
-#define SAI_RCR_RCE(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_RCE_SHIFT))&SAI_RCR_RCE_MASK)
-#define SAI_RCR_BCD_MASK                         0x1000000u
-#define SAI_RCR_BCD_SHIFT                        24u
-#define SAI_RCR_BCD_WIDTH                        1u
-#define SAI_RCR_BCD(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_BCD_SHIFT))&SAI_RCR_BCD_MASK)
-#define SAI_RCR_CFR_MASK                         0xF000000u
-#define SAI_RCR_CFR_SHIFT                        24u
-#define SAI_RCR_CFR_WIDTH                        4u
-#define SAI_RCR_CFR(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_CFR_SHIFT))&SAI_RCR_CFR_MASK)
-#define SAI_RCR_FPACK_MASK                       0x3000000u
-#define SAI_RCR_FPACK_SHIFT                      24u
-#define SAI_RCR_FPACK_WIDTH                      2u
-#define SAI_RCR_FPACK(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FPACK_SHIFT))&SAI_RCR_FPACK_MASK)
-#define SAI_RCR_WNW_MASK                         0x1F000000u
-#define SAI_RCR_WNW_SHIFT                        24u
-#define SAI_RCR_WNW_WIDTH                        5u
-#define SAI_RCR_WNW(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_WNW_SHIFT))&SAI_RCR_WNW_MASK)
-#define SAI_RCR_BCP_MASK                         0x2000000u
-#define SAI_RCR_BCP_SHIFT                        25u
-#define SAI_RCR_BCP_WIDTH                        1u
-#define SAI_RCR_BCP(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_BCP_SHIFT))&SAI_RCR_BCP_MASK)
-#define SAI_RCR_MSEL_MASK                        0xC000000u
-#define SAI_RCR_MSEL_SHIFT                       26u
-#define SAI_RCR_MSEL_WIDTH                       2u
-#define SAI_RCR_MSEL(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR_MSEL_SHIFT))&SAI_RCR_MSEL_MASK)
-#define SAI_RCR_FCOMB_MASK                       0xC000000u
-#define SAI_RCR_FCOMB_SHIFT                      26u
-#define SAI_RCR_FCOMB_WIDTH                      2u
-#define SAI_RCR_FCOMB(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FCOMB_SHIFT))&SAI_RCR_FCOMB_MASK)
-#define SAI_RCR_BCI_MASK                         0x10000000u
-#define SAI_RCR_BCI_SHIFT                        28u
-#define SAI_RCR_BCI_WIDTH                        1u
-#define SAI_RCR_BCI(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_BCI_SHIFT))&SAI_RCR_BCI_MASK)
-#define SAI_RCR_FCONT_MASK                       0x10000000u
-#define SAI_RCR_FCONT_SHIFT                      28u
-#define SAI_RCR_FCONT_WIDTH                      1u
-#define SAI_RCR_FCONT(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR_FCONT_SHIFT))&SAI_RCR_FCONT_MASK)
-#define SAI_RCR_BCS_MASK                         0x20000000u
-#define SAI_RCR_BCS_SHIFT                        29u
-#define SAI_RCR_BCS_WIDTH                        1u
-#define SAI_RCR_BCS(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR_BCS_SHIFT))&SAI_RCR_BCS_MASK)
-#define SAI_RCR_SYNC_MASK                        0xC0000000u
-#define SAI_RCR_SYNC_SHIFT                       30u
-#define SAI_RCR_SYNC_WIDTH                       2u
-#define SAI_RCR_SYNC(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR_SYNC_SHIFT))&SAI_RCR_SYNC_MASK)
+/* RCR1 Bit Fields */
+#define SAI_RCR1_RFW_MASK                        0x7u
+#define SAI_RCR1_RFW_SHIFT                       0u
+#define SAI_RCR1_RFW_WIDTH                       3u
+#define SAI_RCR1_RFW(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR1_RFW_SHIFT))&SAI_RCR1_RFW_MASK)
+/* RCR2 Bit Fields */
+#define SAI_RCR2_DIV_MASK                        0xFFu
+#define SAI_RCR2_DIV_SHIFT                       0u
+#define SAI_RCR2_DIV_WIDTH                       8u
+#define SAI_RCR2_DIV(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_DIV_SHIFT))&SAI_RCR2_DIV_MASK)
+#define SAI_RCR2_BCD_MASK                        0x1000000u
+#define SAI_RCR2_BCD_SHIFT                       24u
+#define SAI_RCR2_BCD_WIDTH                       1u
+#define SAI_RCR2_BCD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_BCD_SHIFT))&SAI_RCR2_BCD_MASK)
+#define SAI_RCR2_BCP_MASK                        0x2000000u
+#define SAI_RCR2_BCP_SHIFT                       25u
+#define SAI_RCR2_BCP_WIDTH                       1u
+#define SAI_RCR2_BCP(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_BCP_SHIFT))&SAI_RCR2_BCP_MASK)
+#define SAI_RCR2_MSEL_MASK                       0xC000000u
+#define SAI_RCR2_MSEL_SHIFT                      26u
+#define SAI_RCR2_MSEL_WIDTH                      2u
+#define SAI_RCR2_MSEL(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_MSEL_SHIFT))&SAI_RCR2_MSEL_MASK)
+#define SAI_RCR2_BCI_MASK                        0x10000000u
+#define SAI_RCR2_BCI_SHIFT                       28u
+#define SAI_RCR2_BCI_WIDTH                       1u
+#define SAI_RCR2_BCI(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_BCI_SHIFT))&SAI_RCR2_BCI_MASK)
+#define SAI_RCR2_BCS_MASK                        0x20000000u
+#define SAI_RCR2_BCS_SHIFT                       29u
+#define SAI_RCR2_BCS_WIDTH                       1u
+#define SAI_RCR2_BCS(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_BCS_SHIFT))&SAI_RCR2_BCS_MASK)
+#define SAI_RCR2_SYNC_MASK                       0xC0000000u
+#define SAI_RCR2_SYNC_SHIFT                      30u
+#define SAI_RCR2_SYNC_WIDTH                      2u
+#define SAI_RCR2_SYNC(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR2_SYNC_SHIFT))&SAI_RCR2_SYNC_MASK)
+/* RCR3 Bit Fields */
+#define SAI_RCR3_WDFL_MASK                       0xFu
+#define SAI_RCR3_WDFL_SHIFT                      0u
+#define SAI_RCR3_WDFL_WIDTH                      4u
+#define SAI_RCR3_WDFL(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR3_WDFL_SHIFT))&SAI_RCR3_WDFL_MASK)
+#define SAI_RCR3_RCE_MASK                        0xF0000u
+#define SAI_RCR3_RCE_SHIFT                       16u
+#define SAI_RCR3_RCE_WIDTH                       4u
+#define SAI_RCR3_RCE(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR3_RCE_SHIFT))&SAI_RCR3_RCE_MASK)
+#define SAI_RCR3_CFR_MASK                        0xF000000u
+#define SAI_RCR3_CFR_SHIFT                       24u
+#define SAI_RCR3_CFR_WIDTH                       4u
+#define SAI_RCR3_CFR(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR3_CFR_SHIFT))&SAI_RCR3_CFR_MASK)
+/* RCR4 Bit Fields */
+#define SAI_RCR4_FSD_MASK                        0x1u
+#define SAI_RCR4_FSD_SHIFT                       0u
+#define SAI_RCR4_FSD_WIDTH                       1u
+#define SAI_RCR4_FSD(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FSD_SHIFT))&SAI_RCR4_FSD_MASK)
+#define SAI_RCR4_FSP_MASK                        0x2u
+#define SAI_RCR4_FSP_SHIFT                       1u
+#define SAI_RCR4_FSP_WIDTH                       1u
+#define SAI_RCR4_FSP(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FSP_SHIFT))&SAI_RCR4_FSP_MASK)
+#define SAI_RCR4_ONDEM_MASK                      0x4u
+#define SAI_RCR4_ONDEM_SHIFT                     2u
+#define SAI_RCR4_ONDEM_WIDTH                     1u
+#define SAI_RCR4_ONDEM(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_ONDEM_SHIFT))&SAI_RCR4_ONDEM_MASK)
+#define SAI_RCR4_FSE_MASK                        0x8u
+#define SAI_RCR4_FSE_SHIFT                       3u
+#define SAI_RCR4_FSE_WIDTH                       1u
+#define SAI_RCR4_FSE(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FSE_SHIFT))&SAI_RCR4_FSE_MASK)
+#define SAI_RCR4_MF_MASK                         0x10u
+#define SAI_RCR4_MF_SHIFT                        4u
+#define SAI_RCR4_MF_WIDTH                        1u
+#define SAI_RCR4_MF(x)                           (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_MF_SHIFT))&SAI_RCR4_MF_MASK)
+#define SAI_RCR4_SYWD_MASK                       0x1F00u
+#define SAI_RCR4_SYWD_SHIFT                      8u
+#define SAI_RCR4_SYWD_WIDTH                      5u
+#define SAI_RCR4_SYWD(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_SYWD_SHIFT))&SAI_RCR4_SYWD_MASK)
+#define SAI_RCR4_FRSZ_MASK                       0xF0000u
+#define SAI_RCR4_FRSZ_SHIFT                      16u
+#define SAI_RCR4_FRSZ_WIDTH                      4u
+#define SAI_RCR4_FRSZ(x)                         (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FRSZ_SHIFT))&SAI_RCR4_FRSZ_MASK)
+#define SAI_RCR4_FPACK_MASK                      0x3000000u
+#define SAI_RCR4_FPACK_SHIFT                     24u
+#define SAI_RCR4_FPACK_WIDTH                     2u
+#define SAI_RCR4_FPACK(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FPACK_SHIFT))&SAI_RCR4_FPACK_MASK)
+#define SAI_RCR4_FCOMB_MASK                      0xC000000u
+#define SAI_RCR4_FCOMB_SHIFT                     26u
+#define SAI_RCR4_FCOMB_WIDTH                     2u
+#define SAI_RCR4_FCOMB(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FCOMB_SHIFT))&SAI_RCR4_FCOMB_MASK)
+#define SAI_RCR4_FCONT_MASK                      0x10000000u
+#define SAI_RCR4_FCONT_SHIFT                     28u
+#define SAI_RCR4_FCONT_WIDTH                     1u
+#define SAI_RCR4_FCONT(x)                        (((uint32_t)(((uint32_t)(x))<<SAI_RCR4_FCONT_SHIFT))&SAI_RCR4_FCONT_MASK)
+/* RCR5 Bit Fields */
+#define SAI_RCR5_FBT_MASK                        0x1F00u
+#define SAI_RCR5_FBT_SHIFT                       8u
+#define SAI_RCR5_FBT_WIDTH                       5u
+#define SAI_RCR5_FBT(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR5_FBT_SHIFT))&SAI_RCR5_FBT_MASK)
+#define SAI_RCR5_W0W_MASK                        0x1F0000u
+#define SAI_RCR5_W0W_SHIFT                       16u
+#define SAI_RCR5_W0W_WIDTH                       5u
+#define SAI_RCR5_W0W(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR5_W0W_SHIFT))&SAI_RCR5_W0W_MASK)
+#define SAI_RCR5_WNW_MASK                        0x1F000000u
+#define SAI_RCR5_WNW_SHIFT                       24u
+#define SAI_RCR5_WNW_WIDTH                       5u
+#define SAI_RCR5_WNW(x)                          (((uint32_t)(((uint32_t)(x))<<SAI_RCR5_WNW_SHIFT))&SAI_RCR5_WNW_MASK)
 /* RDR Bit Fields */
 #define SAI_RDR_RDR_MASK                         0xFFFFFFFFu
 #define SAI_RDR_RDR_SHIFT                        0u

@@ -1,40 +1,27 @@
 /* ---------------------------------------------------------------------------------------*/
 /*  @file:    startup_S32K144.s                                                           */
-/*  @purpose: GNU Compiler Collection Startup File                                    */
+/*  @purpose: GNU Compiler Collection Startup File                                        */
 /*            S32K144                                                                     */
 /*  @version: 2.0                                                                         */
-/*  @date:    2016-4-7                                                                    */
-/*  @build:   b160421                                                                     */
+/*  @date:    2017-1-10                                                                   */
+/*  @build:   b170107                                                                     */
 /* ---------------------------------------------------------------------------------------*/
 /*                                                                                        */
 /* Copyright (c) 1997 - 2016 , Freescale Semiconductor, Inc.                              */
-/* Copyright 2016 NXP                                                                     */
+/* Copyright 2016-2017 NXP                                                                */
 /* All rights reserved.                                                                   */
 /*                                                                                        */
-/* Redistribution and use in source and binary forms, with or without modification,       */
-/* are permitted provided that the following conditions are met:                          */
-/*                                                                                        */
-/* o Redistributions of source code must retain the above copyright notice, this list     */
-/*   of conditions and the following disclaimer.                                          */
-/*                                                                                        */
-/* o Redistributions in binary form must reproduce the above copyright notice, this       */
-/*   list of conditions and the following disclaimer in the documentation and/or          */
-/*   other materials provided with the distribution.                                      */
-/*                                                                                        */
-/* o Neither the name of Freescale Semiconductor, Inc. nor the names of its               */
-/*   contributors may be used to endorse or promote products derived from this            */
-/*   software without specific prior written permission.                                  */
-/*                                                                                        */
-/* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND        */
-/* ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED          */
-/* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE                 */
-/* DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR       */
-/* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES         */
-/* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;           */
-/* LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON         */
-/* ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT                */
-/* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS          */
-/* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.                           */
+/* THIS SOFTWARE IS PROVIDED BY NXP "AS IS" AND ANY EXPRESSED OR                          */
+/* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES              */
+/* OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.                */
+/* IN NO EVENT SHALL NXP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT,                    */
+/* INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES                     */
+/* (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR                     */
+/* SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)                     */
+/* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,                    */
+/* STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING                  */
+/* IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF                         */
+/* THE POSSIBILITY OF SUCH DAMAGE.                                                        */
 /*****************************************************************************/
 /* Version: GNU Compiler Collection                                          */
 /*****************************************************************************/
@@ -81,111 +68,111 @@ __isr_vector:
     .long   DMA15_IRQHandler                                /* DMA channel 15 transfer complete*/
     .long   DMA_Error_IRQHandler                            /* DMA error interrupt channels 0-15*/
     .long   MCM_IRQHandler                                  /* FPU sources*/
-    .long   FTFC_IRQHandler                                 /* FTFC command complete*/
-    .long   Read_Collision_IRQHandler                       /* FTFC read collision*/
-    .long   LVD_LVW_IRQHandler                              /* PMC controller low-voltage detect, low-voltage warning*/
+    .long   FTFC_IRQHandler                                 /* FTFC Command complete*/
+    .long   Read_Collision_IRQHandler                       /* FTFC Read collision*/
+    .long   LVD_LVW_IRQHandler                              /* PMC Low voltage detect interrupt*/
     .long   FTFC_Fault_IRQHandler                           /* FTFC Double bit fault detect*/
     .long   WDOG_EWM_IRQHandler                             /* Single interrupt vector for WDOG and EWM*/
     .long   RCM_IRQHandler                                  /* RCM Asynchronous Interrupt*/
-    .long   LPI2C0_Master_IRQHandler                        /* Inter-integrated circuit 0*/
-    .long   LPI2C0_Slave_IRQHandler                         /* Inter-integrated circuit 0*/
-    .long   LPSPI0_IRQHandler                               /* Serial peripheral Interface 0*/
-    .long   LPSPI1_IRQHandler                               /* Serial peripheral Interface 1*/
-    .long   LPSPI2_IRQHandler                               /* Serial peripheral Interface 2*/
-    .long   Reserved45_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved46_IRQHandler                           /* Reserved interrupt*/
-    .long   LPUART0_RxTx_IRQHandler                         /* LPUART0 receive/transmit interrupt*/
-    .long   LPUART0_ERR_IRQHandler                          /* LPUART0 Receive overrun, parity error, framing error or noise error*/
-    .long   LPUART1_RxTx_IRQHandler                         /* LPUART1 receive/transmit interrupt*/
-    .long   LPUART1_ERR_IRQHandler                          /* LPUART1 Receive overrun, parity error, framing error or noise error*/
-    .long   LPUART2_RxTx_IRQHandler                         /* LPUART2 receive/transmit interrupt*/
-    .long   LPUART2_ERR_IRQHandler                          /* LPUART2 Receive overrun, parity error, framing error or noise error*/
-    .long   Reserved53_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved54_IRQHandler                           /* Reserved interrupt*/
-    .long   ADC0_IRQHandler                                 /* ADC0 conversion complete interrupt*/
-    .long   ADC1_IRQHandler                                 /* ADC1 conversion complete interrupt*/
-    .long   CMP0_IRQHandler                                 /* CMP0 interrupt*/
-    .long   Reserved58_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved59_IRQHandler                           /* Reserved interrupt*/
-    .long   ERM_single_fault_IRQHandler                     /* ERM single fault*/
-    .long   ERM_double_fault_IRQHandler                     /* ERM double fault*/
+    .long   LPI2C0_Master_IRQHandler                        /* LPI2C0 Master Interrupt*/
+    .long   LPI2C0_Slave_IRQHandler                         /* LPI2C0 Slave Interrupt*/
+    .long   LPSPI0_IRQHandler                               /* LPSPI0 Interrupt*/
+    .long   LPSPI1_IRQHandler                               /* LPSPI1 Interrupt*/
+    .long   LPSPI2_IRQHandler                               /* LPSPI2 Interrupt*/
+    .long   Reserved45_IRQHandler                           /* Reserved Interrupt 45*/
+    .long   Reserved46_IRQHandler                           /* Reserved Interrupt 46*/
+    .long   LPUART0_RxTx_IRQHandler                         /* LPUART0 Transmit / Receive Interrupt*/
+    .long   Reserved48_IRQHandler                           /* Reserved Interrupt 48*/
+    .long   LPUART1_RxTx_IRQHandler                         /* LPUART1 Transmit / Receive  Interrupt*/
+    .long   Reserved50_IRQHandler                           /* Reserved Interrupt 50*/
+    .long   LPUART2_RxTx_IRQHandler                         /* LPUART2 Transmit / Receive  Interrupt*/
+    .long   Reserved52_IRQHandler                           /* Reserved Interrupt 52*/
+    .long   Reserved53_IRQHandler                           /* Reserved Interrupt 53*/
+    .long   Reserved54_IRQHandler                           /* Reserved Interrupt 54*/
+    .long   ADC0_IRQHandler                                 /* ADC0 interrupt request.*/
+    .long   ADC1_IRQHandler                                 /* ADC1 interrupt request.*/
+    .long   CMP0_IRQHandler                                 /* CMP0 interrupt request*/
+    .long   Reserved58_IRQHandler                           /* Reserved Interrupt 58*/
+    .long   Reserved59_IRQHandler                           /* Reserved Interrupt 59*/
+    .long   ERM_single_fault_IRQHandler                     /* ERM single bit error correction*/
+    .long   ERM_double_fault_IRQHandler                     /* ERM double bit error non-correctable*/
     .long   RTC_IRQHandler                                  /* RTC alarm interrupt*/
-    .long   RTC_Seconds_IRQHandler                          /* RTC seconds interrupt overflow*/
-    .long   LPIT0_Ch0_IRQHandler                            /* LPIT0 channel 0 overflow*/
-    .long   LPIT0_Ch1_IRQHandler                            /* LPIT0 channel 1 overflow*/
-    .long   LPIT0_Ch2_IRQHandler                            /* LPIT0 channel 2 overflow*/
-    .long   LPIT0_Ch3_IRQHandler                            /* LPIT0 channel 3 overflow*/
-    .long   PDB0_IRQHandler                                 /* Programmable delay block*/
-    .long   Reserved69_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved70_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved71_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved72_IRQHandler                           /* Reserved interrupt*/
-    .long   SCG_IRQHandler                                  /* System clock generator*/
-    .long   LPTMR0_IRQHandler                               /* Single interrupt vector for  Low Power Timer 0*/
+    .long   RTC_Seconds_IRQHandler                          /* RTC seconds interrupt*/
+    .long   LPIT0_Ch0_IRQHandler                            /* LPIT0 channel 0 overflow interrupt*/
+    .long   LPIT0_Ch1_IRQHandler                            /* LPIT0 channel 1 overflow interrupt*/
+    .long   LPIT0_Ch2_IRQHandler                            /* LPIT0 channel 2 overflow interrupt*/
+    .long   LPIT0_Ch3_IRQHandler                            /* LPIT0 channel 3 overflow interrupt*/
+    .long   PDB0_IRQHandler                                 /* PDB0 interrupt*/
+    .long   Reserved69_IRQHandler                           /* Reserved Interrupt 69*/
+    .long   Reserved70_IRQHandler                           /* Reserved Interrupt 70*/
+    .long   Reserved71_IRQHandler                           /* Reserved Interrupt 71*/
+    .long   Reserved72_IRQHandler                           /* Reserved Interrupt 72*/
+    .long   SCG_IRQHandler                                  /* SCG bus interrupt request*/
+    .long   LPTMR0_IRQHandler                               /* LPTIMER interrupt request*/
     .long   PORTA_IRQHandler                                /* Port A pin detect interrupt*/
     .long   PORTB_IRQHandler                                /* Port B pin detect interrupt*/
     .long   PORTC_IRQHandler                                /* Port C pin detect interrupt*/
     .long   PORTD_IRQHandler                                /* Port D pin detect interrupt*/
     .long   PORTE_IRQHandler                                /* Port E pin detect interrupt*/
     .long   SWI_IRQHandler                                  /* Software interrupt*/
-    .long   Reserved81_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved82_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved83_IRQHandler                           /* Reserved interrupt*/
-    .long   PDB1_IRQHandler                                 /* Programmable delay block*/
-    .long   FLEXIO_IRQHandler                               /* FLEXIO*/
-    .long   Reserved86_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved87_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved88_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved89_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved90_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved91_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved92_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved93_IRQHandler                           /* Reserved interrupt*/
-    .long   CAN0_ORed_IRQHandler                            /* can*/
-    .long   CAN0_Error_IRQHandler                           /* can*/
-    .long   CAN0_Wake_Up_IRQHandler                         /* can*/
-    .long   CAN0_ORed_0_15_MB_IRQHandler                    /* can*/
-    .long   CAN0_ORed_16_31_MB_IRQHandler                   /* can*/
-    .long   Reserved99_IRQHandler                           /* Reserved interrupt*/
-    .long   Reserved100_IRQHandler                          /* Reserved interrupt*/
-    .long   CAN1_ORed_IRQHandler                            /* can*/
-    .long   CAN1_Error_IRQHandler                           /* can*/
-    .long   CAN1_Wake_Up_IRQHandler                         /* can*/
-    .long   CAN1_ORed_0_15_MB_IRQHandler                    /* can*/
-    .long   CAN1_ORed_16_31_MB_IRQHandler                   /* can*/
-    .long   Reserved106_IRQHandler                          /* Reserved interrupt*/
-    .long   Reserved107_IRQHandler                          /* Reserved interrupt*/
-    .long   CAN2_ORed_IRQHandler                            /* can*/
-    .long   CAN2_Error_IRQHandler                           /* can*/
-    .long   CAN2_Wake_Up_IRQHandler                         /* can*/
-    .long   CAN2_ORed_0_15_MB_IRQHandler                    /* can*/
-    .long   CAN2_ORed_16_31_MB_IRQHandler                   /* can*/
-    .long   Reserved113_IRQHandler                          /* Reserved interrupt*/
-    .long   Reserved114_IRQHandler                          /* Reserved interrupt*/
-    .long   FTM0_Ch0_Ch1_IRQHandler                         /* FTM0 ch0 and ch1*/
-    .long   FTM0_Ch2_Ch3_IRQHandler                         /* FTM0 ch2 and ch3*/
-    .long   FTM0_Ch4_Ch5_IRQHandler                         /* FTM0 ch4 and ch5*/
-    .long   FTM0_Ch6_Ch7_IRQHandler                         /* FTM0 ch6 and ch7*/
-    .long   FTM0_Fault_IRQHandler                           /* FTM0 Fault*/
-    .long   FTM0_Ovf_Reload_IRQHandler                      /* FTM0 Counter overflow, Reload*/
-    .long   FTM1_Ch0_Ch1_IRQHandler                         /* FTM1 ch0 and ch1*/
-    .long   FTM1_Ch2_Ch3_IRQHandler                         /* FTM1 ch2 and ch3*/
-    .long   FTM1_Ch4_Ch5_IRQHandler                         /* FTM1 ch4 and ch5*/
-    .long   FTM1_Ch6_Ch7_IRQHandler                         /* FTM1 ch6 and ch7*/
-    .long   FTM1_Fault_IRQHandler                           /* FTM1 Fault*/
-    .long   FTM1_Ovf_Reload_IRQHandler                      /* FTM1 Counter overflow, Reload*/
-    .long   FTM2_Ch0_Ch1_IRQHandler                         /* FTM2 ch0 and ch1*/
-    .long   FTM2_Ch2_Ch3_IRQHandler                         /* FTM2 ch2 and ch3*/
-    .long   FTM2_Ch4_Ch5_IRQHandler                         /* FTM2 ch4 and ch5*/
-    .long   FTM2_Ch6_Ch7_IRQHandler                         /* FTM2 ch6 and ch7*/
-    .long   FTM2_Fault_IRQHandler                           /* FTM2 Fault*/
-    .long   FTM2_Ovf_Reload_IRQHandler                      /* FTM2 Counter overflow, Reload*/
-    .long   FTM3_Ch0_Ch1_IRQHandler                         /* FTM3 ch0 and ch1*/
-    .long   FTM3_Ch2_Ch3_IRQHandler                         /* FTM3 ch2 and ch3*/
-    .long   FTM3_Ch4_Ch5_IRQHandler                         /* FTM3 ch4 and ch5*/
-    .long   FTM3_Ch6_Ch7_IRQHandler                         /* FTM3 ch6 and ch7*/
-    .long   FTM3_Fault_IRQHandler                           /* FTM3 Fault*/
-    .long   FTM3_Ovf_Reload_IRQHandler                      /* FTM3 Counter overflow, Reload*/
+    .long   Reserved81_IRQHandler                           /* Reserved Interrupt 81*/
+    .long   Reserved82_IRQHandler                           /* Reserved Interrupt 82*/
+    .long   Reserved83_IRQHandler                           /* Reserved Interrupt 83*/
+    .long   PDB1_IRQHandler                                 /* PDB1 interrupt*/
+    .long   FLEXIO_IRQHandler                               /* FlexIO Interrupt*/
+    .long   Reserved86_IRQHandler                           /* Reserved Interrupt 86*/
+    .long   Reserved87_IRQHandler                           /* Reserved Interrupt 87*/
+    .long   Reserved88_IRQHandler                           /* Reserved Interrupt 88*/
+    .long   Reserved89_IRQHandler                           /* Reserved Interrupt 89*/
+    .long   Reserved90_IRQHandler                           /* Reserved Interrupt 90*/
+    .long   Reserved91_IRQHandler                           /* Reserved Interrupt 91*/
+    .long   Reserved92_IRQHandler                           /* Reserved Interrupt 92*/
+    .long   Reserved93_IRQHandler                           /* Reserved Interrupt 93*/
+    .long   CAN0_ORed_IRQHandler                            /* CAN0 OR'ed [Bus Off OR Transmit Warning OR Receive Warning]*/
+    .long   CAN0_Error_IRQHandler                           /* CAN0 Interrupt indicating that errors were detected on the CAN bus*/
+    .long   CAN0_Wake_Up_IRQHandler                         /* CAN0 Interrupt asserted when Pretended Networking operation is enabled, and a valid message matches the selected filter criteria during Low Power mode*/
+    .long   CAN0_ORed_0_15_MB_IRQHandler                    /* CAN0 OR'ed Message buffer (0-15)*/
+    .long   CAN0_ORed_16_31_MB_IRQHandler                   /* CAN0 OR'ed Message buffer (16-31)*/
+    .long   Reserved99_IRQHandler                           /* Reserved Interrupt 99*/
+    .long   Reserved100_IRQHandler                          /* Reserved Interrupt 100*/
+    .long   CAN1_ORed_IRQHandler                            /* CAN1 OR'ed [Bus Off OR Transmit Warning OR Receive Warning]*/
+    .long   CAN1_Error_IRQHandler                           /* CAN1 Interrupt indicating that errors were detected on the CAN bus*/
+    .long   Reserved103_IRQHandler                          /* Reserved Interrupt 103*/
+    .long   CAN1_ORed_0_15_MB_IRQHandler                    /* CAN1 OR'ed Interrupt for Message buffer (0-15)*/
+    .long   Reserved105_IRQHandler                          /* Reserved Interrupt 105*/
+    .long   Reserved106_IRQHandler                          /* Reserved Interrupt 106*/
+    .long   Reserved107_IRQHandler                          /* Reserved Interrupt 107*/
+    .long   CAN2_ORed_IRQHandler                            /* CAN2 OR'ed [Bus Off OR Transmit Warning OR Receive Warning]*/
+    .long   CAN2_Error_IRQHandler                           /* CAN2 Interrupt indicating that errors were detected on the CAN bus*/
+    .long   Reserved110_IRQHandler                          /* Reserved Interrupt 110*/
+    .long   CAN2_ORed_0_15_MB_IRQHandler                    /* CAN2 OR'ed Message buffer (0-15)*/
+    .long   Reserved112_IRQHandler                          /* Reserved Interrupt 112*/
+    .long   Reserved113_IRQHandler                          /* Reserved Interrupt 113*/
+    .long   Reserved114_IRQHandler                          /* Reserved Interrupt 114*/
+    .long   FTM0_Ch0_Ch1_IRQHandler                         /* FTM0 Channel 0 and 1 interrupt*/
+    .long   FTM0_Ch2_Ch3_IRQHandler                         /* FTM0 Channel 2 and 3 interrupt*/
+    .long   FTM0_Ch4_Ch5_IRQHandler                         /* FTM0 Channel 4 and 5 interrupt*/
+    .long   FTM0_Ch6_Ch7_IRQHandler                         /* FTM0 Channel 6 and 7 interrupt*/
+    .long   FTM0_Fault_IRQHandler                           /* FTM0 Fault interrupt*/
+    .long   FTM0_Ovf_Reload_IRQHandler                      /* FTM0 Counter overflow and Reload interrupt*/
+    .long   FTM1_Ch0_Ch1_IRQHandler                         /* FTM1 Channel 0 and 1 interrupt*/
+    .long   FTM1_Ch2_Ch3_IRQHandler                         /* FTM1 Channel 2 and 3 interrupt*/
+    .long   FTM1_Ch4_Ch5_IRQHandler                         /* FTM1 Channel 4 and 5 interrupt*/
+    .long   FTM1_Ch6_Ch7_IRQHandler                         /* FTM1 Channel 6 and 7 interrupt*/
+    .long   FTM1_Fault_IRQHandler                           /* FTM1 Fault interrupt*/
+    .long   FTM1_Ovf_Reload_IRQHandler                      /* FTM1 Counter overflow and Reload interrupt*/
+    .long   FTM2_Ch0_Ch1_IRQHandler                         /* FTM2 Channel 0 and 1 interrupt*/
+    .long   FTM2_Ch2_Ch3_IRQHandler                         /* FTM2 Channel 2 and 3 interrupt*/
+    .long   FTM2_Ch4_Ch5_IRQHandler                         /* FTM2 Channel 4 and 5 interrupt*/
+    .long   FTM2_Ch6_Ch7_IRQHandler                         /* FTM2 Channel 6 and 7 interrupt*/
+    .long   FTM2_Fault_IRQHandler                           /* FTM2 Fault interrupt*/
+    .long   FTM2_Ovf_Reload_IRQHandler                      /* FTM2 Counter overflow and Reload interrupt*/
+    .long   FTM3_Ch0_Ch1_IRQHandler                         /* FTM3 Channel 0 and 1 interrupt*/
+    .long   FTM3_Ch2_Ch3_IRQHandler                         /* FTM3 Channel 2 and 3 interrupt*/
+    .long   FTM3_Ch4_Ch5_IRQHandler                         /* FTM3 Channel 4 and 5 interrupt*/
+    .long   FTM3_Ch6_Ch7_IRQHandler                         /* FTM3 Channel 6 and 7 interrupt*/
+    .long   FTM3_Fault_IRQHandler                           /* FTM3 Fault interrupt*/
+    .long   FTM3_Ovf_Reload_IRQHandler                      /* FTM3 Counter overflow and Reload interrupt*/
     .long   DefaultISR                                      /* 139*/
     .long   DefaultISR                                      /* 140*/
     .long   DefaultISR                                      /* 141*/
@@ -419,11 +406,11 @@ DefaultISR:
     def_irq_handler    Reserved45_IRQHandler
     def_irq_handler    Reserved46_IRQHandler
     def_irq_handler    LPUART0_RxTx_IRQHandler
-    def_irq_handler    LPUART0_ERR_IRQHandler
+    def_irq_handler    Reserved48_IRQHandler
     def_irq_handler    LPUART1_RxTx_IRQHandler
-    def_irq_handler    LPUART1_ERR_IRQHandler
+    def_irq_handler    Reserved50_IRQHandler
     def_irq_handler    LPUART2_RxTx_IRQHandler
-    def_irq_handler    LPUART2_ERR_IRQHandler
+    def_irq_handler    Reserved52_IRQHandler
     def_irq_handler    Reserved53_IRQHandler
     def_irq_handler    Reserved54_IRQHandler
     def_irq_handler    ADC0_IRQHandler
@@ -474,16 +461,16 @@ DefaultISR:
     def_irq_handler    Reserved100_IRQHandler
     def_irq_handler    CAN1_ORed_IRQHandler
     def_irq_handler    CAN1_Error_IRQHandler
-    def_irq_handler    CAN1_Wake_Up_IRQHandler
+    def_irq_handler    Reserved103_IRQHandler
     def_irq_handler    CAN1_ORed_0_15_MB_IRQHandler
-    def_irq_handler    CAN1_ORed_16_31_MB_IRQHandler
+    def_irq_handler    Reserved105_IRQHandler
     def_irq_handler    Reserved106_IRQHandler
     def_irq_handler    Reserved107_IRQHandler
     def_irq_handler    CAN2_ORed_IRQHandler
     def_irq_handler    CAN2_Error_IRQHandler
-    def_irq_handler    CAN2_Wake_Up_IRQHandler
+    def_irq_handler    Reserved110_IRQHandler
     def_irq_handler    CAN2_ORed_0_15_MB_IRQHandler
-    def_irq_handler    CAN2_ORed_16_31_MB_IRQHandler
+    def_irq_handler    Reserved112_IRQHandler
     def_irq_handler    Reserved113_IRQHandler
     def_irq_handler    Reserved114_IRQHandler
     def_irq_handler    FTM0_Ch0_Ch1_IRQHandler

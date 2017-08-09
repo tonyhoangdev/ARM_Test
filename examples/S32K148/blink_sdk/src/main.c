@@ -284,6 +284,9 @@ int main()
         return 1;
     }
 
+    g_ut_result = 5;
+    end_of_test_hook();
+
     /* Infinite loop */
     for (;;)
     {
